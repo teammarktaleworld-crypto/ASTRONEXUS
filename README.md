@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🌌 ASTRONEXUS
+<img width="200" height="200" alt="Gemini_Generated_Image_pjd3etpjd3etpjd3-removebg-preview" src="https://github.com/user-attachments/assets/7dbac9cc-6542-4082-9195-d5d777eb50d6" />
+
+# ASTRONEXUS
 
 ### Modern Astrology & Astronomical Computation Platform
 
@@ -215,7 +217,7 @@ print(f"Sun latitude: {planet_pos[1]:.4f}°")
 
 ## 📈 Roadmap
 
-- [ ] 🤖 AI-powered astrological insights
+- [ ] ��� AI-powered astrological insights
 - [ ] 📴 Offline ephemeris support
 - [ ] 📊 Advanced chart visualization
 - [ ] 🌐 Public API ecosystem
