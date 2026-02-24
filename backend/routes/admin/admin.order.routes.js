@@ -1,15 +1,23 @@
-const router = require("express").Router();
-const c = require("../../controllers/admin/admin.order.controller");
-const { authenticateToken } = require("../../middlewares/auth.js");
-const admin = require("../../middlewares/admin.middleware.js");
+import { Router } from "express";
+import {
+  getAllOrders,
+  updateStatus,
+  deleteOrder,
+  getOrderCounts,
+  getOrdersByUser
+} from "../../controllers/admin/admin.order.controller.js";
 
-// Apply auth + admin middleware to all admin order routes
+import { authenticateToken } from "../../middlewares/auth.js";
+import admin from "../../middlewares/admin.middleware.js";
+
+const router = Router();
+
 router.use(authenticateToken, admin);
 
-// GET all orders (admin)
-router.get("/all", c.getAllOrders);
+router.get("/all", getAllOrders);
+router.put("/:id/status", updateStatus);
+router.delete("/:id", deleteOrder);
+router.get("/counts", getOrderCounts);
+router.get("/user/:userId", getOrdersByUser);
 
-// UPDATE order status
-router.put("/orders/:id/status", c.updateStatus);
-
-module.exports = router;
+export default router;

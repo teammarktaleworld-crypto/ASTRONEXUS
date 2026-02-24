@@ -1,6 +1,6 @@
 import { verifyToken } from "../service/auth.js";
 import mongoose from "mongoose";
-import User from "../models/user.js"; // adjust path if needed
+import User from "../models/user/user.js"; // adjust path if needed
 
 
 // ✅ Admin authorization middleware

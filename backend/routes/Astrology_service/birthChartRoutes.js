@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { generateBirthChart } = require("../../controllers/birthChartImage");
+const { generateBirthChart } = require("../../controllers/services/birthChartImage.js");
 const { checkFeatureEnabled } = require("../../middlewares/checkFeature.js");
 const { trackFeatureUsage } = require("../../middlewares/trackUsage.js");
 

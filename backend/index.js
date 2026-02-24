@@ -15,11 +15,11 @@ import tarotRoutes from './routes/Astrology_service/tarotRoutes.js';
 
 // ================= EXISTING ROUTES =================
 import predictionsRoute from "./routes/predictions.js";
-import birthChartRoute from "./routes/users/birthChartRoutes.js";
+import birthChartRoute from "./routes/Astrology_service/birthChartRoutes.js";
 import urlRoute from "./routes/url.js";
 import staticRoute from "./routes/staticRouter.js";
-import userRoute from "./routes/user.js";
-import compatibilityRoute from "./routes/compatablity.js";
+import userRoute from "./routes/users/user.js";
+import compatibilityRoute from "./routes/Astrology_service/compatablity.js";
 import horoscopeRoute from "./routes/Astrology_service/horoscope.js";
 
 // ================= ADMIN ROUTES =================
@@ -30,9 +30,18 @@ import adminCMSRoutes from "./routes/admin/admin.cms.routes.js";
 import adminDashboardRoutes from "./routes/admin/admin.dashboard.routes.js";
 import adminCategoryRoutes from "./routes/admin/categories.js";
 import adminUserRoutes from "./routes/admin/admin.user.routes.js";
-import feedbackRoutes from "./routes/feedback.js";
-import chatbotRoutes from "./routes/chatbot.routes.js"
+import feedbackRoutes from "./routes/feedback/feedback.js";
+import chatbotRoutes from "./routes/chatbot/chatbot.routes.js"
 import adminAstroRoutes from "./routes/admin/adminAstrologyRoutes.js";
+import invoiceRoutes from "./routes/invoice/invoiceRoutes.js";
+import discountRoutes from "./routes/admin/discountRoutes.js";
+
+import shippingRoutes from "./routes/shipping/shipping.js";
+import couponRoutes from "./routes/admin/coupons.js";
+import notificationRoutes from "./routes/notification/notificationRoutes.js";
+
+
+
 
 
 // ==================================================
@@ -67,12 +76,18 @@ app.use(cookieParser());
 
 // ================= STATIC FOLDER FOR CHART IMAGES =================
 // This makes saved birth chart images publicly accessible
-app.use("/charts", express.static(path.join(__dirname, "charts")));
 
+app.use(
+  "/charts",
+  express.static(path.join(__dirname, "controllers/charts"))
+);
 // ================= PUBLIC APIs =================
 app.use("/api/predictions", predictionsRoute);
 app.use("/api/birthchart", birthChartRoute); // Birth chart generation + DB save
 app.use("/api/chatbot", chatbotRoutes);
+
+// ================= INVOICE ROUTES =================
+app.use("/api/invoice", invoiceRoutes);
 
 
 app.use("/api/v1/compatibility", compatibilityRoute);
@@ -89,6 +104,18 @@ app.use("/api/admin/categories", adminCategoryRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/tarot", tarotRoutes);
 app.use("/api/admin/astrology", adminAstroRoutes);
+
+// Mount discount routes under /discount
+app.use("/api/discount", discountRoutes);
+
+
+app.use("/shipping", shippingRoutes);
+
+// Coupons
+app.use("/coupon", couponRoutes);
+
+// Notifications
+app.use("/api/notifications", notificationRoutes);
 
 
 // ================= HEALTH CHECK =================

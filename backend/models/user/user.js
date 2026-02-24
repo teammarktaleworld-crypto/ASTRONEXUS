@@ -23,6 +23,13 @@ const userSchema = new mongoose.Schema(
       default: () => crypto.randomBytes(16).toString("hex")
     },
 
+    // ⭐ PROFILE IMAGE
+    profileImage: {
+      url: String,
+      publicId: String
+    },
+
+
     // Astrology profile
     astrologyProfile: astrologySchema,
 

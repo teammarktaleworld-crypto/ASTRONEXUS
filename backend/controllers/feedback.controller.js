@@ -133,3 +133,76 @@ export const getAllFeedbacks = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+/* -------------------------------------------------------
+   ⭐ Delete Feedback (User or Admin)
+--------------------------------------------------------*/
+export const deleteFeedback = async (req, res) => {
+  try {
+    const { feedbackId } = req.params;
+    const user = req.user;
+
+    // 1️⃣ Validate feedback ID
+    if (!mongoose.Types.ObjectId.isValid(feedbackId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid feedback ID",
+      });
+    }
+
+    // 2️⃣ Find feedback
+    const feedback = await Feedback.findById(feedbackId);
+    if (!feedback) {
+      return res.status(404).json({
+        success: false,
+        message: "Feedback not found",
+      });
+    }
+
+    // 3️⃣ Ensure user and feedback.userId exist
+    if (!user || !user._id || !feedback.userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user or feedback data",
+      });
+    }
+
+    // 4️⃣ Authorization check
+    const isOwner = feedback.userId.toString() === user._id.toString();
+    const isAdmin = user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to delete this feedback",
+      });
+    }
+
+    const productId = feedback.productId;
+
+    // 5️⃣ Delete feedback
+    await feedback.deleteOne();
+
+    // 6️⃣ Recalculate product rating (safe)
+    try {
+      await updateProductRating(productId);
+    } catch (ratingErr) {
+      console.error(`Failed to update rating for product ${productId}:`, ratingErr);
+    }
+
+    // 7️⃣ Return success
+    res.status(200).json({
+      success: true,
+      message: "Feedback deleted successfully",
+    });
+
+  } catch (err) {
+    console.error("Delete feedback error:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message || "Server error",
+    });
+  }
+};
+
+

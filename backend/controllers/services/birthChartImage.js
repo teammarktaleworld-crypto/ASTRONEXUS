@@ -2,7 +2,7 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const { createCanvas } = require("canvas");
-const BirthChart = require("../models/birthChartModel");
+const BirthChart = require("../../models/features/birthChartModel");
 
 const planetColors = {
   Sun: "#ff6600",

@@ -1,8 +1,8 @@
 import express from "express";
-import { askAstrologyChatbot } from "../controllers/chat/chatbot.controller.js";
-import { authenticateToken } from "../middlewares/auth.js";
-import { checkFeatureEnabled } from "../middlewares/checkFeature.js";
-import { trackFeatureUsage } from "../middlewares/trackUsage.js";
+import { askAstrologyChatbot } from "../../controllers/chat/chatbot.controller.js";
+import { authenticateToken } from "../../middlewares/auth.js";
+import { checkFeatureEnabled } from "../../middlewares/checkFeature.js";
+import { trackFeatureUsage } from "../../middlewares/trackUsage.js";
 
 const router = express.Router();
 

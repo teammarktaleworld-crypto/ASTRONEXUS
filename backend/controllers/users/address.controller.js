@@ -48,16 +48,54 @@ export const updateAddress = async (req, res) => {
 // Delete an address
 export const deleteAddress = async (req, res) => {
   try {
-    const deleted = await Address.findOneAndDelete({
-      _id: req.params.addressId,
-      userId: req.userId,
+    const { addressId } = req.params;
+    const requester = req.user; // from authenticateToken
+
+    let address;
+
+    // 🔐 Admin can delete any address
+    if (requester.role === "admin") {
+      address = await Address.findById(addressId);
+    } 
+    // 👤 User can delete only their own address
+    else {
+      address = await Address.findOne({
+        _id: addressId,
+        userId: req.userId,
+      });
+    }
+
+    if (!address) {
+      return res.status(404).json({ message: "Address not found" });
+    }
+
+    const userId = address.userId;
+    const wasDefault = address.isDefault;
+
+    await address.deleteOne();
+
+    // ⭐ If default address deleted, promote another one
+    if (wasDefault) {
+      const anotherAddress = await Address.findOne({ userId });
+      if (anotherAddress) {
+        anotherAddress.isDefault = true;
+        await anotherAddress.save();
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message:
+        requester.role === "admin"
+          ? "Address deleted by admin"
+          : "Address deleted successfully",
     });
-    if (!deleted) return res.status(404).json({ message: "Address not found" });
-    res.status(200).json({ message: "Address deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Delete address error:", err);
+    res.status(500).json({ message: "Failed to delete address" });
   }
 };
+
 
 
 // Admin: get all addresses

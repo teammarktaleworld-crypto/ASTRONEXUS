@@ -2,9 +2,10 @@ import express from "express";
 import {
   createFeedback,
   getFeedbackByProduct,
-  getAllFeedbacks
-} from "../controllers/feedback.controller.js";
-import { authenticateToken } from "../middlewares/auth.js";
+  getAllFeedbacks,
+  deleteFeedback
+} from "../../controllers/feedback.controller.js";
+import { authenticateToken } from "../../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -16,5 +17,12 @@ router.get("/:productId", getFeedbackByProduct);
 
 // Get all feedbacks (admin)
 router.get("/", authenticateToken, getAllFeedbacks);
+
+router.delete(
+  "/:feedbackId",
+  authenticateToken,
+  deleteFeedback
+);
+
 
 export default router;

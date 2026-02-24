@@ -3,10 +3,10 @@ const router = express.Router();
 
 const {
   ashtakootScore
-} = require("../controllers/services/compatabiltycontroller.js");
+} = require("../../controllers/services/compatabiltycontroller.js");
 
-const { checkFeatureEnabled } = require("../middlewares/checkFeature.js");
-const { trackFeatureUsage } = require("../middlewares/trackUsage.js");
+const { checkFeatureEnabled } = require("../../middlewares/checkFeature.js");
+const { trackFeatureUsage } = require("../../middlewares/trackUsage.js");
 
 // Generate Ashtakoot Compatibility Score
 router.post(

@@ -1,5 +1,5 @@
-const FeatureFlag = require("../../models/featureFlagModel.js");
-const FeatureUsage = require("../../models/featureUsageModel.js");
+const FeatureFlag = require("../../models/features/featureFlagModel.js");
+const FeatureUsage = require("../../models/features/featureUsageModel.js");
 
 exports.getAstrologyDashboard = async (req, res) => {
   const features = await FeatureFlag.find();

@@ -1,5 +1,5 @@
 import axios from "axios";
-import User from "../../models/user.js";
+import User from "../../models/user/user.js";
 
 const sendToMatiAI = async (payload, retries = 2) => {
   try {

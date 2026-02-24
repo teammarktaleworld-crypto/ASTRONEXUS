@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import Admin from "../../models/admin.js";
+import Admin from "../../models/shop/admin.js";
 
 // ==========================
 // 🔑 ADMIN LOGIN

@@ -1,4 +1,4 @@
-const FeatureFlag = require("../models/featureFlagModel");
+const FeatureFlag = require("../models/features/featureFlagModel");
 
 exports.checkFeatureEnabled = (featureKey) => async (req, res, next) => {
   const feature = await FeatureFlag.findOne({ key: featureKey });

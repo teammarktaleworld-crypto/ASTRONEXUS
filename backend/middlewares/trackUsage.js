@@ -1,4 +1,4 @@
-const FeatureUsage = require("../models/featureUsageModel");
+const FeatureUsage = require("../models/features/featureUsageModel");
 
 exports.trackFeatureUsage = async (req, res, next) => {
   res.on("finish", async () => {

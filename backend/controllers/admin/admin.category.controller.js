@@ -55,6 +55,7 @@ export const updateCategory = async (req, res) => {
  * TOGGLE CATEGORY STATUS
  * PATCH /api/admin/categories/:id/toggle
  */
+
 export const toggleCategoryStatus = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
@@ -69,3 +70,19 @@ export const toggleCategoryStatus = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const deleteCategory = async (req, res) => {
+  try {
+    const deleted = await Category.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    res.json({ message: "Category deleted successfully" });
+  } catch (err) {
+    console.error("DELETE CATEGORY ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
