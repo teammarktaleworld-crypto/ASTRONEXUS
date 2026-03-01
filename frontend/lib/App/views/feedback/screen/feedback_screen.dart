@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -27,17 +26,13 @@ class FeedbackScreenState extends State<FeedbackScreen> {
     loadFeedbacks();
   }
 
-  /// Public method so parent can refresh reviews after submission
   Future<void> loadFeedbacks({bool showLoader = true}) async {
     if (showLoader && mounted) setState(() => loading = true);
 
     try {
       final res = await _controller.fetchFeedbacks(widget.productId);
       if (!mounted) return;
-
-      setState(() {
-        feedbacks = res;
-      });
+      setState(() => feedbacks = res);
     } catch (e) {
       debugPrint('Feedback load error: $e');
       if (!mounted) return;
@@ -56,12 +51,9 @@ class FeedbackScreenState extends State<FeedbackScreen> {
   String _getName(dynamic item) {
     try {
       if (item is Map) {
-        return item['userName'] ??
-            item['user']?['name'] ??
-            item['name'] ??
-            'User';
+        return item['userName'] ?? 'User';
       }
-      return item.userName ?? item.user?.name ?? 'User';
+      return item.userName ?? 'User';
     } catch (_) {
       return 'User';
     }
@@ -70,12 +62,9 @@ class FeedbackScreenState extends State<FeedbackScreen> {
   String _getComment(dynamic item) {
     try {
       if (item is Map) {
-        return item['comment'] ??
-            item['review'] ??
-            item['description'] ??
-            '';
+        return item['description'] ?? '';
       }
-      return item.comment ?? item.review ?? item.description ?? '';
+      return item.description ?? '';
     } catch (_) {
       return '';
     }
@@ -95,7 +84,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
     if (loading) {
       return Center(
         child: LoadingAnimationWidget.fourRotatingDots(
-          color: Colors.white,
+          color: Colors.grey.shade600,
           size: 36,
         ),
       );
@@ -105,17 +94,20 @@ class FeedbackScreenState extends State<FeedbackScreen> {
       return Center(
         child: Text(
           'No reviews yet',
-          style: GoogleFonts.poppins(color: Colors.white70),
+          style: GoogleFonts.poppins(
+            color: Colors.grey.shade600,
+            fontSize: 14,
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
       onRefresh: _refresh,
-      color: Colors.amberAccent,
+      color: Colors.black,
       child: ListView.separated(
+        padding: const EdgeInsets.only(bottom: 16, top: 8),
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(bottom: 12),
         itemCount: feedbacks.length,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
@@ -124,71 +116,75 @@ class FeedbackScreenState extends State<FeedbackScreen> {
           final comment = _getComment(item);
           final rating = _getRating(item);
 
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white12),
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.white12,
-                      child: Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                        style: GoogleFonts.poppins(color: Colors.white),
-                      ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.grey.shade300,
+                  child: Text(
+                    name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                    style: GoogleFonts.poppins(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  name,
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              RatingBarIndicator(
-                                rating: rating,
-                                itemBuilder: (_, __) =>
-                                const Icon(Icons.star, color: Colors.amber),
-                                itemCount: 5,
-                                itemSize: 16,
-                              ),
-                            ],
-                          ),
-                          if (comment.isNotEmpty) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              comment,
+                          Expanded(
+                            child: Text(
+                              name,
                               style: GoogleFonts.poppins(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                height: 1.4,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
                               ),
                             ),
-                          ],
+                          ),
+                          RatingBarIndicator(
+                            rating: rating,
+                            itemBuilder: (_, __) =>
+                            const Icon(Icons.star, color: Colors.amber),
+                            itemCount: 5,
+                            itemSize: 16,
+                          ),
                         ],
                       ),
-                    ),
-                  ],
+                      if (comment.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          comment,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: Colors.grey.shade800,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           );
         },

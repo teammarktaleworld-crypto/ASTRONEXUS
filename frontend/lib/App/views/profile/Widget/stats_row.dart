@@ -2,19 +2,50 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class StatsRow extends StatelessWidget {
+class StatsRow extends StatefulWidget {
   const StatsRow({super.key});
 
-  // Example stats data
-  static const stats = [
-    {"label": "Kundli", "value": "3", "icon": LucideIcons.star},
-    {"label": "Reports", "value": "12", "icon": LucideIcons.file},
-    {"label": "Chats", "value": "8", "icon": LucideIcons.messageCircle},
-  ];
+  @override
+  State<StatsRow> createState() => _StatsRowState();
+}
+
+class _StatsRowState extends State<StatsRow> {
+  int planetCount = 0;
+  int houseCount = 0;
+  int reportsCount = 0; // Placeholder, can be fetched from API
+  int chatsCount = 0;   // Placeholder, can be fetched from API
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      // Load planets & houses count from SharedPreferences
+      planetCount = prefs.getInt("planetCount") ?? 0;
+      houseCount = prefs.getInt("houseCount") ?? 0;
+
+      // TODO: Replace with real API/fetch if you have reports & chats counts
+      reportsCount = 12;
+      chatsCount = 8;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final stats = [
+      {"label": "Kundli", "value": planetCount.toString(), "icon": LucideIcons.star},
+      {"label": "Houses", "value": houseCount.toString(), "icon": LucideIcons.layoutDashboard},
+      {"label": "Reports", "value": reportsCount.toString(), "icon": LucideIcons.file},
+      {"label": "Chats", "value": chatsCount.toString(), "icon": LucideIcons.messageCircle},
+    ];
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: stats.map((e) {
@@ -24,11 +55,8 @@ class StatsRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 18),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white12,
-                  Colors.white10,
-                ],
+              gradient: const LinearGradient(
+                colors: [Colors.white12, Colors.white10],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -47,10 +75,13 @@ class StatsRow extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.black26
+                    color: Colors.black26,
                   ),
-                  child: Icon(e["icon"] as IconData,
-                      color: Colors.white, size: 28),
+                  child: Icon(
+                    e["icon"] as IconData,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(

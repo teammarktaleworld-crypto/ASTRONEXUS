@@ -1,7 +1,7 @@
+import 'package:astro_tale/App/views/Ai(chatbot)/View/Chatbot.dart';
 import 'package:astro_tale/App/views/Home/Screens/HomeScreen.dart';
 import 'package:astro_tale/App/views/options/optionscreen.dart';
 import 'package:astro_tale/App/views/profile/Screen/Profile.dart';
-import 'package:astro_tale/App/views/report/screen/Flow_screen_f/Report_screen.dart';
 import 'package:astro_tale/App/views/shop/store_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,8 +15,6 @@ class DashboardScreen extends StatefulWidget {
   final HoroscopeData weekly;
   final HoroscopeData monthly;
 
-
-
   const DashboardScreen({
     super.key,
     required this.zodiacSign,
@@ -26,27 +24,25 @@ class DashboardScreen extends StatefulWidget {
   });
 
   @override
-  _DashboardScreenState createState() => _DashboardScreenState();
+  State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen>
-    with TickerProviderStateMixin {
+class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
+  late final List<Widget> _pages;
 
-  late List<Widget> _pages;
-
-  final List<Map<String, dynamic>> _navItems = [
-    {"icon": LucideIcons.house, "label": "Home", "color": Colors.white},
-    {"icon": Icons.shopping_bag_outlined, "label": "Shop", "color": Colors.white}, // New Shop
-    {"icon": LucideIcons.layoutDashboard, "label": "Service", "color": Colors.white},
-    {"icon": LucideIcons.file, "label": "Report", "color": Colors.white},
-    {"icon": Icons.person_outline_outlined, "label": "Profile", "color": Colors.white},
+  /// Updated nav items with AI Chatbot in the middle
+  final List<Map<String, dynamic>> _navItems = const [
+    {"icon": LucideIcons.house, "label": "Home"},
+    {"icon": Icons.shopping_bag_outlined, "label": "Shop"},
+    {"icon": LucideIcons.bot, "label": "Mati"}, // 👈 new middle tab
+    {"icon": LucideIcons.layoutDashboard, "label": "Service"},
+    {"icon": Icons.person_outline, "label": "Profile"},
   ];
 
   @override
   void initState() {
     super.initState();
-
     _pages = [
       Homescreen(
         zodiacSign: widget.zodiacSign,
@@ -54,54 +50,88 @@ class _DashboardScreenState extends State<DashboardScreen>
         weekly: widget.weekly,
         monthly: widget.monthly,
       ),
-      StoreScreen(),
-      ServiceScreen(),
-      ReportsScreen(),
-      CosmicProfileScreen(),
+      const StoreScreen(),
+      const MatiChatBotScreen(), // 👈 add chatbot screen here
+      const ServiceScreen(),
+      const CosmicProfileScreen(),
     ];
   }
 
   void _onTabChanged(int index) {
+    if (index == _selectedIndex) return;
     setState(() => _selectedIndex = index);
   }
 
-  Widget _buildNavItem(int index) {
-    final bool isActive = _selectedIndex == index;
-    final Color activeColor = _navItems[index]["color"];
-    final Color inactiveColor = Colors.white38;
+  Widget _buildFloatingNavItem(int index) {
+    final isActive = _selectedIndex == index;
 
-    return GestureDetector(
-      onTap: () => _onTabChanged(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutBack,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => _onTabChanged(index),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Transform.translate(
-              offset: Offset(0, isActive ? -8 : 0),
-              child: AnimatedScale(
-                scale: isActive ? 2.2 : 1.0,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutBack,
-                child: Icon(
-                  _navItems[index]["icon"],
-                  size: 26,
-                  color: isActive ? activeColor : inactiveColor,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              transform: Matrix4.translationValues(
+                0,
+                index == 2 ? -25 : (isActive ? -8 : 0), // ⬅ middle tab floats higher
+                0,
+              ),
+              child: index == 2
+                  ? Container(
+                width: isActive ? 75 : 65, // ⬅ bigger size
+                height: isActive ? 75 : 65,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white, // background for pop
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/mati.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+                  : Icon(
+                _navItems[index]["icon"],
+                size: isActive ? 40 : 23,
+                color: isActive ? Colors.white : Colors.white54,
+              ),
+            ),
+
+            // Only show label and indicator for non-middle tabs
+            if (index != 2) ...[
+              const SizedBox(height: 2),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: GoogleFonts.dmSans(
+                  fontSize: 13,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  color: isActive ? Colors.white : Colors.white54,
+                ),
+                child: Text(_navItems[index]["label"]),
+              ),
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                height: 3,
+                width: isActive ? 50 : 0,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-            ),
-            const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 300),
-              style: GoogleFonts.dmSans(
-                color: isActive ? activeColor : inactiveColor,
-                fontSize: 12,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.normal,
-              ),
-              child: Text(_navItems[index]["label"]),
-            ),
+            ],
           ],
         ),
       ),
@@ -111,32 +141,41 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xff18122B),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-          border: Border.all(color: Colors.white10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 14,
-              offset: const Offset(0, 8),
+      backgroundColor: const Color(0xff050B1E),
+      body: Stack(
+        children: [
+          // Main Content
+          _pages[_selectedIndex],
+
+          // Floating Nav
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 5,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xff1B1B2F).withOpacity(.95),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.15),
+                      width: 1,
+                    ),
+                  ),
+                  height: 77,
+                  child: Row(
+                    children: List.generate(
+                      _navItems.length,
+                          (index) => _buildFloatingNavItem(index),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(
-            _navItems.length,
-                (index) => _buildNavItem(index),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -10,7 +10,6 @@ import '../../terms and condition/termsandconditions.dart';
 import '../controller/signin_controller.dart';
 import '../helper/signin_helpers.dart';
 import '../widgets/signin_widgets.dart';
-import '../../Create_SignUp/screens/signup_screen.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});

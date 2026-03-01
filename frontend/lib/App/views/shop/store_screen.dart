@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:astro_tale/App/controller/Auth_Controller.dart';
 import 'package:astro_tale/App/views/shop/product/product_details_screen.dart';
 import 'package:astro_tale/App/views/shop/widgets/search_field.dart';
+import 'package:astro_tale/App/views/wishlist/screen/wishlist_screen.dart';
 import 'package:astro_tale/util/app_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,6 +34,7 @@ class _StoreScreenState extends State<StoreScreen> {
 
   bool isSearching = false;
   bool loading = true;
+  int cartCount = 0; // number of items in cart
 
   List<ProductModel> products = [];
   List<ProductModel> filteredProducts = [];
@@ -158,11 +160,50 @@ class _StoreScreenState extends State<StoreScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined),
+            icon: const Icon(Icons.favorite_border),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => CartScreen()),
+              MaterialPageRoute(builder: (_) => WishlistScreen()),
             ),
+          ),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CartScreen()),
+                ),
+              ),
+              if (cartCount > 0) // only show badge if count > 0
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Center(
+                      child: Text(
+                        "$cartCount",
+                        style: GoogleFonts.dmSans(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.list_alt_outlined),
@@ -315,15 +356,15 @@ class _StoreScreenState extends State<StoreScreen> {
     final list = isSearching ? filteredProducts : products;
 
     if (loading) {
-      // Show skeleton cards
+      // Show skeleton shimmer cards
       return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.65,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          childAspectRatio: 0.68,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
         ),
         itemCount: 4,
         itemBuilder: (_, __) => SkeletonItem(
@@ -332,25 +373,24 @@ class _StoreScreenState extends State<StoreScreen> {
             children: [
               SkeletonLine(
                 style: SkeletonLineStyle(
-                  height: 150,
-
-                  borderRadius: BorderRadius.circular(16),
+                  height: 180,
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               SkeletonLine(
                 style: SkeletonLineStyle(
-                  height: 14,
-                  width: 100,
-                  borderRadius: BorderRadius.circular(6),
+                  height: 16,
+                  width: 120,
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               SkeletonLine(
                 style: SkeletonLineStyle(
                   height: 14,
                   width: 60,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ],
@@ -365,7 +405,7 @@ class _StoreScreenState extends State<StoreScreen> {
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Text(
             "No products found",
-            style: GoogleFonts.poppins(color: Colors.white60),
+            style: GoogleFonts.dmSans(color: Colors.white60, fontSize: 16),
           ),
         ),
       );
@@ -376,28 +416,107 @@ class _StoreScreenState extends State<StoreScreen> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.65,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+        childAspectRatio: 0.68,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
       ),
       itemCount: list.length,
       itemBuilder: (_, index) {
         final product = list[index];
-        return ProductCard(
-          name: product.name,
-          imageUrl: product.images.isNotEmpty
-              ? product.images.first
-              : "https://via.placeholder.com/200",
-          price: product.price,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    ProductDetailsScreen(productId: product.id.trim()),
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ProductDetailsScreen(productId: product.id.trim()),
+                ),
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.05),
+                    Colors.white.withOpacity(0.08),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+                border: Border.all(color: Colors.white12),
               ),
-            );
-          },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image with rounded corners and overlay
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                        child: Image.network(
+                          product.images.isNotEmpty
+                              ? product.images.first
+                              : "https://via.placeholder.com/200",
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "₹${product.price.toStringAsFixed(2)}",
+                            style: GoogleFonts.dmSans(
+                              color: Colors.amberAccent,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    child: Text(
+                      product.name,
+                      style: GoogleFonts.dmSans(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );

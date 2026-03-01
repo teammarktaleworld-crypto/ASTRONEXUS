@@ -21,6 +21,7 @@ import staticRoute from "./routes/staticRouter.js";
 import userRoute from "./routes/users/user.js";
 import compatibilityRoute from "./routes/Astrology_service/compatablity.js";
 import horoscopeRoute from "./routes/Astrology_service/horoscope.js";
+import unifiedWrapperRoutes from "./routes/integration/unifiedWrapper.routes.js";
 
 // ================= ADMIN ROUTES =================
 import adminAuthRoutes from "./routes/admin/admin.auth.routes.js";
@@ -81,10 +82,13 @@ app.use(
   "/charts",
   express.static(path.join(__dirname, "controllers/charts"))
 );
+
+
 // ================= PUBLIC APIs =================
 app.use("/api/predictions", predictionsRoute);
 app.use("/api/birthchart", birthChartRoute); // Birth chart generation + DB save
 app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/wrapper", unifiedWrapperRoutes);
 
 // ================= INVOICE ROUTES =================
 app.use("/api/invoice", invoiceRoutes);
@@ -109,10 +113,10 @@ app.use("/api/admin/astrology", adminAstroRoutes);
 app.use("/api/discount", discountRoutes);
 
 
-app.use("/shipping", shippingRoutes);
+app.use("/api/shipping", shippingRoutes);
 
 // Coupons
-app.use("/coupon", couponRoutes);
+app.use("/api/coupon", couponRoutes);
 
 // Notifications
 app.use("/api/notifications", notificationRoutes);

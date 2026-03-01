@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../sharedWidgets/step_image.dart';
-import '../model/SignUp_Data_Model.dart';
+import '../Model/SignUp_Data_Model.dart';
 
 class StepBirthTime extends StatelessWidget {
   final AstrologySignupModel model;

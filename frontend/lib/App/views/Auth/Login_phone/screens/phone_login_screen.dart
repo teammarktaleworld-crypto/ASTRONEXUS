@@ -6,7 +6,6 @@ import 'package:astro_tale/App/views/Auth/terms%20and%20condition/termsandcondit
 
 import '../../../../../ui_componets/cosmic/cosmic_one.dart';
 import '../../../../../ui_componets/glass/glass_card.dart';
-import '../../Create_SignUp/screens/signup_screen.dart';
 import '../../Login_email/screens/signin_screen.dart';
 import '../controller/phone_login_controller.dart';
 import '../helper/phone_login_helpers.dart';

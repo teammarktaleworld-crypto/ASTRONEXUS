@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:astro_tale/App/views/Home/others/output/birthchart/birthchart_result.dart';
+import 'package:astro_tale/services/API/APIservice.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -171,7 +172,7 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
 
       /// 🟣 CALL API 2 → Chart Image
       final imageResponse = await http.post(
-        Uri.parse("https://astro-nexus-new-6.onrender.com/api/birthchart/generate"),
+        Uri.parse("https://astro-nexus-new-6-46mo.onrender.com/api/birthchart/generate"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(payload),
       );
@@ -186,7 +187,7 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
 
       /// 🟢 MERGE BOTH RESPONSES
       astroData["chartImageUrl"] =
-      "https://astro-nexus-new-6.onrender.com$chartImagePath";
+      "$baseurl$chartImagePath";
 
       Navigator.push(
         context,

@@ -242,18 +242,24 @@ class _ServiceScreenState extends State<ServiceScreen>
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
-        children: services
-            .map(
-              (service) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: _ServiceCard(
-              data: service,
-              // Mark Tarot and Nutrition as premium
-              isPremium: service.title == "Numerology" || service.title == "Nutrition" || service.title == "Match",
-            ),
+        children: [
+          Column(
+            children: services
+                .map(
+                  (service) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: _ServiceCard(
+                  data: service,
+                  // Mark Tarot and Nutrition as premium
+                  isPremium: service.title == "Numerology" || service.title == "Nutrition" || service.title == "Match",
+                ),
+              ),
+            )
+                .toList(),
+
           ),
-        )
-            .toList(),
+          SizedBox(height: 100,)
+        ],
       ),
     );
   }

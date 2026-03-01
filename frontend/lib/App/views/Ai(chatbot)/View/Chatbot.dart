@@ -118,32 +118,42 @@ class _MatiChatBotScreenState extends State<MatiChatBotScreen>
     return Scaffold(
       backgroundColor: const Color(0xff050B1E),
       appBar: _modernAppBar(context),
-      body: Stack(
-        children: [
-          _backgroundGradient(),
-          Positioned.fill(child: SmoothShootingStars()),
-          AnimatedBuilder(
-              animation: planetController, builder: (_, __) => _planetField()),
-          Column(
-            children: [
-              Expanded(child: _chatList()),
+        body: Stack(
+          children: [
+            _backgroundGradient(),
+            Positioned.fill(child: SmoothShootingStars()),
+            AnimatedBuilder(
+              animation: planetController,
+              builder: (_, __) => _planetField(),
+            ),
 
-              /// ⭐ Suggestion Chips
-              if (suggestions.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SuggestionChips(
-                    suggestions: suggestions,
-                    onTap: (text) => sendMessage(text),
+            /// MAIN CHAT & SUGGESTIONS
+            Column(
+              children: [
+                Expanded(child: _chatList()),
+
+                // ⭐ Suggestion Chips
+                if (suggestions.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: SuggestionChips(
+                      suggestions: suggestions,
+                      onTap: (text) => sendMessage(text),
+                    ),
                   ),
-                ),
+                const SizedBox(height: 200), // leave space for the floating input bar
+              ],
+            ),
 
-              _modernInputBar(),
-            ],
-          ),
-
-        ],
-      ),
+            /// ⭐ FLOATING INPUT BAR ABOVE NAV
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 100, // adjust according to your bottom nav height
+              child: _modernInputBar(),
+            ),
+          ],
+        )
     );
   }
 
@@ -152,34 +162,14 @@ class _MatiChatBotScreenState extends State<MatiChatBotScreen>
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 12),
-        child: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-
-            child: const Icon(
-              LucideIcons.arrowLeft,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
+      automaticallyImplyLeading: false, // ← removes default back button
+      title: Text(
+        "Mati AI",
+        style: GoogleFonts.dmSans(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
         ),
-      ),
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: 8),
-          Text(
-            "Mati AI",
-            style: GoogleFonts.dmSans(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-              color: Colors.white,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -231,19 +221,19 @@ class _MatiChatBotScreenState extends State<MatiChatBotScreen>
   Widget _modernInputBar() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
-            borderRadius: BorderRadius.circular(40),
-            border: Border.all(color: Colors.white.withOpacity(0.15)),
+            color: Colors.white, // ✅ fully white
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withOpacity(0.3)), // subtle border
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withOpacity(0.15), // softer shadow
                 blurRadius: 12,
                 offset: const Offset(0, 6),
-              )
+              ),
             ],
           ),
           child: Row(
@@ -253,11 +243,11 @@ class _MatiChatBotScreenState extends State<MatiChatBotScreen>
                   controller: _controller,
                   focusNode: _focusNode,
                   textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => sendMessage(), // ✅ ENTER SENDS
-                  style: GoogleFonts.dmSans(color: Colors.white),
+                  onSubmitted: (_) => sendMessage(),
+                  style: GoogleFonts.dmSans(color: Colors.black), // text black on white
                   decoration: const InputDecoration(
                     hintText: "Ask about your destiny...",
-                    hintStyle: TextStyle(color: Colors.white54),
+                    hintStyle: TextStyle(color: Colors.black45),
                     border: InputBorder.none,
                   ),
                 ),
@@ -272,8 +262,11 @@ class _MatiChatBotScreenState extends State<MatiChatBotScreen>
                       colors: [Color(0xffFFD700), Color(0xffFFB300)],
                     ),
                   ),
-                  child: const Icon(LucideIcons.send,
-                      size: 18, color: Colors.black),
+                  child: const Icon(
+                    LucideIcons.send,
+                    size: 18,
+                    color: Colors.black,
+                  ),
                 ),
               )
             ],
@@ -327,11 +320,6 @@ class TypingIndicatorBubble extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2)),
-                SizedBox(width: 8),
                 Text("Mati is reading your stars..."),
               ],
             ),

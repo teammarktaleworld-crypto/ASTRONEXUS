@@ -1,19 +1,23 @@
 class AstrologySignupModel {
-  // Basic user info
+  // ------------------ Basic user info ------------------
   String name;
   String email;
   String phone;
   String password;
   String confirmPassword;
 
-  // Birth info
+  // ------------------ Birth info ------------------
   String dateOfBirth; // format: "YYYY-MM-DD"
   int hour; // 1-12
   int minute; // 0-59
   bool isAM; // true = AM, false = PM
   String place; // city, country
-  double timezone; // eg: 5.5
+  double timezone; // e.g., 5.5
 
+  // ⭐ Temporary chart ID (from birth chart generation)
+  String tempChartId;
+
+  // ------------------ Constructor ------------------
   AstrologySignupModel({
     this.name = '',
     this.email = '',
@@ -26,9 +30,10 @@ class AstrologySignupModel {
     this.isAM = true,
     this.place = '',
     this.timezone = 5.5,
+    this.tempChartId = '',
   });
 
-  // Convert to API-ready JSON
+  // ------------------ Convert to API-ready JSON ------------------
   Map<String, dynamic> toJson() {
     final hour24 = isAM ? hour % 12 : (hour % 12) + 12;
     final timeString =
@@ -43,7 +48,7 @@ class AstrologySignupModel {
       "dateOfBirth": dateOfBirth,
       "timeOfBirth": timeString,
       "placeOfBirth": place.trim(),
+      "tempChartId": tempChartId,
     };
   }
-
 }

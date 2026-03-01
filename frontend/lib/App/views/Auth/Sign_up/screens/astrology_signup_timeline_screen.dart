@@ -1,19 +1,18 @@
 import 'dart:async';
 
+import 'package:astro_tale/App/views/Auth/Sign_up/helper/step_birth_time.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../dash/DashboardScreen.dart';
-
 import '../helper/step_name.dart';
 import '../helper/step_email.dart';
 import '../helper/step_phone.dart';
 import '../helper/StepPassword.dart';
 import '../helper/step_birth_date.dart';
-import '../helper/step_birth_time.dart';
 import '../helper/step_birth_place.dart';
 
-import '../model/SignUp_Data_Model.dart';
+
 import '../controller/controller.dart';
 
 import '../widgets/signup_app_bar.dart';
@@ -31,7 +30,7 @@ class AstrologySignupTimeline extends StatefulWidget {
 
 class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
   int step = 0; // current step
-  final SignupController controller = SignupController();
+  late final SignupController controller = SignupController();
   bool _isSigningUp = false;
 
 
@@ -181,14 +180,12 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
         return StepEmail(
           controller: emailController,
           onChanged: controller.setEmail,
-          value: '',
         );
 
       case 2:
         return StepPhone(
           controller: phoneController,
           onChanged: controller.setPhone,
-          value: '',
         );
 
       case 3:
@@ -197,8 +194,6 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
           confirmController: confirmController,
           onPasswordChanged: controller.setPassword,
           onConfirmChanged: controller.setConfirmPassword,
-          password: '',
-          confirmPassword: '',
         );
 
       case 4:
@@ -293,13 +288,13 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
           const SignupBackground(),
           Column(
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               SignupStepper(
                 step: step,
                 totalSteps: 7,
                 onStepChanged: (i) => setState(() => step = i),
               ),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
               Expanded(child: SignupCard(child: _buildStep())),
               _nextButton(),
             ],

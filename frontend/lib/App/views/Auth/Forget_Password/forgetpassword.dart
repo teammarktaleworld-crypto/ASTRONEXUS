@@ -1,9 +1,9 @@
 import 'package:astro_tale/App/views/Auth/OTP/otpScreen.dart';
+import 'package:astro_tale/App/views/Auth/Sign_up/screens/astrology_signup_timeline_screen.dart';
 import 'package:astro_tale/App/views/Auth/terms%20and%20condition/termsandconditions.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../Create_SignUp/screens/signup_screen.dart';
 import '../Login_email/screens/signin_screen.dart';
 
 class ForgetPassword extends StatefulWidget {
@@ -244,7 +244,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                               onPressed: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (_) => SignUp()),
+                                  MaterialPageRoute(builder: (_) => AstrologySignupTimeline()),
                                 );
                               },
                               child: Text(

@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static const String baseUrl = "https://astro-nexus-new-6.onrender.com/user";
+  static const String baseUrl = "https://astro-nexus-new-6-46mo.onrender.com/user";
   static const String Horoscopeurl = "https://astronexus-horoscope.onrender.com/api/horoscope?sign=leo&type=daily&day=TODAY";
 
   // Auth handled elsewhere

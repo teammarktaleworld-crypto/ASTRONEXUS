@@ -1,3 +1,4 @@
+
 import Product from "../../models/shop/Product.model.js";
 import Category from "../../models/shop/Category.model.js";
 
@@ -93,6 +94,8 @@ export const getAllProducts = async (req, res) => {
     });
   }
 };
+
+
 
 /**
  * ================= GET SINGLE PRODUCT =================
@@ -216,6 +219,49 @@ export const deleteProductPermanent = async (req, res) => {
     res.json({ success: true, message: "Product permanently deleted" });
   } catch (err) {
     console.error("DELETE PRODUCT ERROR:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+export const getHomeProducts = async (req, res) => {
+  try {
+    // ✅ First, get active products marked for home
+    let products = await Product.find({
+      isActive: true,
+      isDeleted: false,
+      showInHome: true
+    })
+      .sort({ homePriority: -1, lastShownAt: 1, createdAt: -1 })
+      .limit(10);
+
+    // ✅ If less than 3, get fallback products
+    if (products.length < 3) {
+      const fallback = await Product.find({
+        isActive: true,
+        isDeleted: false,
+        _id: { $nin: products.map(p => p._id) }
+      })
+        .sort({ createdAt: -1 })
+        .limit(3 - products.length);
+
+      products.push(...fallback);
+    }
+
+    // ✅ Update lastShownAt for rotation
+    const now = new Date();
+    await Promise.all(
+      products.map(p => Product.findByIdAndUpdate(p._id, { lastShownAt: now }))
+    );
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products
+    });
+
+  } catch (err) {
+    console.error("HOME PRODUCTS ERROR:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };

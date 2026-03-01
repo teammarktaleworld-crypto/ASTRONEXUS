@@ -3,14 +3,18 @@ import 'package:astro_tale/App/views/Nuterational/views/NutritonalScreen.dart';
 import 'package:astro_tale/App/views/dash/DashboardScreen.dart';
 import 'package:astro_tale/App/views/options/IconScreen/views/horoscope/splashHoroscope.dart';
 import 'package:astro_tale/App/views/splash/SplashSreen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:astro_tale/Test/authentication/login_screen.dart';
 import 'package:flutter/material.dart';
 
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
-
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

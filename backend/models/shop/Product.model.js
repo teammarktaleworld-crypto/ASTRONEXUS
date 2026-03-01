@@ -35,7 +35,7 @@ const productSchema = new mongoose.Schema(
     astrologyType: {
       type: String,
       enum: ["gemstone", "pooja", "report", "consultation"],
-      default: "gemstone"   // ✅ prevents 500 error
+      default: "gemstone"
     },
 
     stock: {
@@ -58,6 +58,22 @@ const productSchema = new mongoose.Schema(
     isDeleted: {
       type: Boolean,
       default: false
+    },
+
+    // ---------------- HOME SCREEN RELATED ----------------
+    showInHome: {
+      type: Boolean,
+      default: false, // Only products marked true will appear on home
+    },
+
+    lastShownAt: {
+      type: Date,
+      default: null, // Can be used to rotate suggestions
+    },
+
+    homePriority: {
+      type: Number,
+      default: 0, // Higher value = shows earlier in home
     }
   },
   {

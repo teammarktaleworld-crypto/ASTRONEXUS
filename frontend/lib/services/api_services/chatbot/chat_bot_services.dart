@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatbotService {
   static const String baseUrl =
-      "https://astro-nexus-new-6.onrender.com/api/chatbot/ask";
+      "https://astro-nexus-new-6-46mo.onrender.com/api/chatbot/ask";
 
   static Future<String> askQuestion(String question) async {
     final prefs = await SharedPreferences.getInstance();

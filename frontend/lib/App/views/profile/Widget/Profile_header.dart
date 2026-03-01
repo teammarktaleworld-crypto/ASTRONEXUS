@@ -4,17 +4,21 @@ import 'package:google_fonts/google_fonts.dart';
 class ProfileHeaderCard extends StatelessWidget {
   final String userName;
   final String email;
+  final String phone;
   final String zodiacSign;
-  final String birthDate;
   final String userAvatar;
+  final VoidCallback onAvatarTap;
+  final bool isUploading;
 
   const ProfileHeaderCard({
     super.key,
     required this.userName,
     required this.email,
+    required this.phone,
     required this.zodiacSign,
-    required this.birthDate,
     required this.userAvatar,
+    required this.onAvatarTap,
+    this.isUploading = false,
   });
 
   @override
@@ -22,7 +26,7 @@ class ProfileHeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xFF14162E), Color(0xFF1C1F3A)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -31,110 +35,115 @@ class ProfileHeaderCard extends StatelessWidget {
         border: Border.all(color: Colors.white12),
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.4),
             blurRadius: 20,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         children: [
-          // Avatar with white circular background
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white24,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white12,
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+          /// AVATAR
+          GestureDetector(
+            onTap: onAvatarTap,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 52,
+                  backgroundColor: Colors.white,
+                  backgroundImage: userAvatar.startsWith("http")
+                      ? NetworkImage(userAvatar)
+                      : null,
+                  child: userAvatar.isEmpty
+                      ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                      : null,
                 ),
+                if (isUploading)
+                  Container(
+                    width: 104,
+                    height: 104,
+                    decoration: BoxDecoration(
+                      color: Colors.black45,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
               ],
-            ),
-            child: CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.white,
-              backgroundImage: userAvatar.isNotEmpty
-                  ? (userAvatar.startsWith("http")
-                  ? NetworkImage(userAvatar)
-                  : AssetImage(userAvatar) as ImageProvider)
-                  : null,
-              child: userAvatar.isEmpty
-                  ? const Icon(
-                Icons.person,
-                size: 50,
-                color: Colors.grey,
-              )
-                  : null,
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          // User Name
+          /// NAME
           Text(
             userName,
             style: GoogleFonts.dmSans(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.w700,
             ),
           ),
+
           const SizedBox(height: 4),
 
-          // Email
-          Text(
-            email,
-            style: GoogleFonts.dmSans(
-              color: Colors.white60,
-              fontSize: 14,
+          /// EMAIL
+          if (email.isNotEmpty)
+            Text(
+              email,
+              style: GoogleFonts.dmSans(
+                color: Colors.white60,
+                fontSize: 14,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
 
-          // Zodiac & Birth Date Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple.withOpacity(0.25),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                      color: Colors.deepPurpleAccent.withOpacity(0.4)),
-                ),
-                child: Text(
-                  zodiacSign.toUpperCase(),
-                  style: GoogleFonts.dmSans(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.2,
-                  ),
-                ),
+          const SizedBox(height: 6),
+
+          /// PHONE
+          if (phone.isNotEmpty)
+            Text(
+              phone,
+              style: GoogleFonts.dmSans(
+                color: Colors.white70,
+                fontSize: 14,
               ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white10,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  birthDate,
-                  style: GoogleFonts.dmSans(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+
+          const SizedBox(height: 12),
+
+          /// RASHI CHIP
+          if (zodiacSign.isNotEmpty)
+            _infoChip(
+              "Rashi: ${zodiacSign.toUpperCase()}",
+              Colors.deepPurple.withOpacity(0.25),
+              Colors.deepPurpleAccent.withOpacity(0.4),
+            ),
         ],
+      ),
+    );
+  }
+
+  Widget _infoChip(String text, Color bgColor, Color borderColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: borderColor),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.dmSans(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.4,
+        ),
       ),
     );
   }

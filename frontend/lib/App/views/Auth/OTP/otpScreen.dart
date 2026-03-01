@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:astro_tale/App/views/Auth/Sign_up/screens/astrology_signup_timeline_screen.dart';
 import 'package:astro_tale/App/views/Auth/terms%20and%20condition/termsandconditions.dart';
 import 'package:astro_tale/App/views/onboard/Screens/onboarding.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../ui_componets/cosmic/cosmic_one.dart';
 import '../../../../ui_componets/glass/glass_card.dart';
 import '../../dash/DashboardScreen.dart';
-import '../Create_SignUp/screens/signup_screen.dart';
 
 class OTPVerification extends StatefulWidget {
   final String phoneNumber; // Receive phone number from Login screen
@@ -298,7 +298,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => const SignUp()),
+                                MaterialPageRoute(builder: (_) => AstrologySignupTimeline()),
                               );
                             },
                             style: OutlinedButton.styleFrom(

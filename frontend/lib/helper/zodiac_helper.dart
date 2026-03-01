@@ -3,9 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ZodiacHelper {
-  /// Fetch Vedic Rashi from Astro Nexus API
-  /// Async version, works per user DOB, time, and place
-  static Future<String> getVedicZodiac(
+  /// Generate birth chart and return both rashi and temporary chart id
+  static Future<Map<String, String>> generateBirthChart(
       DateTime dob, {
         String name = "User",
         String gender = "male",
@@ -36,7 +35,7 @@ class ZodiacHelper {
       };
 
       final response = await http.post(
-        Uri.parse("https://astro-nexus-backend-9u1s.onrender.com/api/v1/chart"),
+        Uri.parse("https://astro-nexus-new-6-46mo.onrender.com/api/birthchart/generate"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(payload),
       );
@@ -46,24 +45,29 @@ class ZodiacHelper {
       }
 
       final data = jsonDecode(response.body);
+      final chartData = data['data'] ?? {};
 
-      // Extract rashi from API response
-      final rashi = (data["rashi"] ?? data["ascendant"]?["sign"] ?? "").toString().toLowerCase();
+      // Extract rashi & temp chart id
+      final rashi = (chartData['rashi'] ?? chartData['ascendant']?['sign'] ?? "").toString().toLowerCase();
+      final tempChartId = chartData['_id'] ?? '';
 
-      // Save in SharedPreferences
+      // Save rashi locally
       if (rashi.isNotEmpty) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("vedic_rashi", rashi);
       }
 
-      return rashi.isNotEmpty ? rashi : "unknown";
+      return {
+        'rashi': rashi.isNotEmpty ? rashi : 'unknown',
+        'tempChartId': tempChartId
+      };
     } catch (e) {
-      print("Error fetching Rashi from API: $e");
-      return "unknown";
+      print("Error generating birth chart: $e");
+      return {'rashi': 'unknown', 'tempChartId': ''};
     }
   }
 
-  /// Get stored Rashi from SharedPreferences
+  /// Get stored Rashi
   static Future<String?> getStoredRashi() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString("vedic_rashi");

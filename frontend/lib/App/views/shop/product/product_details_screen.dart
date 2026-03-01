@@ -13,6 +13,7 @@ import '../../../Model/product_model.dart';
 import '../../../controller/Auth_Controller.dart';
 import '../../../controller/feedback_conroller.dart';
 import '../../feedback/screen/feedback_screen.dart';
+import '../../wishlist/button/wishlist_button.dart';
 import '../cart/cart_screen.dart';
 import '../checkout/checkout_screen.dart';
 
@@ -32,6 +33,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   // typed keys so we can call \`loadFeedbacks()\` safely
   final GlobalKey<FeedbackScreenState> feedbackListKey = GlobalKey<FeedbackScreenState>();
   final GlobalKey<FeedbackScreenState> feedbackSheetKey = GlobalKey<FeedbackScreenState>();
+  bool isWishlisted = false; // define at class level
+
 
   ProductModel? product;
   CartModel? cart;
@@ -116,20 +119,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.amberAccent,
-        icon: const Icon(Icons.rate_review, color: Colors.black),
-        label: const Text("Review", style: TextStyle(color: Colors.black)),
-        onPressed: () {
-          if (!AuthController.isLoggedIn) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Please login to write a review")),
-            );
-            return;
-          }
-          _openReviewBottomSheet();
-        },
-      ),
+      bottomNavigationBar:
+      loading || product == null ? const SizedBox() : _actionButtons(),
+
       backgroundColor: const Color(0xff050B1E),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -200,17 +192,53 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _imageSlider(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
+
                 _infoCard(),
                 const SizedBox(height: 24),
-                _actionButtons(),
-                const SizedBox(height: 32),
-                Text(
-                  "Customer Reviews",
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                Padding(
+                  padding: const EdgeInsets.only(left: 14, right: 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Customer Reviews",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: _openReviewBottomSheet,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.white24, width: 1.2),
+                              ),
+                              child: Icon(Icons.edit, color: Colors.white, size: 16)
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 2,
+                        width: double.infinity, // makes the divider short and elegant
+                        decoration: BoxDecoration(
+                          color: Colors.white, // accent color for visibility
+                          borderRadius: BorderRadius.circular(1), // subtle rounding
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -248,60 +276,218 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     final images = product!.images.isNotEmpty
         ? product!.images
         : ["https://via.placeholder.com/400"];
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: SizedBox(
-        height: 280,
-        child: PageView.builder(
-          itemCount: images.length,
-          itemBuilder: (_, i) => Image.network(
-            images[i],
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-                color: Colors.white10,
-                child:
-                const Icon(Icons.image_not_supported, size: 60)),
+
+    final PageController controller = PageController(viewportFraction: 0.97);
+    int activeIndex = 0;
+
+    return Container(
+
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white24, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 14,
+            offset: const Offset(0, 8),
           ),
-        ),
+        ],
+      ),
+      height: 320, // total height including dots
+      width: double.infinity,
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          controller.addListener(() {
+            final newIndex = (controller.page ?? 0).round();
+            if (newIndex != activeIndex) {
+              setState(() => activeIndex = newIndex);
+            }
+          });
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Image slider
+              SizedBox(
+                height: 280,
+                child: PageView.builder(
+                  controller: controller,
+                  itemCount: images.length,
+                  itemBuilder: (context, i) {
+                    return AnimatedBuilder(
+                      animation: controller,
+                      builder: (context, child) {
+                        double value = 1.0;
+                        if (controller.position.haveDimensions) {
+                          value = controller.page! - i;
+                          value = (1 - (value.abs() * 0.15)).clamp(0.85, 1.0);
+                        }
+                        return Center(
+                          child: Transform.scale(
+                            scale: value,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 14,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: AspectRatio(
+                                    aspectRatio: 4 / 3, // better image proportion
+                                    child: Image.network(
+                                      images[i],
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: Colors.white10,
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          size: 60,
+                                        ),
+                                      ),
+                                      loadingBuilder:
+                                          (context, child, progress) {
+                                        if (progress == null) return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: progress.expectedTotalBytes !=
+                                                null
+                                                ? progress.cumulativeBytesLoaded /
+                                                progress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Dots indicator
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(images.length, (index) {
+                  final isActive = index == activeIndex;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: isActive ? 32 : 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isActive ? Colors.white : Colors.white24,
+                      borderRadius: BorderRadius.circular(4),
+
+
+                    ),
+                  );
+                }),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   Widget _infoCard() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // stronger blur for frosted effect
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.white12),
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.08),
+                Colors.white.withOpacity(0.04),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 20,
+                spreadRadius: 1,
+                offset: const Offset(0, 10),
+              ),
+              BoxShadow(
+                color: Colors.white12,
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(product!.name,
-                  style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700)),
-              const SizedBox(height: 8),
-              const Divider(),
-              Text(product!.description ?? "No description available",
-                  style:
-                  GoogleFonts.poppins(color: Colors.white70, height: 1.5)),
-              const SizedBox(height: 8),
-              Text("₹${product!.price}",
-                  style: GoogleFonts.poppins(
-                      color: Colors.amberAccent,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600)),
+              // Product Name
+              Text(
+                product!.name,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 12),
-              _badges(),
+
+              // Divider
+              Container(
+                height: 1,
+                color: Colors.white30,
+              ),
               const SizedBox(height: 12),
+
+              // Description
+              Text(
+                product!.description ?? "No description available",
+                style: GoogleFonts.poppins(
+                  color: Colors.white70,
+                  fontSize: 15,
+                  height: 1.6,
+                ),
+                maxLines: 5,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 16),
+
+              // Price
+              Text(
+                "₹${product!.price}",
+                style: GoogleFonts.poppins(
+                  color: Colors.amberAccent,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Badges or Tags
+              _badges(), // keep your existing badge widget
             ],
           ),
         ),
@@ -311,15 +497,46 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Widget _badges() {
     return Wrap(
-      spacing: 8,
+      spacing: 10,
+      runSpacing: 6,
       children: [
-        _chip(product!.astrologyType.name.toUpperCase()),
-        _chip(product!.deliveryType.name.toUpperCase()),
-        _chip(
+        _badgeChip(product!.astrologyType.name.toUpperCase()),
+        _badgeChip(product!.deliveryType.name.toUpperCase()),
+        _badgeChip(
           product!.stock > 0 ? "IN STOCK" : "OUT OF STOCK",
-          color: product!.stock > 0 ? Colors.green : Colors.red,
+          color: product!.stock > 0 ? Colors.greenAccent : Colors.redAccent,
         ),
       ],
+    );
+  }
+
+  Widget _badgeChip(String label, {Color? color}) {
+    final chipColor = color ?? Colors.white; // default white
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: chipColor.withOpacity(0.15), // subtle white/colored background
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: chipColor.withOpacity(0.3), // soft border
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          color: chipColor, // text color matches chip accent
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -333,135 +550,185 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Widget _actionButtons() {
     final disabled = product!.stock <= 0;
+    bool addedToCart = false; // track if item is added
 
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: disabled ? null : _addToCart,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              side: const BorderSide(color: Colors.white),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
-            ),
-            child:
-            Text("Add to Cart", style: GoogleFonts.poppins(color: Colors.white)),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.06),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 8,
+            offset: const Offset(0, -2),
           ),
+        ],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: disabled
-                ? null
-                : () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => CartScreen()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.amberAccent,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
-            ),
-            child: Text("Buy Now",
-                style: GoogleFonts.poppins(
-                    color: Colors.black, fontWeight: FontWeight.w600)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Wishlist Button
+          WishlistButton(
+            productId: product?.id ?? "",
           ),
-        ),
-      ],
+          SizedBox(width: 10,),
+          // Add to Cart / Add Another Button
+          Expanded(
+            child: StatefulBuilder(
+              builder: (context, setInnerState) {
+                return InkWell(
+                  onTap: disabled
+                      ? null
+                      : () async {
+                    await _addToCart();
+
+                    setInnerState(() => addedToCart = true);
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    width: 160,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: addedToCart ? Colors.white : Colors.amberAccent,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: addedToCart
+                            ? Colors.white
+                            : (disabled ? Colors.white24 : Colors.amberAccent),
+                        width: 2,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      addedToCart ? "Add Another" : "Add to Cart",
+                      style: GoogleFonts.dmSans(
+                        color: addedToCart ? Colors.black : Colors.black,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   void _openReviewBottomSheet() {
     double userRating = 0;
-    final reviewController = TextEditingController();
+    final TextEditingController reviewController = TextEditingController();
     bool submitting = false;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) {
+      builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
               child: Container(
                 padding: EdgeInsets.only(
                   left: 20,
                   right: 20,
                   top: 20,
-                  bottom:
-                  MediaQuery.of(context).viewInsets.bottom + 20,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
+                  color: const Color(0xff050B1E).withOpacity(0.4),
                   borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(30)),
-                  border:
-                  Border.all(color: Colors.white.withOpacity(0.15)),
+                  const BorderRadius.vertical(top: Radius.circular(28)),
+                  border: Border.all(color: Colors.white.withOpacity(0.12)),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    /// Drag Handle
                     Center(
                       child: Container(
-                        width: 50,
+                        width: 48,
                         height: 5,
-                        margin: const EdgeInsets.only(bottom: 16),
+                        margin: const EdgeInsets.only(bottom: 18),
                         decoration: BoxDecoration(
                           color: Colors.white24,
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
-                    Text("Rate this product",
-                        style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 16),
+
+                    /// Title
+                    Text(
+                      "Rate this product",
+                      style: GoogleFonts.dmSans(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    /// Rating
                     Center(
                       child: RatingBar.builder(
                         initialRating: 0,
                         minRating: 1,
+                        allowHalfRating: true,
                         itemCount: 5,
                         itemSize: 36,
-                        glow: true,
-                        itemBuilder: (_, __) =>
-                        const Icon(Icons.star, color: Colors.amber),
+                        glow: false,
+                        unratedColor: Colors.white24,
+                        itemBuilder: (_, __) => const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amber,
+                        ),
                         onRatingUpdate: (rating) {
                           setModalState(() => userRating = rating);
                         },
                       ),
                     ),
-                    const SizedBox(height: 20),
+
+                    const SizedBox(height: 22),
+
+                    /// Review Input
                     TextField(
                       controller: reviewController,
                       maxLines: 3,
-                      style: const TextStyle(color: Colors.white),
+                      style: GoogleFonts.dmSans(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
                       decoration: InputDecoration(
-                        hintText: "Share your experience...",
-                        hintStyle: const TextStyle(color: Colors.white54),
+                        hintText: "Share your experience…",
+                        hintStyle:
+                        GoogleFonts.dmSans(color: Colors.white54),
                         filled: true,
-                        fillColor: Colors.white10,
+                        fillColor: Colors.white.withOpacity(0.08),
+                        contentPadding: const EdgeInsets.all(14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+
+                    const SizedBox(height: 22),
+
+                    /// Submit Button / Loader
                     submitting
                         ? Center(
-                      child:
-                      LoadingAnimationWidget.staggeredDotsWave(
-                        color: Colors.amberAccent,
-                        size: 40,
+                      child: LoadingAnimationWidget
+                          .fourRotatingDots(
+                        color: Colors.white,
+                        size: 36,
                       ),
                     )
                         : SizedBox(
@@ -469,11 +736,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           if (userRating == 0 ||
-                              reviewController.text.trim().isEmpty) {
+                              reviewController.text
+                                  .trim()
+                                  .isEmpty) {
                             ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
+                                .showSnackBar(
+                              const SnackBar(
                                 content: Text(
-                                    "Please add rating & review")));
+                                    "Please add rating and review"),
+                              ),
+                            );
                             return;
                           }
 
@@ -481,46 +753,62 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
                           try {
                             await FeedbackController().addFeedback(
-                              product!.id,
-                              userRating,
-                              reviewController.text.trim(),
+                              productId: product!.id,
+                              rating: userRating,
+                              review: reviewController.text.trim(),
                             );
 
-                            // Close the input sheet
                             if (Navigator.canPop(context)) {
-                              Navigator.of(context).pop();
+                              Navigator.pop(context);
                             }
 
-                            // Refresh inline review list
-                            feedbackListKey.currentState?.loadFeedbacks();
+                            feedbackListKey.currentState
+                                ?.loadFeedbacks();
 
                             ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
+                                .showSnackBar(
+                              const SnackBar(
                                 content: Text(
-                                    "Review submitted successfully")));
+                                    "Review submitted successfully"),
+                              ),
+                            );
 
-                            // Open full reviews sheet so user sees the new review
                             _openReviewsListSheet();
                           } catch (e) {
                             ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(
-                                content: Text("Failed: $e")));
+                                .showSnackBar(
+                              SnackBar(
+                                content:
+                                Text("Submission failed: $e"),
+                              ),
+                            );
+
+                            Navigator.pop(context);
                           } finally {
-                            setModalState(() => submitting = false);
+                            if (mounted) {
+                              setModalState(
+                                      () => submitting = false);
+                            }
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.amberAccent,
                           padding: const EdgeInsets.symmetric(
                               vertical: 14),
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
-                              borderRadius:
-                              BorderRadius.circular(14)),
+                            borderRadius:
+                            BorderRadius.circular(14),
+                          ),
                         ),
-                        child: Text("Submit Review",
-                            style: GoogleFonts.poppins(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600)),
+                        child: Text(
+                          "Submit Review",
+                          style: GoogleFonts.dmSans(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
                       ),
                     ),
                   ],

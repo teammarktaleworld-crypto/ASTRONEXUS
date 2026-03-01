@@ -1,9 +1,11 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:astro_tale/App/Model/cart_model.dart';
 import 'package:astro_tale/App/Model/product_model.dart';
 import 'package:astro_tale/App/views/shop/checkout/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../../services/api_services/api_service.dart';
 import '../../../../services/api_services/order_api.dart';
 import '../../../../services/api_services/payment_api.dart';
@@ -95,55 +97,82 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                       const SizedBox(height: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        margin: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xff18122B),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white12),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: paymentMethod,
-                            isExpanded: true,
-                            dropdownColor: const Color(0xff18122B),
-                            icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                                color: Colors.white70),
-                            style: GoogleFonts.dmSans(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.9),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
                             ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: "UPI",
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.account_balance_wallet_outlined,
-                                        color: Colors.greenAccent, size: 20),
-                                    SizedBox(width: 10),
-                                    Text("Online Payment"),
-                                  ],
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.85),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.grey.shade300.withOpacity(0.5),
+                                  width: 1.2,
                                 ),
                               ),
-                              DropdownMenuItem(
-                                value: "CASH",
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.payments_outlined,
-                                        color: Colors.amberAccent, size: 20),
-                                    SizedBox(width: 10),
-                                    Text("Cash on Delivery"),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: paymentMethod,
+                                  isExpanded: true,
+                                  dropdownColor: Colors.white.withOpacity(0.95),
+                                  icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: Colors.grey,
+                                    size: 28,
+                                  ),
+                                  style: GoogleFonts.dmSans(
+                                    color: Colors.black87,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  items: const [
+                                    DropdownMenuItem(
+                                      value: "UPI",
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.account_balance_wallet_outlined,
+                                              color: Colors.green, size: 24),
+                                          SizedBox(width: 12),
+                                          Text("Online Payment"),
+                                        ],
+                                      ),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: "CASH",
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.payments_outlined,
+                                              color: Colors.orange, size: 24),
+                                          SizedBox(width: 12),
+                                          Text("Cash on Delivery"),
+                                        ],
+                                      ),
+                                    ),
                                   ],
+                                  onChanged: (val) {
+                                    setState(() {
+                                      paymentMethod = val!;
+                                    });
+                                  },
                                 ),
                               ),
-                            ],
-                            onChanged: (val) {
-                              setState(() {
-                                paymentMethod = val!;
-                              });
-                            },
+                            ),
                           ),
                         ),
-                      ),
+                      )
                     ],
                   ),
 
@@ -188,62 +217,84 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(24),
                                     decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [Color(0xff393053), Color(0xff050B1E)],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.white12),
+                                      color: Colors.white, // Light background
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.15),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
                                     ),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.check_circle_outline,
-                                            color: Colors.greenAccent, size: 64),
-                                        const SizedBox(height: 16),
+                                        /// Success Icon
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.greenAccent.withOpacity(0.2),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          padding: const EdgeInsets.all(20),
+                                          child: const Icon(
+                                            Icons.check_circle_outline,
+                                            color: Colors.greenAccent,
+                                            size: 64,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+
+                                        /// Title
                                         Text(
                                           "Order Placed Successfully!",
-                                          style: GoogleFonts.dmSans(
-                                            color: Colors.white,
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.black87,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 18,
+                                            fontSize: 20,
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
-                                        const SizedBox(height: 8),
+                                        const SizedBox(height: 12),
+
+                                        /// Subtitle
                                         Text(
                                           "You can pay on delivery. Thank you for shopping with us!",
-                                          style: GoogleFonts.dmSans(
-                                            color: Colors.white70,
-                                            fontSize: 14,
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.black54,
+                                            fontSize: 15,
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
-                                        const SizedBox(height: 24),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.pop(context); // close dialog
-                                            Navigator.pop(context); // close dialog
-                                            Navigator.pop(context); // close dialog
-                                            Navigator.pop(context); // close dialog
+                                        const SizedBox(height: 28),
 
-
-
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.greenAccent,
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 32, vertical: 12),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
+                                        /// Go to Shop Button
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.pop(context); // close dialog
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);// optional extra pops
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green,
+                                              padding: const EdgeInsets.symmetric(vertical: 16),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(16),
+                                              ),
+                                              elevation: 6,
+                                              shadowColor: Colors.greenAccent.withOpacity(0.5),
                                             ),
-                                          ),
-                                          child: Text(
-                                            "Go to Shop",
-                                            style: GoogleFonts.dmSans(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
+                                            child: Text(
+                                              "Go to Shop",
+                                              style: GoogleFonts.poppins(
+                                                color: Colors.black87,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -266,7 +317,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         }
                       },
                       child: loading
-                          ? const CircularProgressIndicator(color: Colors.black)
+                          ? LoadingAnimationWidget.fourRotatingDots(color: Colors.white, size: 16)
                           : Text(
                         paymentMethod == "UPI" ? "Proceed to Payment" : "Place Order (Cash)",
                         style: GoogleFonts.dmSans(

@@ -1,18 +1,20 @@
 import 'dart:ui';
-import 'package:astro_tale/ui_componets/cosmic/cosmic_one.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:astro_tale/ui_componets/cosmic/cosmic_one.dart';
 
 class SubscriptionPage extends StatelessWidget {
   const SubscriptionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: const Color(0xff050B1E),
       body: Stack(
         children: [
-          // 🌌 Background Gradient
+          // 🌌 Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -31,113 +33,65 @@ class SubscriptionPage extends StatelessWidget {
 
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 🔹 HEADER ROW (Title + Close Button)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "Upgrade Your Experience",
-                          style: GoogleFonts.dmSans(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white12,
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Colors.white70,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                  _header(context),
+                  const SizedBox(height: 10),
+                  _subtitle(),
+                  const SizedBox(height: 18),
+                  _banner(),
+                  const SizedBox(height: 22),
+
                   Text(
-                    "Unlock personalized readings, nutritional astrology insights, and exclusive content.",
+                    "Subscription Plans",
                     style: GoogleFonts.dmSans(
-                      fontSize: 12,
-                      color: Colors.white54,
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
-                  // 🌟 BANNER
-                  Container(
-                    height: 140,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      image: const DecorationImage(
-                        image: AssetImage("assets/images/bg_card.png"),
-                        fit: BoxFit.cover,
-                      ),
-                      border: Border.all(color: Colors.white24),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 🔹 PLANS SECTION
                   Expanded(
                     child: ListView(
                       physics: const BouncingScrollPhysics(),
-                      children: [
-                        Text(
-                          "Choose Your Plan",
-                          style: GoogleFonts.dmSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
+                      children: const [
+                        CalmPlanCard(
+                          title: "Weekly",
+                          price: "₹199",
+                          description: "Gentle start for guidance",
+                          features: [
+                            "Daily Horoscope",
+                            "Basic Insights",
+                          ],
                         ),
-                        const SizedBox(height: 12),
-
-                        // Plan Cards
-                        SubscriptionPlanCard(
-                          title: "Monthly Plan",
-                          price: "\$9.99",
+                        SizedBox(height: 14),
+                        CalmPlanCard(
+                          title: "Monthly",
+                          price: "₹699",
+                          description: "Complete astrological support",
+                          highlight: true,
                           features: [
                             "Daily Horoscope",
                             "Nutritional Astrology",
-                            "Exclusive Videos"
+                            "Exclusive Videos",
+                            "Chat Support",
                           ],
-                          accent: const Color(0xff6EE7F9),
                         ),
-                        const SizedBox(height: 12),
-                        SubscriptionPlanCard(
-                          title: "Yearly Plan",
-                          price: "\$99.99",
+                        SizedBox(height: 14),
+                        CalmPlanCard(
+                          title: "Yearly",
+                          price: "₹6,999",
+                          description: "Deep long-term guidance",
                           features: [
                             "All Monthly Features",
                             "Priority Astrologer Support",
-                            "Premium Content Access"
+                            "Premium Content",
                           ],
-                          accent: const Color(0xff8B5CF6),
                         ),
-                        const SizedBox(height: 12),
-                        SubscriptionPlanCard(
-                          title: "Weekly Plan",
-                          price: "\$3.99",
-                          features: [
-                            "Limited Daily Horoscope",
-                            "Basic Insights"
-                          ],
-                          accent: const Color(0xffF59EAE),
-                        ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 28),
                       ],
                     ),
                   ),
@@ -149,43 +103,101 @@ class SubscriptionPage extends StatelessWidget {
       ),
     );
   }
+
+  // ================= HEADER =================
+
+  Widget _header(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            "Upgrade Your Journey",
+            style: GoogleFonts.dmSans(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white12,
+            ),
+            child: const Icon(Icons.close, color: Colors.white70, size: 20),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _subtitle() {
+    return Text(
+      "Choose a plan that aligns with your spiritual path and unlock deeper astrological insights.",
+      style: GoogleFonts.dmSans(
+        color: Colors.white60,
+        fontSize: 13,
+        height: 1.5,
+      ),
+    );
+  }
+
+  Widget _banner() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Image.asset(
+        "assets/images/bg_card.png",
+        height: 120,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
 }
 
-class SubscriptionPlanCard extends StatelessWidget {
+// ================= PLAN CARD =================
+
+class CalmPlanCard extends StatelessWidget {
   final String title;
   final String price;
+  final String description;
   final List<String> features;
-  final Color accent;
   final bool highlight;
 
-  const SubscriptionPlanCard({
+  const CalmPlanCard({
     super.key,
     required this.title,
     required this.price,
+    required this.description,
     required this.features,
-    required this.accent,
     this.highlight = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: highlight ? accent.withOpacity(0.15) : Colors.white.withOpacity(0.06),
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-            color: highlight ? accent : Colors.white.withOpacity(0.08),
-            width: highlight ? 2 : 1),
-        boxShadow: highlight
-            ? [
+          color: highlight
+              ? Colors.black.withOpacity(0.3)
+              : Colors.black.withOpacity(0.15),
+          width: highlight ? 1.4 : 1,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: accent.withOpacity(0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          )
-        ]
-            : null,
+            color: Colors.black.withOpacity(0.7),
+            blurRadius:  5 ,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,63 +205,73 @@ class SubscriptionPlanCard extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.dmSans(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            price,
+            description,
             style: GoogleFonts.dmSans(
-              color: Colors.white70,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+              fontSize: 12,
+              color: Colors.black54,
             ),
           ),
-          const SizedBox(height: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: features
-                .map((f) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
+          const SizedBox(height: 14),
+          Text(
+            price,
+            style: GoogleFonts.dmSans(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          ...features.map(
+                (f) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
               child: Row(
                 children: [
-                  Icon(Icons.check_rounded, size: 16, color: accent),
-                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: 16,
+                    color: Colors.black87,
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       f,
                       style: GoogleFonts.dmSans(
-                          color: Colors.white70, fontSize: 12),
+                        fontSize: 13,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ))
-                .toList(),
+            ),
           ),
-          const SizedBox(height: 12),
-          Center(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  colors: highlight
-                      ? [accent, accent.withOpacity(0.8)]
-                      : [Colors.white12, Colors.white24],
+
+          const SizedBox(height: 16),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff18122B),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: Center(
-                child: Text(
-                  "Subscribe Now",
-                  style: GoogleFonts.dmSans(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
+              onPressed: () {},
+              child: Text(
+                "Subscribe",
+                style: GoogleFonts.dmSans(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),

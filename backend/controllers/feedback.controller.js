@@ -38,8 +38,12 @@ const updateProductRating = async (productId) => {
 export const createFeedback = async (req, res) => {
   try {
     const { productId, rating, description } = req.body;
+
+    // ✅ Extract user info from middleware
+    const userId = req.userId;
     const user = req.user;
 
+    // 🔐 Basic validations
     if (!productId || !rating) {
       return res.status(400).json({
         success: false,
@@ -54,17 +58,17 @@ export const createFeedback = async (req, res) => {
       });
     }
 
-    if (!user || !user._id || !user.name) {
+    if (!userId || !user?.name) {
       return res.status(401).json({
         success: false,
         message: "User information missing",
       });
     }
 
-    // 🚫 Prevent duplicate review per user per product
+    // 🚫 Prevent duplicate review (per user per product)
     const existingReview = await Feedback.findOne({
       productId,
-      userId: user._id,
+      userId: userId,
     });
 
     if (existingReview) {
@@ -74,9 +78,10 @@ export const createFeedback = async (req, res) => {
       });
     }
 
+    // ✅ Create feedback
     const feedback = new Feedback({
       productId,
-      userId: user._id,
+      userId: userId,
       userName: user.name,
       userDisplay: user.astrologyProfile || "",
       rating,
@@ -88,17 +93,19 @@ export const createFeedback = async (req, res) => {
     // ⭐ Update product rating stats
     await updateProductRating(productId);
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Review submitted successfully",
       feedback,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error("CREATE FEEDBACK ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error",
+    });
   }
 };
-
 
 /* -------------------------------------------------------
    ⭐ Get Reviews for a Single Product
@@ -137,9 +144,13 @@ export const getAllFeedbacks = async (req, res) => {
 /* -------------------------------------------------------
    ⭐ Delete Feedback (User or Admin)
 --------------------------------------------------------*/
+
 export const deleteFeedback = async (req, res) => {
   try {
     const { feedbackId } = req.params;
+
+    // ✅ JWT data from middleware
+    const userId = req.userId;
     const user = req.user;
 
     // 1️⃣ Validate feedback ID
@@ -159,17 +170,17 @@ export const deleteFeedback = async (req, res) => {
       });
     }
 
-    // 3️⃣ Ensure user and feedback.userId exist
-    if (!user || !user._id || !feedback.userId) {
-      return res.status(400).json({
+    // 3️⃣ Ensure required auth data exists
+    if (!userId || !feedback.userId) {
+      return res.status(401).json({
         success: false,
-        message: "Invalid user or feedback data",
+        message: "User information missing",
       });
     }
 
     // 4️⃣ Authorization check
-    const isOwner = feedback.userId.toString() === user._id.toString();
-    const isAdmin = user.role === "admin";
+    const isOwner = feedback.userId.toString() === userId.toString();
+    const isAdmin = user?.role === "admin";
 
     if (!isOwner && !isAdmin) {
       return res.status(403).json({
@@ -183,26 +194,23 @@ export const deleteFeedback = async (req, res) => {
     // 5️⃣ Delete feedback
     await feedback.deleteOne();
 
-    // 6️⃣ Recalculate product rating (safe)
-    try {
-      await updateProductRating(productId);
-    } catch (ratingErr) {
-      console.error(`Failed to update rating for product ${productId}:`, ratingErr);
-    }
+    // 6️⃣ Recalculate product rating
+    await updateProductRating(productId);
 
-    // 7️⃣ Return success
-    res.status(200).json({
+    // 7️⃣ Success response
+    return res.status(200).json({
       success: true,
       message: "Feedback deleted successfully",
     });
 
   } catch (err) {
     console.error("Delete feedback error:", err);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: err.message || "Server error",
     });
   }
 };
+
 
 

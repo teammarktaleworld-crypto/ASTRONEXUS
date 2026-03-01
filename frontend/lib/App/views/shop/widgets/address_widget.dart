@@ -92,7 +92,7 @@ class _AddressWidgetState extends State<AddressWidget> {
                       ),
                       Text(
                         address == null ? "Add New Address" : "Edit Address",
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.dmSans(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -253,33 +253,36 @@ class _AddressWidgetState extends State<AddressWidget> {
                     },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
-                      margin: const EdgeInsets.only(bottom: 14),
+                      margin: const EdgeInsets.only(bottom: 16),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: const Color(0xff18122B),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: isSelected
-                              ? Colors.amberAccent
-                              : Colors.white10,
-                          width: 1.4,
+                          color: isSelected ? Colors.amberAccent : Colors.white10,
+                          width: 1.5,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          /// Header: Icon + Name + Default Check
                           Row(
                             children: [
                               Icon(Icons.location_on_rounded,
-                                  color: isSelected
-                                      ? Colors.amberAccent
-                                      : Colors.white54),
-                              const SizedBox(width: 8),
+                                  color: isSelected ? Colors.amberAccent : Colors.white54),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: Text(addr.fullName,
                                     style: GoogleFonts.poppins(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600)),
+                                        color: Colors.white, fontWeight: FontWeight.w600)),
                               ),
                               if (addr.isDefault)
                                 const Icon(Icons.check_circle,
@@ -287,35 +290,79 @@ class _AddressWidgetState extends State<AddressWidget> {
                             ],
                           ),
                           const SizedBox(height: 8),
+
+                          /// Address details
                           Text(
                             "${addr.street}, ${addr.city}, ${addr.state}",
-                            style: GoogleFonts.poppins(
-                                color: Colors.white70, fontSize: 13),
+                            style: GoogleFonts.poppins(color: Colors.white70, fontSize: 13),
                           ),
                           Text(
                             "${addr.country} - ${addr.postalCode}",
-                            style: GoogleFonts.poppins(
-                                color: Colors.white54, fontSize: 12),
+                            style: GoogleFonts.poppins(color: Colors.white54, fontSize: 12),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
+
+                          const Divider(color: Colors.white10, thickness: 1),
+
+                          /// Action buttons: Edit + Delete
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit_rounded,
-                                    color: Colors.amberAccent),
-                                onPressed: () => _showAddressForm(address: addr),
+                              /// Edit
+                              InkWell(
+                                onTap: () => _showAddressForm(address: addr),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amberAccent.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.edit_rounded,
+                                          size: 16, color: Colors.amberAccent),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        "Edit",
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.amberAccent, fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_rounded,
-                                    color: Colors.redAccent),
-                                onPressed: () => _deleteAddress(addr.id),
+                              const SizedBox(width: 12),
+
+                              /// Delete
+                              InkWell(
+                                onTap: () => _deleteAddress(addr.id),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.delete_rounded,
+                                          size: 16, color: Colors.white),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        "Delete",
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.white, fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ],
                       ),
-                    ),
+                    )
                   );
                 },
               ),
@@ -323,20 +370,31 @@ class _AddressWidgetState extends State<AddressWidget> {
             const SizedBox(height: 6),
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.amberAccent),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
-                ),
+              child: ElevatedButton.icon(
                 onPressed: () => _showAddressForm(),
-                icon: const Icon(Icons.add_location_alt_rounded,
-                    color: Colors.amberAccent),
-                label: Text("Add New Address",
-                    style: GoogleFonts.poppins(
-                        color: Colors.amberAccent,
-                        fontWeight: FontWeight.w600)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: Colors.amberAccent),
+                  ),
+                  elevation: 12, // stronger elevation
+                  shadowColor: Colors.black.withOpacity(0.9), // richer shadow
+                ),
+                icon: const Icon(
+                  Icons.add_location_alt_rounded,
+                  color: Colors.amberAccent,
+                  size: 24,
+                ),
+                label: Text(
+                  "Add New Address",
+                  style: GoogleFonts.poppins(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             )
           ],

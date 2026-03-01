@@ -1,13 +1,20 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
+import 'package:astro_tale/App/controller/Auth_Controller.dart';
+import 'package:astro_tale/App/views/Auth/terms%20and%20condition/termsandconditions.dart';
 import 'package:astro_tale/App/views/Home/others/splash/splashbirth.dart';
+import 'package:astro_tale/App/views/Home/others/view/birthchart.dart';
+import 'package:astro_tale/App/views/Home/widgets/banner_corsol.dart';
 import 'package:astro_tale/App/views/Tarot/SplashTarot.dart';
 import 'package:astro_tale/App/views/drawer/screen/Drawer.dart';
+import 'package:astro_tale/App/views/drawer/widgets/support_screen.dart';
 import 'package:astro_tale/App/views/notification/screens/Notification_screen.dart';
 import 'package:astro_tale/App/views/options/IconScreen/views/horoscope/splashHoroscope.dart';
 import 'package:astro_tale/App/views/options/IconScreen/views/match/splashMatch.dart';
 import 'package:astro_tale/App/views/subscription/views/subscription_screen.dart';
+import 'package:astro_tale/App/views/support/screen/support_screen.dart';
+import 'package:astro_tale/App/views/wishlist/screen/wishlist_screen.dart';
 import 'package:astro_tale/ui_componets/glass/glass_card.dart';
 import 'package:astro_tale/util/images.dart';
 import 'package:flutter/material.dart';
@@ -21,16 +28,16 @@ import '../../../../ui_componets/cosmic/cosmic_one.dart';
 import '../../../../ui_componets/video/localvideocard.dart';
 import '../../../Model/Horoscope/horoscope_model.dart';
 import '../../Ai(chatbot)/View/Chatbot.dart';
+import '../../feedback/screen/feedback_screen.dart';
 import '../widgets/panchangcard.dart';
-
+import '../widgets/service_card.dart';
+import '../widgets/suggestion_card.dart';
 
 class Homescreen extends StatefulWidget {
-
   final String zodiacSign;
   final HoroscopeData daily;
   final HoroscopeData weekly;
   final HoroscopeData monthly;
-
 
   const Homescreen({
     super.key,
@@ -40,14 +47,11 @@ class Homescreen extends StatefulWidget {
     required this.monthly,
   });
 
-
   @override
   State<Homescreen> createState() => _HomescreenState();
 }
 
-class _HomescreenState extends State<Homescreen>
-    with TickerProviderStateMixin {
-
+class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   late AnimationController starController;
   late AnimationController planetController;
   int feedbackRating = 4;
@@ -56,18 +60,34 @@ class _HomescreenState extends State<Homescreen>
   String userName = "";
   String userPhone = "";
   String userAvatar = "";
+  bool _isDarkMode = false;
 
 
+  final List<Map<String, dynamic>> banners = [
+    {
+      "image": "assets/images/banner_mati.jpeg",
+      "title": "Explore Tarot",
+      "destination": Splashtarot(),
+    },
+    {
+      "image": "assets/images/banner_tarot.jpeg",
+      "title": "Check Your Horoscope",
+      "destination": SplashHoroscope(),
+    },
+    {
+      "image": "assets/images/banner_shop_one.jpeg",
+      "title": "Unlock Birth Chart",
+      "destination": SplashBirth(),
+    },
+  ];
 
-
-
-
+  int currentBanner = 0; // track the active page
 
   int selectedTab = 0;
   final tabs = ["Today", "Week", "Month"];
 
   @override
-   FallingStarPainter? starPainter;
+  FallingStarPainter? starPainter;
 
   @override
   void initState() {
@@ -92,18 +112,13 @@ class _HomescreenState extends State<Homescreen>
 
     _loadUserData(); // load real user info here
 
-
-
     // Start subscription page timer every 2 minutes
     _subscriptionTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       _showSubscriptionPage();
     });
 
     // Example: User's birth details (from signup/login)
-
   }
-
-
 
   @override
   void dispose() {
@@ -112,7 +127,6 @@ class _HomescreenState extends State<Homescreen>
     super.dispose();
 
     _subscriptionTimer?.cancel();
-
   }
 
   void _showSubscriptionPage() {
@@ -124,87 +138,71 @@ class _HomescreenState extends State<Homescreen>
     }
   }
 
-
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
 
     setState(() {
       userName = prefs.getString("userName") ?? "";
       userPhone = prefs.getString("userPhone") ?? "";
-      userAvatar = prefs.getString("userAvatar") ?? "assets/icons/sun.png"; // fallback avatar
+      userAvatar =
+          prefs.getString("userAvatar") ??
+          "assets/icons/sun.png"; // fallback avatar
     });
   }
 
+  void _handleDrawerItem(String item) {
+    switch (item) {
+      case "Terms & Conditions":
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const TermsAndConditions()));
+        break;
+      case "wishlist":
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) =>  WishlistScreen()));
+        break;
+      case "Match Services":
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) =>  BirthChartScreen()));
+        break;
+      case "Support":
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) =>  AstroSupportScreen()));
+        break;
+      default:
+        break;
+    }
+  }
 
+  void _toggleTheme(bool isDark) {
+    setState(() {
+      _isDarkMode = isDark;
+      // Optionally, apply theme changes globally using Theme.of(context)
+    });
+  }
 
   @override
   @override
   Widget build(BuildContext context) {
-
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
 
     return Scaffold(
       drawer: CustomDrawer(
-        userName: userName, // <-- pass the real user name dynamically
-        onItemTap: (item) {
-          Navigator.pop(context);
-
-          switch (item) {
-            case "Terms & Conditions":
-            // Show terms
-              break;
-            case "Feedback":
-            // Show feedback
-              break;
-            case "Match Services":
-            // Open match services
-              break;
-          }
-        },
-      )
-      ,
-
+        userName: userName,
+        userEmail: userName,
+        userAvatar: userAvatar,
+        onItemTap: _handleDrawerItem,
+        isDarkMode: _isDarkMode,
+        onThemeChanged: _toggleTheme,
+      ),
 
       backgroundColor: const Color(0xff050B1E),
 
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          "Home",
-          style: GoogleFonts.dmSans(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 26,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: (){
-
-              Navigator.push(context, MaterialPageRoute(builder: (_){
-                return NotificationScreen();
-              }));
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.money),
-            onPressed: (){
-              Navigator.push(context, MaterialPageRoute(builder: (_){
-                return SubscriptionPage();
-              }));
-            },
-          ),
-        ],
-      ),
+      appBar: _homeAppBar(context, userName, userAvatar),
 
       body: Stack(
         children: [
-
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -213,8 +211,8 @@ class _HomescreenState extends State<Homescreen>
                   // Color(0xff1C4D8D),
                   // Color(0xff0F2854),
                   Color(0xff393053),
-                  Color(0xff050B1E),
 
+                  Color(0xff050B1E),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -242,8 +240,6 @@ class _HomescreenState extends State<Homescreen>
           //     },
           //   ),
 
-
-
           /// 🪐 MULTI PLANET LAYER
           AnimatedBuilder(
             animation: planetController,
@@ -252,68 +248,44 @@ class _HomescreenState extends State<Homescreen>
 
           /// 🌠 CONTENT
           SafeArea(
-            child: Stack(
-              children: [
-                Column(
-                  children: [
+            child: CustomScrollView(
+              slivers: [
 
-                    // _servicesTopBar(),
-                    _profileHeader(),
+                // 🔹 Banners
+                SliverToBoxAdapter(child: BannerCarousel()),
 
-
-                    const SizedBox(height: 16),
-                    _tabs(),
-
-
-                    /// 🔹 SCROLLABLE CONTENT BELOW
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: Column(
-                          children: [
-                            // SizedBox(height: 28),
-                            // focusMoodCard(
-                            //   levels: {
-                            //     "Career": 0.6,
-                            //     "Love": 0.7,
-                            //     "Health": 0.65,
-                            //     "Family": 0.55,
-                            //   },
-                            // ),
-                            //
-
-                            SizedBox(height: 5),
-                            _bigPrediction(),
-                            SizedBox(height: 20,),
-
-                            _astrologyServicesRow(),
-                            const SizedBox(height: 34),
-                            _videoEducationSection(),
-                            const SizedBox(height: 34),
-                            _nutritionalAstrology(),
-                            const SizedBox(height: 40),
-                            _services(),
-                            const SizedBox(height: 40),
-                            _supportSection(),
-                            const SizedBox(height: 34),
-
-                            _feedbackForm(),
-
-
-
-                            const SizedBox(height: 34),
-
-                            _copyrightSection(),
-                            const SizedBox(height: 80),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                // 🔹 Sticky Tabs
+                SliverPersistentHeader(
+                  pinned: true, // <- STICKY
+                  delegate: _SliverTabsDelegate(_tabs(), 50), // 50 is height
                 ),
 
-                /// 🟢 MATI CHATBOT BUTTON — FLOATING ABOVE
-                _matiChatBot(context)
+                // 🔹 Scrollable content
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        _bigPrediction(),
+                        SizedBox(height: 20),
+                        astrologyServicesRow(context),
+                        SizedBox(height: 34),
+                        SuggestionProductList(),
+                        SizedBox(height: 20),
+
+                        _nutritionalAstrology(),
+                        // SizedBox(height: 40),
+                        // _supportSection(),
+                        // SizedBox(height: 34),
+                        // _feedbackForm(),
+                        // SizedBox(height: 34),
+                        // _copyrightSection(),
+                        SizedBox(height: 80),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -323,148 +295,120 @@ class _HomescreenState extends State<Homescreen>
   }
 
 
-  // TOP BAR
-  PreferredSizeWidget _servicesTopBar() {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(70),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08), // glassy effect
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Menu Button
-                  Builder(
-                    builder: (context) => IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.white70),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
-                    ),
-                  ),
-
-                  // Title
-                  Text(
-                    "Home",
-                    style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-
-                  // Notification or Avatar
-                  IconButton(
-                    icon: const Icon(Icons.notifications_none, color: Colors.white70),
-                    onPressed: () {
-                      // Handle notifications
-                    },
-                  ),
-
-                  IconButton(
-                    icon: const Icon(Icons.monetization_on, color: Colors.white70),
-                    onPressed: _showSubscriptionPage,
-                  ),
-
-
-                ],
-              ),
+  PreferredSizeWidget _homeAppBar(
+    BuildContext context,
+    String userName,
+    String userAvatar,
+  ) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      toolbarHeight: 80,
+      automaticallyImplyLeading: false,
+      titleSpacing: 0,
+      title: Row(
+        children: [
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
             ),
           ),
-        ),
-      ),
-    );
-  }
 
-
-
-
-  // 🧿 PROFILE HEADER
-  Widget _profileHeader() {
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 12),
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(
-                      width: 82,
-                      height: 82,
-                      padding: const EdgeInsets.all(4),
-                      child: CircleAvatar(
-                        radius: 50,
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.black,
-                        child: ClipOval(
-
-                          child: userAvatar.isNotEmpty
-                              ? Image.asset(userAvatar, fit: BoxFit.cover)
-                              : FluttermojiCircleAvatar(radius: 50),
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => FluttermojiCustomizer()),
+          // Profile avatar
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: Colors.white12,
+            child: ClipOval(
+              child: userAvatar.isNotEmpty
+                  ? Image.network(
+                      userAvatar,
+                      fit: BoxFit.cover,
+                      width: 44,
+                      height: 44,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          "assets/icons/sun.png",
+                          fit: BoxFit.cover,
+                          width: 44,
+                          height: 44,
                         );
                       },
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        child: const Icon(
-                          Icons.edit,
-                          size: 16,
-                          color: Colors.black,
-                        ),
-                      ),
+                    )
+                  : Image.asset(
+                      "assets/icons/sun.png",
+                      fit: BoxFit.cover,
+                      width: 44,
+                      height: 44,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // Greeting text
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Text(
-                  userName.isNotEmpty ? userName : "Guest",
+                  "Hi, ${userName.isNotEmpty ? userName : "Guest"}",
                   style: GoogleFonts.dmSans(
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                Text(
+                  "Welcome back!",
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
-          ],
+          ),
+        ],
+      ),
+      actions: [
+        // Notifications
+        IconButton(
+          icon: const Icon(Icons.notifications, color: Colors.white),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) {
+                  return NotificationScreen(token: AuthController.token);
+                },
+              ),
+            );
+          },
+        ),
+
+        // Subscription / money
+        IconButton(
+          icon: const Icon(Icons.money, color: Colors.white),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) {
+                  return SubscriptionPage();
+                },
+              ),
+            );
+          },
         ),
       ],
     );
   }
-
-
 
   Widget _zodiacIcon(String asset) {
     return Container(
@@ -476,7 +420,6 @@ class _HomescreenState extends State<Homescreen>
       child: Image.asset(asset, height: 16),
     );
   }
-
 
   Widget _videoEducationSection() {
     return Column(
@@ -500,8 +443,6 @@ class _HomescreenState extends State<Homescreen>
     );
   }
 
-
-
   // 🔮 CTA
   Widget _birthChartCTA() {
     return Container(
@@ -519,7 +460,6 @@ class _HomescreenState extends State<Homescreen>
     );
   }
 
-
   Widget _supportSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,6 +472,7 @@ class _HomescreenState extends State<Homescreen>
             fontWeight: FontWeight.w600,
           ),
         ),
+
         const SizedBox(height: 18),
 
         Row(
@@ -548,6 +489,17 @@ class _HomescreenState extends State<Homescreen>
               asset: "assets/support/help.jpg",
             ),
           ],
+        ),
+
+        const SizedBox(height: 24),
+
+        /// 🌙 SOFT COSMIC DIVIDER
+        Center(
+          child: Container(
+            height: 1.2,
+            width: double.infinity,
+            decoration: BoxDecoration(color: Colors.white),
+          ),
         ),
       ],
     );
@@ -569,7 +521,7 @@ class _HomescreenState extends State<Homescreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Image.asset(asset, height: 130,)),
+            Center(child: Image.asset(asset, height: 130)),
             const SizedBox(height: 14),
             Text(
               title,
@@ -582,17 +534,13 @@ class _HomescreenState extends State<Homescreen>
             const SizedBox(height: 6),
             Text(
               subtitle,
-              style: GoogleFonts.dmSans(
-                color: Colors.white54,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.dmSans(color: Colors.white54, fontSize: 12),
             ),
           ],
         ),
       ),
     );
   }
-
 
   // 📅 TABS
   // Widget _tabs() {
@@ -640,17 +588,18 @@ class _HomescreenState extends State<Homescreen>
   //   );
   // }
 
-
   // 📊 FOCUS & MOOD
-  Widget focusMoodCard({
-    required Map<String, double> levels,
-  }) {
+  Widget focusMoodCard({required Map<String, double> levels}) {
     final size = MediaQuery.of(context).size;
     final width = size.width;
 
     // Dynamic sizing
     final cardHeight = width < 360 ? 150.0 : 180.0;
-    final circleRadius = width < 360 ? 26.0 : width < 600 ? 32.0 : 38.0;
+    final circleRadius = width < 360
+        ? 26.0
+        : width < 600
+        ? 32.0
+        : 38.0;
     final fontSmall = width < 360 ? 11.0 : 13.0;
     final fontPercent = width < 360 ? 11.0 : 13.0;
 
@@ -745,8 +694,7 @@ class _HomescreenState extends State<Homescreen>
     );
   }
 
-
-// 📅 TABS
+  // 📅 TABS
   Widget _tabs() {
     return Container(
       height: 50,
@@ -762,11 +710,14 @@ class _HomescreenState extends State<Homescreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      SizedBox(height: 5,),
                       Text(
                         tabs[i],
                         style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                          fontSize: 16,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                           color: Colors.white70,
                         ),
                       ),
@@ -775,7 +726,9 @@ class _HomescreenState extends State<Homescreen>
                         height: 3,
                         width: 40,
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xffDBC33F) : Colors.transparent,
+                          color: isSelected
+                              ? const Color(0xffDBC33F)
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -790,7 +743,7 @@ class _HomescreenState extends State<Homescreen>
     );
   }
 
-// 🔮 BIG PREDICTION
+  // 🔮 BIG PREDICTION
   Widget _bigPrediction() {
     final now = DateTime.now();
     final formattedDate = "${now.day}-${now.month}-${now.year}";
@@ -811,243 +764,210 @@ class _HomescreenState extends State<Homescreen>
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(28),
         gradient: const LinearGradient(
-          colors: [Color(0xFF14162E), Color(0xFF14162E)],
+          colors: [Color(0xFF14162E), Color(0xFF1A1D3A)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.55),
+            blurRadius: 26,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              /// ♉ Zodiac Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple.withOpacity(0.25),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.deepPurpleAccent.withOpacity(0.4)),
-                ),
-                child: Text(
-                  widget.zodiacSign.toUpperCase(),
-                  style: GoogleFonts.dmSans(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              /// 🌟 Title
-              Text(
-                headerTitle,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              /// 📅 Date
-              Text(
-                formattedDate,
-                style: GoogleFonts.dmSans(
-                  color: Colors.amber,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-
-              const SizedBox(height: 14),
-              Divider(color: Colors.white12),
-              const SizedBox(height: 14),
-
-              /// 🔮 FULL Horoscope Text
-              Text(
-                horoscopeText,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(
-                  color: Colors.white70,
-                  fontSize: 15.5,
-                  height: 1.9,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-
-
-
-
-
-
-
-
-
-
-  Widget _astrologyServicesRow() {
-    final width = MediaQuery.of(context).size.width;
-
-    // Responsive sizing
-    final titleSize = width < 360 ? 15.0 : 17.0;
-    final spacing = width < 360 ? 10.0 : 16.0;
-    final runSpacing = width < 360 ? 12.0 : 18.0;
-
-    return _glass(
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: width * 0.03),
+        padding: const EdgeInsets.fromLTRB(24, 26, 24, 28),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+            /// ♉ ZODIAC BADGE
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.deepPurpleAccent.withOpacity(0.22),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.deepPurpleAccent.withOpacity(0.45),
+                ),
+              ),
               child: Text(
-                "Astrology Services",
+                widget.zodiacSign.toUpperCase(),
                 style: GoogleFonts.dmSans(
-                  fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontSize: titleSize,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.4,
                 ),
               ),
             ),
 
-            SizedBox(height: spacing),
+            const SizedBox(height: 18),
 
-            /// Responsive Wrap instead of Row
-            Wrap(
-              alignment: WrapAlignment.spaceAround,
-              spacing: spacing,
-              runSpacing: runSpacing,
-              children: [
-                _ServiceRing(
-                  "Horoscope",
-                  "assets/icons/horoscope.png",
-                  size: width < 360 ? 60 : 72,
-                  destination: SplashHoroscope(),
-                ),
-                _ServiceRing(
-                  "Love",
-                  "assets/icons/love12.png",
-                  size: width < 360 ? 60 : 72,
-                  destination: SplashMatch(),
-                ),
-                _ServiceRing(
-                  "Birth Chart",
-                  "assets/icons/birth_chart.png",
-                  size: width < 360 ? 60 : 72,
-                  destination: SplashBirth(),
-                ),
-                _ServiceRing(
-                  "Tarot",
-                  "assets/icons/tarot.png",
-                  size: width < 360 ? 60 : 72,
-                  destination: Splashtarot(),
-                ),
-              ],
+            /// 🌟 TITLE
+            Text(
+              headerTitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.dmSans(
+                color: Colors.white,
+                fontSize: 21,
+                fontWeight: FontWeight.w700,
+              ),
             ),
 
-            SizedBox(height: spacing),
+            const SizedBox(height: 6),
+
+            /// 📅 DATE
+            Text(
+              formattedDate,
+              style: GoogleFonts.dmSans(
+                color: Colors.white60,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+
+            const SizedBox(height: 22),
+
+            /// SOFT GLOW DIVIDER
+            Container(
+              height: 1,
+              width: 110,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    Colors.deepPurpleAccent.withOpacity(0.6),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 22),
+
+            /// 🔮 HOROSCOPE TEXT
+            Text(
+              horoscopeText,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.dmSans(
+                color: Colors.white70,
+                fontSize: 15.8,
+                height: 1.9,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
+  Widget astrologyServicesRow(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
 
-
-
-
-  // 🧿 SERVICES
-  // 🧿 ASTROLOGY SERVICES — FOCUS MODE STYLE
-  Widget _services() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
-        color: Color(0xFF18122B),
-
-        border: Border.all(color: Colors.white.withOpacity(.06)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.45),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
-          )
-        ],
+    // Services data
+    final services = [
+      ServiceData(
+        title: "Horoscope",
+        description: "Daily & monthly predictions",
+        asset: "assets/icons/horoscope.png",
+        color: Colors.deepPurpleAccent,
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SplashHoroscope()),
+        ),
       ),
+      // ServiceData(
+      //   title: "Love",
+      //   description: "Matchmaking & compatibility",
+      //   asset: "assets/icons/love12.png",
+      //   color: Colors.pinkAccent,
+      //   onTap: () => Navigator.push(
+      //     context,
+      //     MaterialPageRoute(builder: (_) => SplashMatch()),
+      //   ),
+      // ),
+      ServiceData(
+        title: "Birth Chart",
+        description: "Your complete kundli",
+        asset: "assets/icons/birth_chart.png",
+        color: Colors.orangeAccent,
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SplashBirth()),
+        ),
+      ),
+      ServiceData(
+        title: "Tarot",
+        description: "Guidance through tarot cards",
+        asset: "assets/icons/tarot.png",
+        color: Colors.blueAccent,
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => Splashtarot()),
+        ),
+      ),
+    ];
+
+    return _glass(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🧠 Title
-          Text(
-            "Astrology Services",
-            style: GoogleFonts.dmSans(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 18),
+          // Heading
+          Row(
+            children: [
 
-          // 🧿 Services Grid
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            children: const [
-              _FocusService(
-                title: "Daily Horoscope",
-                asset: "assets/icons/daily.png",
-                accent: Color(0xff6EE7F9),
-              ),
-              _FocusService(
-                title: "Love Compatibility",
-                asset: "assets/icons/love.png",
-                accent: Color(0xffF59EAE),
-              ),
-              _FocusService(
-                title: "Career Guidance",
-                asset: "assets/icons/career.png",
-                accent: Color(0xff6EE7B7),
-              ),
-              _FocusService(
-                title: "Health Astrology",
-                asset: "assets/icons/health.png",
-                accent: Color(0xff93C5FD),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Astrology Services",
+                    style: GoogleFonts.dmSans(
+                      fontSize: width < 360 ? 16 : 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    "Explore your cosmic guidance",
+                    style: GoogleFonts.dmSans(
+                      fontSize: width < 360 ? 12 : 13,
+                      color: Colors.white60,
+                    ),
+                  ),
+                ],
               ),
             ],
+          ),
+
+          const SizedBox(height: 10),
+          Divider(color: Colors.white24),
+
+          // Services Row (compact)
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: services.map((service) {
+              return SizedBox(
+                width: double.infinity, // two per row with spacing
+                child: ServiceCard(
+                  data: service,
+                  isPremium: false,
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),
     );
   }
+
+
 
 
   Widget _feedbackForm() {
@@ -1066,10 +986,7 @@ class _HomescreenState extends State<Homescreen>
           const SizedBox(height: 6),
           Text(
             "Help us refine your cosmic experience",
-            style: GoogleFonts.dmSans(
-              color: Colors.white54,
-              fontSize: 13,
-            ),
+            style: GoogleFonts.dmSans(color: Colors.white54, fontSize: 13),
           ),
           const SizedBox(height: 20),
 
@@ -1148,7 +1065,6 @@ class _HomescreenState extends State<Homescreen>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 color: Color(0xFF11224E),
-
               ),
               child: Center(
                 child: Text(
@@ -1160,88 +1076,125 @@ class _HomescreenState extends State<Homescreen>
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-
   Widget _nutritionalAstrology() {
-    return _glass(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 🌿 ILLUSTRATION ON TOP
-            Container(
-              width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Image.asset(
-                  "assets/nutrition/food.png",
-                  fit: BoxFit.cover,
+    return Column(
+      children: [
+        _glass(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                /// 🌿 ILLUSTRATION
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.7),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+
+                  ),
+                  padding: const EdgeInsets.all(14),
+                  child: Image.asset(
+
+                    "assets/nutrition/food.png",
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-            // 📝 TITLE
-            Text(
-              "Nutritional Astrology",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // 📝 DESCRIPTION
-            Text(
-              "Personalized food guidance aligned with your zodiac energy, planetary balance, and chakra harmony.",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(
-                color: Colors.white60,
-                fontSize: 13,
-                height: 1.6,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // 🔮 CTA BUTTON
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: const Color(0xff1C4D8D),
-              ),
-              child: Text(
-                "Try Recommendation",
-                style: GoogleFonts.dmSans(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                /// 📝 TITLE
+                Text(
+                  "Nutritional Astrology",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white,
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
+
+                const SizedBox(height: 8),
+
+                /// 📝 DESCRIPTION
+                Text(
+                  "Personalized food guidance aligned with your zodiac energy, planetary balance, and chakra harmony.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white60,
+                    fontSize: 13,
+                    height: 1.6,
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                /// 🔮 CTA BUTTON (CLICKABLE)
+                InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const SubscriptionPage(), // 👈 your page
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 26,
+                      vertical: 13,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: const Color(0xff1C4D8D),
+
+                    ),
+                    child: Text(
+                      "Try Recommendation",
+                      style: GoogleFonts.dmSans(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 22),
+
+                /// 🌙 SOFT COSMIC DIVIDER
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+
+        SizedBox(height: 40),
+        // Center(
+        //   child: Container(
+        //     height: 1.2,
+        //     width: double.infinity,
+        //     decoration: BoxDecoration(color: Colors.white),
+        //   ),
+        // ),
+      ],
     );
   }
-
-
 
   // 🪐 PLANET FIELD
   Widget _planetField() {
@@ -1251,14 +1204,20 @@ class _HomescreenState extends State<Homescreen>
         Positioned(
           top: 100 + sin(t) * 40,
           right: -50,
-          child: Image.asset("assets/planets/planet1.png",
-              height: 140, opacity: const AlwaysStoppedAnimation(.5)),
+          child: Image.asset(
+            "assets/planets/planet1.png",
+            height: 140,
+            opacity: const AlwaysStoppedAnimation(.5),
+          ),
         ),
         Positioned(
           bottom: 120 + cos(t) * 30,
           left: -40,
-          child: Image.asset("assets/planets/planet2.png",
-              height: 110, opacity: const AlwaysStoppedAnimation(.35)),
+          child: Image.asset(
+            "assets/planets/planet2.png",
+            height: 110,
+            opacity: const AlwaysStoppedAnimation(.35),
+          ),
         ),
         // Positioned(
         //   top: 260 + sin(t * .6) * 20,
@@ -1272,23 +1231,23 @@ class _HomescreenState extends State<Homescreen>
 
   // 🧭 DRAWER
 
-
   // 🧊 GLASS
   Widget _glass({required Widget child}) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
-        color: Color(0xFF18122B).withOpacity(0.9),
+        color: Color(0xFF1A1D3A).withOpacity(1),
 
         border: Border.all(color: Colors.white24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.7),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
+
       ),
       child: child,
     );
@@ -1313,8 +1272,10 @@ class _Ring extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Text(label,
-            style: GoogleFonts.dmSans(color: Colors.white60, fontSize: 12)),
+        Text(
+          label,
+          style: GoogleFonts.dmSans(color: Colors.white60, fontSize: 12),
+        ),
       ],
     );
   }
@@ -1339,71 +1300,23 @@ class _Service extends StatelessWidget {
         children: [
           Image.asset(asset, height: 36),
           const SizedBox(height: 14),
-          Text(title,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(color: Colors.white70)),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.dmSans(color: Colors.white70),
+          ),
         ],
       ),
     );
   }
-
-
-
 }
-
-// 🟢 MATI CHATBOT BUTTON WITH TEXT
-Widget _matiChatBot(BuildContext context) {
-  return Positioned(
-    bottom: 26,
-    right: 22,
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Material(
-          shape: const CircleBorder(),
-          elevation: 6, // shadow
-          clipBehavior: Clip.hardEdge,
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => MatiChatBotScreen()),
-              );
-            },
-            child: Image.asset(
-              Images.mati,
-              width: 60,
-              height: 60,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-        const SizedBox(height: 6), // space between image and text
-        const Text(
-          "Mati",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14, // small text
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-
-
 
 Widget _copyrightSection() {
   return _glass(
     child: Center(
       child: Text(
         "© 2026 AstroNexus. All rights reserved.",
-        style: GoogleFonts.dmSans(
-          color: Colors.white38,
-          fontSize: 13,
-        ),
+        style: GoogleFonts.dmSans(color: Colors.white38, fontSize: 13),
       ),
     ),
   );
@@ -1420,7 +1333,6 @@ Widget _glass({required Widget child}) {
   );
 }
 
-
 // ✨ FALLING STARS PAINTER
 class FallingStarPainter extends CustomPainter {
   final double progress;
@@ -1429,11 +1341,11 @@ class FallingStarPainter extends CustomPainter {
   final List<double> speeds;
 
   FallingStarPainter(
-      this.progress, {
-        required this.stars,
-        required this.sizes,
-        required this.speeds,
-      });
+    this.progress, {
+    required this.stars,
+    required this.sizes,
+    required this.speeds,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1455,14 +1367,27 @@ class FallingStarPainter extends CustomPainter {
     final rand = Random();
     List<Offset> stars = List.generate(
       count,
-          (_) => Offset(rand.nextDouble() * size.width, rand.nextDouble() * size.height),
+      (_) => Offset(
+        rand.nextDouble() * size.width,
+        rand.nextDouble() * size.height,
+      ),
     );
-    List<double> sizes = List.generate(count, (_) => rand.nextDouble() * 1.2 + 0.4);
-    List<double> speeds = List.generate(count, (_) => 50 + rand.nextDouble() * 250); // pixels per animation
-    return FallingStarPainter(progress, stars: stars, sizes: sizes, speeds: speeds);
+    List<double> sizes = List.generate(
+      count,
+      (_) => rand.nextDouble() * 1.2 + 0.4,
+    );
+    List<double> speeds = List.generate(
+      count,
+      (_) => 50 + rand.nextDouble() * 250,
+    ); // pixels per animation
+    return FallingStarPainter(
+      progress,
+      stars: stars,
+      sizes: sizes,
+      speeds: speeds,
+    );
   }
 }
-
 
 // 🔵 FOCUS MODE SERVICE CARD
 class _FocusService extends StatelessWidget {
@@ -1495,15 +1420,12 @@ class _FocusService extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [
-                  accent.withOpacity(.35),
-                  accent.withOpacity(.15),
-                ],
+                colors: [accent.withOpacity(.35), accent.withOpacity(.15)],
               ),
             ),
             child: Padding(
               padding: const EdgeInsets.all(1),
-              child: Image.asset(asset,width: 50,height: 50,),
+              child: Image.asset(asset, width: 50, height: 50),
             ),
           ),
 
@@ -1532,11 +1454,11 @@ class _ServiceRing extends StatelessWidget {
   final double size;
 
   const _ServiceRing(
-      this.title,
-      this.iconPath, {
-        required this.destination,
-        this.size = 70,
-      });
+    this.title,
+    this.iconPath, {
+    required this.destination,
+    this.size = 70,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1545,10 +1467,7 @@ class _ServiceRing extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => destination),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (_) => destination));
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1587,8 +1506,30 @@ class _ServiceRing extends StatelessWidget {
   }
 }
 
+class _SliverTabsDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double height;
 
+  _SliverTabsDelegate(this.child, this.height);
 
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      color: Color(0xff050B1E).withOpacity(1), // background to match scaffold
+      child: child,
+    );
+  }
 
+  @override
+  double get maxExtent => height;
+  @override
+  double get minExtent => height;
 
-
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      true;
+}
