@@ -21,7 +21,6 @@ import staticRoute from "./routes/staticRouter.js";
 import userRoute from "./routes/users/user.js";
 import compatibilityRoute from "./routes/Astrology_service/compatablity.js";
 import horoscopeRoute from "./routes/Astrology_service/horoscope.js";
-import unifiedWrapperRoutes from "./routes/integration/unifiedWrapper.routes.js";
 
 // ================= ADMIN ROUTES =================
 import adminAuthRoutes from "./routes/admin/admin.auth.routes.js";
@@ -36,10 +35,12 @@ import chatbotRoutes from "./routes/chatbot/chatbot.routes.js"
 import adminAstroRoutes from "./routes/admin/adminAstrologyRoutes.js";
 import invoiceRoutes from "./routes/invoice/invoiceRoutes.js";
 import discountRoutes from "./routes/admin/discountRoutes.js";
+import unifiedRoutes from "./routes/unified/unified.routes.js";
 
 import shippingRoutes from "./routes/shipping/shipping.js";
 import couponRoutes from "./routes/admin/coupons.js";
 import notificationRoutes from "./routes/notification/notificationRoutes.js";
+import { startUnifiedInternalServices } from "./service/unifiedServiceLauncher.js";
 
 
 
@@ -56,13 +57,21 @@ const PORT = process.env.PORT || 8001;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ================= INTERNAL SERVICE LAUNCHER =================
+startUnifiedInternalServices({ backendDir: __dirname });
+
 // ================= DATABASE =================
-connectToMongoDB(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  });
+const shouldSkipDb = String(process.env.SKIP_DB || "").toLowerCase() === "true";
+if (shouldSkipDb) {
+  console.log("SKIP_DB=true -> skipping MongoDB connection");
+} else {
+  connectToMongoDB(process.env.MONGODB_URI)
+    .then(() => console.log("MongoDB connected"))
+    .catch((err) => {
+      console.error("MongoDB connection error:", err);
+      process.exit(1);
+    });
+}
 
 // ================= VIEW ENGINE =================
 app.set("view engine", "ejs");
@@ -88,7 +97,7 @@ app.use(
 app.use("/api/predictions", predictionsRoute);
 app.use("/api/birthchart", birthChartRoute); // Birth chart generation + DB save
 app.use("/api/chatbot", chatbotRoutes);
-app.use("/api/wrapper", unifiedWrapperRoutes);
+app.use("/api/unified", unifiedRoutes);
 
 // ================= INVOICE ROUTES =================
 app.use("/api/invoice", invoiceRoutes);
