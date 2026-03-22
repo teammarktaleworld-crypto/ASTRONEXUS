@@ -12,7 +12,6 @@ class SplashPuja extends StatefulWidget {
 }
 
 class _SplashPujaState extends State<SplashPuja> {
-
   @override
   void initState() {
     super.initState();
@@ -20,9 +19,7 @@ class _SplashPujaState extends State<SplashPuja> {
     Future.delayed(const Duration(milliseconds: 1200), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const PoojaOptionsScreenDark(),
-        ),
+        MaterialPageRoute(builder: (_) => const PoojaOptionsScreenDark()),
       );
     });
   }
@@ -35,25 +32,20 @@ class _SplashPujaState extends State<SplashPuja> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             /// 🌟 Icon with divine glow
             Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.amberAccent.withOpacity(0.5),
-                    blurRadius: 25,
-                    spreadRadius: 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.amberAccent.withOpacity(0.5),
+                        blurRadius: 25,
+                        spreadRadius: 6,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Icon(
-                LucideIcons.star,
-                size: 80,
-                color: Colors.amber,
-              ),
-            )
+                  child: Icon(LucideIcons.star, size: 80, color: Colors.amber),
+                )
                 .animate()
                 .fadeIn(duration: 500.ms)
                 .scale(begin: const Offset(0.85, 0.85), end: const Offset(1, 1))
@@ -64,13 +56,13 @@ class _SplashPujaState extends State<SplashPuja> {
 
             /// ✨ Title
             Text(
-              "PUJA",
-              style: GoogleFonts.dmSans(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            )
+                  "PUJA",
+                  style: GoogleFonts.dmSans(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                )
                 .animate()
                 .fadeIn(delay: 300.ms, duration: 400.ms)
                 .slideY(begin: 0.25, end: 0),
@@ -80,13 +72,8 @@ class _SplashPujaState extends State<SplashPuja> {
             /// 🧘 Subtitle
             Text(
               "Experience spiritual rituals",
-              style: GoogleFonts.dmSans(
-                fontSize: 16,
-                color: Colors.white54,
-              ),
-            )
-                .animate()
-                .fadeIn(delay: 500.ms, duration: 300.ms),
+              style: GoogleFonts.dmSans(fontSize: 16, color: Colors.white54),
+            ).animate().fadeIn(delay: 500.ms, duration: 300.ms),
           ],
         ),
       ),

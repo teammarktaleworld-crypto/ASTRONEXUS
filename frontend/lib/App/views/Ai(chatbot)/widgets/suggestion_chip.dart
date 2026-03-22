@@ -1,14 +1,15 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 
 class SuggestionChips extends StatefulWidget {
   final List<String> suggestions;
+  final bool isTyping;
   final Function(String) onTap;
 
   const SuggestionChips({
     super.key,
     required this.suggestions,
+    this.isTyping = false,
     required this.onTap,
   });
 
@@ -17,64 +18,103 @@ class SuggestionChips extends StatefulWidget {
 }
 
 class _SuggestionChipsState extends State<SuggestionChips>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnim;
-  late Animation<Offset> _slideAnim;
+    with TickerProviderStateMixin {
+  late final AnimationController entryController;
+  late final AnimationController driftController;
+  late final Animation<double> fadeAnim;
+  late final Animation<Offset> slideAnim;
+  late final Animation<double> driftAnim;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    entryController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 420),
+    );
+    driftController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+      value: 0.5,
     );
 
-    _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.25),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    fadeAnim = CurvedAnimation(parent: entryController, curve: Curves.easeOut);
+    slideAnim = Tween<Offset>(begin: const Offset(0, 0.22), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: entryController, curve: Curves.easeOutCubic),
+        );
+    driftAnim = Tween<double>(begin: -8, end: 8).animate(
+      CurvedAnimation(parent: driftController, curve: Curves.easeInOut),
+    );
 
-    _controller.forward();
+    entryController.forward();
+    _syncTypingMotion();
   }
 
   @override
   void didUpdateWidget(covariant SuggestionChips oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.suggestions != oldWidget.suggestions) {
-      _controller.reset();
-      _controller.forward();
+      entryController
+        ..reset()
+        ..forward();
     }
+    if (widget.isTyping != oldWidget.isTyping) {
+      _syncTypingMotion();
+    }
+  }
+
+  void _syncTypingMotion() {
+    if (widget.isTyping) {
+      if (!driftController.isAnimating) {
+        driftController.repeat(reverse: true);
+      }
+      return;
+    }
+    driftController
+      ..stop()
+      ..value = 0.5;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    entryController.dispose();
+    driftController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.suggestions.isEmpty) return const SizedBox();
+    if (widget.suggestions.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-    return FadeTransition(
-      opacity: _fadeAnim,
-      child: SlideTransition(
-        position: _slideAnim,
-        child: SizedBox(
-          height: 56,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: widget.suggestions.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              return _GlassChip(
-                text: widget.suggestions[index],
-                onTap: widget.onTap,
-              );
-            },
+    return AnimatedBuilder(
+      animation: driftController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(widget.isTyping ? driftAnim.value : 0, 0),
+          child: child,
+        );
+      },
+      child: FadeTransition(
+        opacity: fadeAnim,
+        child: SlideTransition(
+          position: slideAnim,
+          child: SizedBox(
+            height: 56,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: widget.suggestions.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                return _SuggestionChip(
+                  text: widget.suggestions[index],
+                  onTap: widget.onTap,
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -82,84 +122,62 @@ class _SuggestionChipsState extends State<SuggestionChips>
   }
 }
 
-class _GlassChip extends StatefulWidget {
+class _SuggestionChip extends StatefulWidget {
   final String text;
   final Function(String) onTap;
 
-  const _GlassChip({required this.text, required this.onTap});
+  const _SuggestionChip({required this.text, required this.onTap});
 
   @override
-  State<_GlassChip> createState() => _GlassChipState();
+  State<_SuggestionChip> createState() => _SuggestionChipState();
 }
 
-class _GlassChipState extends State<_GlassChip> {
+class _SuggestionChipState extends State<_SuggestionChip> {
   bool isPressed = false;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
     return GestureDetector(
       onTapDown: (_) => setState(() => isPressed = true),
+      onTapCancel: () => setState(() => isPressed = false),
       onTapUp: (_) {
         setState(() => isPressed = false);
         widget.onTap(widget.text);
       },
-      onTapCancel: () => setState(() => isPressed = false),
       child: AnimatedScale(
         scale: isPressed ? 0.96 : 1,
         duration: const Duration(milliseconds: 120),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: Stack(
-            children: [
-              /// 🌫️ GLASS BLUR BACKGROUND
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                child: Container(),
-              ),
-
-              /// 💎 GLASS CARD
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(isPressed ? 0.18 : 0.14),
-                      Colors.white.withOpacity(isPressed ? 0.10 : 0.06),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.25),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 10,
-                      offset: const Offset(0, 6),
-                    ),
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.05),
-                      blurRadius: 6,
-                      offset: const Offset(-2, -2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  widget.text,
-                  style: GoogleFonts.dmSans(
-                    color: Colors.white,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.2,
-                  ),
-                ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            color: isDark
+                ? Colors.white.withValues(alpha: isPressed ? 0.16 : 0.1)
+                : Colors.white.withValues(alpha: isPressed ? 0.88 : 0.95),
+            border: Border.all(
+              color: isDark ? Colors.white24 : const Color(0xFFD9E4F7),
+            ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.25)
+                    : const Color(0xFF9AAECE).withValues(alpha: 0.24),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
+          ),
+          child: Text(
+            widget.text,
+            style: GoogleFonts.dmSans(
+              color: textColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),

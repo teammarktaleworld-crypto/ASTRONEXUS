@@ -1,9 +1,10 @@
+import 'package:astro_tale/App/Model/order_model.dart';
+import 'package:astro_tale/App/views/shop/invoice/pdf_invoice_screen.dart';
+import 'package:astro_tale/App/views/shop/orders/order_status_tile.dart';
+import 'package:astro_tale/core/widgets/unified_dark_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../App/Model/order_model.dart';
-import '../invoice/pdf_invoice_screen.dart';
-import 'order_status_tile.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final OrderModel order;
@@ -39,51 +40,32 @@ class OrderDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final completedIndex = getStatusIndex(order.status);
 
     return Scaffold(
-      backgroundColor: const Color(0xff050B1E),
-      appBar: AppBar(
-        backgroundColor: const Color(0xff050B1E),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Order Details",
-          style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: UnifiedDarkUi.appBar(context, title: "Order Details"),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [
-            Color(0xff050B1E),
-            // Color(0xff1C4D8D),
-            // Color(0xff0F2854),
-            Color(0xff393053),
-
-          ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-
-          ),
-
-        ),
+        decoration: UnifiedDarkUi.screenBackground(theme),
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             /// ORDER SUMMARY CARD
             _sectionCard(
+              context,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Order #${order.id.substring(order.id.length - 6)}",
-                      style: _titleStyle()),
+                  Text(
+                    "Order #${order.id.substring(order.id.length - 6)}",
+                    style: _titleStyle(),
+                  ),
                   const SizedBox(height: 6),
-                  Text("Placed on ${formatDate(order.createdAt)}",
-                      style: _subStyle()),
+                  Text(
+                    "Placed on ${formatDate(order.createdAt)}",
+                    style: _subStyle(),
+                  ),
                   const SizedBox(height: 10),
                   _statusBadge(order.status),
                 ],
@@ -94,10 +76,11 @@ class OrderDetailsScreen extends StatelessWidget {
 
             /// STATUS TRACKER
             _sectionCard(
+              context,
               child: Column(
                 children: List.generate(
                   3,
-                      (i) => OrderStatusTile(
+                  (i) => OrderStatusTile(
                     step: i == 0
                         ? "Ordered"
                         : i == 1
@@ -114,19 +97,22 @@ class OrderDetailsScreen extends StatelessWidget {
             /// PRODUCTS
             Text("Items", style: _titleStyle()),
             const SizedBox(height: 10),
-            ...order.items.map((item) => _productTile(item)).toList(),
+            ...order.items.map((item) => _productTile(context, item)),
 
             const SizedBox(height: 16),
 
             /// PAYMENT INFO
             if (order.payment != null)
               _sectionCard(
+                context,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text("Payment Method", style: _subStyle()),
-                    Text(order.payment!.method,
-                        style: _valueStyle(Colors.white)),
+                    Text(
+                      order.payment!.method,
+                      style: _valueStyle(Colors.white),
+                    ),
                   ],
                 ),
               ),
@@ -135,12 +121,15 @@ class OrderDetailsScreen extends StatelessWidget {
 
             /// TOTAL
             _sectionCard(
+              context,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Total Amount", style: _titleStyle()),
-                  Text("₹${order.totalAmount.toStringAsFixed(0)}",
-                      style: _valueStyle(Colors.amber)),
+                  Text(
+                    "Rs ${order.totalAmount.toStringAsFixed(0)}",
+                    style: _valueStyle(Colors.amber),
+                  ),
                 ],
               ),
             ),
@@ -149,15 +138,18 @@ class OrderDetailsScreen extends StatelessWidget {
               onPressed: () async {
                 // Show a loading indicator while generating PDF
 
-
                 try {
                   await InvoicePdfService.generateInvoice(order: order);
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to generate invoice: $e")),
-                  );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Failed to generate invoice: $e")),
+                    );
+                  }
                 } finally {
-                  Navigator.pop(context); // hide loading
+                  if (context.mounted && Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                 }
               },
               icon: const Icon(Icons.picture_as_pdf_rounded),
@@ -175,8 +167,6 @@ class OrderDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-
           ],
         ),
       ),
@@ -184,16 +174,17 @@ class OrderDetailsScreen extends StatelessWidget {
   }
 
   /// PRODUCT TILE WITH BIG IMAGE
-  Widget _productTile(OrderItemModel item) {
+  Widget _productTile(BuildContext context, OrderItemModel item) {
+    final theme = Theme.of(context);
     final product = item.product;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1C23),
+        color: UnifiedDarkUi.cardSurface(theme),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: UnifiedDarkUi.cardBorder(theme)),
       ),
       child: Row(
         children: [
@@ -212,13 +203,17 @@ class OrderDetailsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(product?.name ?? "Product",
-                    style: _valueStyle(Colors.white)),
+                Text(
+                  product?.name ?? "Product",
+                  style: _valueStyle(Colors.white),
+                ),
                 const SizedBox(height: 4),
                 Text("Qty: ${item.quantity}", style: _subStyle()),
                 const SizedBox(height: 4),
-                Text("₹${item.price.toStringAsFixed(0)}",
-                    style: _valueStyle(Colors.amber)),
+                Text(
+                  "Rs ${item.price.toStringAsFixed(0)}",
+                  style: _valueStyle(Colors.amber),
+                ),
               ],
             ),
           ),
@@ -227,13 +222,14 @@ class OrderDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _sectionCard({required Widget child}) {
+  Widget _sectionCard(BuildContext context, {required Widget child}) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1C23),
+        color: UnifiedDarkUi.cardSurface(theme),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: UnifiedDarkUi.cardBorder(theme)),
       ),
       child: child,
     );
@@ -244,13 +240,16 @@ class OrderDetailsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         status.toUpperCase(),
         style: GoogleFonts.poppins(
-            color: color, fontWeight: FontWeight.w600, fontSize: 12),
+          color: color,
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -261,10 +260,8 @@ class OrderDetailsScreen extends StatelessWidget {
     fontSize: 14,
   );
 
-  TextStyle _subStyle() => GoogleFonts.poppins(
-    color: Colors.white54,
-    fontSize: 12,
-  );
+  TextStyle _subStyle() =>
+      GoogleFonts.poppins(color: Colors.white54, fontSize: 12);
 
   TextStyle _valueStyle(Color color) => GoogleFonts.poppins(
     color: color,

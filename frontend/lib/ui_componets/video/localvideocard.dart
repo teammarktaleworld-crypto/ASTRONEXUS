@@ -38,9 +38,7 @@ class _LocalVideoCardState extends State<LocalVideoCard> {
 
   void _togglePlay() {
     setState(() {
-      _controller.value.isPlaying
-          ? _controller.pause()
-          : _controller.play();
+      _controller.value.isPlaying ? _controller.pause() : _controller.play();
     });
   }
 
@@ -79,7 +77,8 @@ class _LocalVideoCardState extends State<LocalVideoCard> {
                 ),
                 child: Container(
                   color: Colors.black.withOpacity(
-                      _controller.value.isPlaying ? 0.2 : 0.45),
+                    _controller.value.isPlaying ? 0.2 : 0.45,
+                  ),
                 ),
               ),
             ),
@@ -94,7 +93,7 @@ class _LocalVideoCardState extends State<LocalVideoCard> {
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      colors: [Colors.black54,Colors.black54],
+                      colors: [Colors.black54, Colors.black54],
                     ),
                   ),
                   child: Icon(

@@ -74,10 +74,7 @@ class NutritionalAstrologyScreen extends StatelessWidget {
                     child: Icon(LucideIcons.user, color: Colors.white),
                   ),
                 ],
-              )
-                  .animate()
-                  .fadeIn(duration: 400.ms)
-                  .slideY(begin: -0.2, end: 0),
+              ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
 
               const SizedBox(height: 28),
 
@@ -100,31 +97,36 @@ class NutritionalAstrologyScreen extends StatelessWidget {
                   final item = entry.value;
 
                   return Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A1A1F),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1A1A1F),
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: Icon(item.icon,
-                            color: Colors.greenAccent, size: 28),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item.title,
-                        style: GoogleFonts.dmSans(
-                            color: Colors.white, fontSize: 12),
-                      ),
-                    ],
-                  )
+                            child: Icon(
+                              item.icon,
+                              color: Colors.greenAccent,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            item.title,
+                            style: GoogleFonts.dmSans(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      )
                       .animate()
                       .fadeIn(delay: (300 + index * 100).ms)
                       .scale(begin: const Offset(0.9, 0.9));
@@ -138,8 +140,7 @@ class NutritionalAstrologyScreen extends StatelessWidget {
                 child: GridView.builder(
                   physics: const BouncingScrollPhysics(),
                   itemCount: features.length,
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
@@ -151,59 +152,62 @@ class NutritionalAstrologyScreen extends StatelessWidget {
                     return Material(
                       color: Colors.transparent,
                       borderRadius: BorderRadius.circular(20),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  AriesDietProfileScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A1F),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.35),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.08),
+                      child:
+                          InkWell(
+                                borderRadius: BorderRadius.circular(20),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => AriesDietProfileScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1A1A1F),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.35),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white.withOpacity(0.08),
+                                        ),
+                                        child: Icon(
+                                          feature.icon,
+                                          color: Colors.greenAccent,
+                                          size: 26,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        feature.title,
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                child: Icon(feature.icon,
-                                    color: Colors.greenAccent, size: 26),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                feature.title,
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                          .animate()
-                          .fadeIn(delay: (400 + index * 80).ms)
-                          .scale(begin: const Offset(0.95, 0.95)),
+                              )
+                              .animate()
+                              .fadeIn(delay: (400 + index * 80).ms)
+                              .scale(begin: const Offset(0.95, 0.95)),
                     );
                   },
                 ),

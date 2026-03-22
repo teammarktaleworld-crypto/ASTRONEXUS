@@ -1,2 +1,5 @@
+import "package:astro_tale/core/constants/api_constants.dart";
 
-final String baseurl = "https://astro-nexus-new-6-46mo.onrender.com";
+const String baseurl = ApiConstants.baseUrl;
+const String userBaseUrl = ApiConstants.userBaseUrl;
+const String authBaseUrl = ApiConstants.authBaseUrl;

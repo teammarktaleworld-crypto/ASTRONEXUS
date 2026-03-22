@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:astro_tale/App/views/Auth/OTP/otpScreen.dart';
+import 'package:astro_tale/services/API/APIservice.dart';
 
 class PhoneLoginController {
-  static const String apiBaseUrl =
-      "https://auth-astronexus-1.onrender.com";
+  static const String apiBaseUrl = authBaseUrl;
 
   static Future<void> sendOtp({
     required BuildContext context,
@@ -47,7 +47,6 @@ class PhoneLoginController {
   }
 
   static void _snack(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 }

@@ -1,3 +1,4 @@
+import 'package:astro_tale/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,12 +28,18 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = isDark ? AppColors.surface : AppColors.lightContainer;
+    final titleColor = Colors.white;
+    final subtitleColor = Colors.white70;
+
     return InkWell(
       onTap: () {
         if (isPremium) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) =>  SubscriptionPage()),
+            MaterialPageRoute(builder: (_) => SubscriptionPage()),
           );
         } else {
           data.onTap();
@@ -43,13 +50,13 @@ class ServiceCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
-          color: Colors.white.withOpacity(0.97),
-          border: Border.all(color: data.color.withOpacity(0.25)),
+          color: cardColor,
+          border: Border.all(color: data.color.withOpacity(0.3)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(isDark ? 0.32 : 0.22),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -74,10 +81,7 @@ class ServiceCard extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: Image.asset(
-                      data.asset,
-                      fit: BoxFit.contain,
-                    ),
+                    child: Image.asset(data.asset, fit: BoxFit.contain),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -91,7 +95,7 @@ class ServiceCard extends StatelessWidget {
                       Text(
                         data.title,
                         style: GoogleFonts.dmSans(
-                          color: Colors.black,
+                          color: titleColor,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -100,7 +104,7 @@ class ServiceCard extends StatelessWidget {
                       Text(
                         data.description,
                         style: GoogleFonts.dmSans(
-                          color: Colors.black,
+                          color: subtitleColor,
                           fontSize: 12,
                           height: 1.3,
                         ),
@@ -122,11 +126,7 @@ class ServiceCard extends StatelessWidget {
                     color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.lock,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                  child: const Icon(Icons.lock, color: Colors.white, size: 16),
                 ),
               ),
           ],

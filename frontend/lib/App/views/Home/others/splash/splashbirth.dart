@@ -23,9 +23,10 @@ class _SplashBirthState extends State<SplashBirth>
       duration: const Duration(milliseconds: 900),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.85,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
 
@@ -61,8 +62,7 @@ class _SplashBirthState extends State<SplashBirth>
                   height: 110,
                   width: 110,
                   fit: BoxFit.cover,
-                  color: Colors.white
-                  ,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 24),
@@ -78,10 +78,7 @@ class _SplashBirthState extends State<SplashBirth>
               const SizedBox(height: 8),
               Text(
                 "Explore your cosmic birth",
-                style: GoogleFonts.dmSans(
-                  fontSize: 16,
-                  color: Colors.white54,
-                ),
+                style: GoogleFonts.dmSans(fontSize: 16, color: Colors.white54),
               ),
             ],
           ),

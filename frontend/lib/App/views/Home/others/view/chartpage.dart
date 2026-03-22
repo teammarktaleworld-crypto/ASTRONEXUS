@@ -60,9 +60,10 @@ class ChartPageDark extends StatelessWidget {
                 Text(
                   "Vedic Birth Chart",
                   style: GoogleFonts.dmSans(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 _buildKundliChart(),
@@ -134,12 +135,18 @@ class ChartPageDark extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text("Date of Birth: $dob",
-              style: GoogleFonts.dmSans(fontSize: 15, color: Colors.grey[300])),
-          Text("Time of Birth: $tob",
-              style: GoogleFonts.dmSans(fontSize: 15, color: Colors.grey[300])),
-          Text("Place of Birth: $pob",
-              style: GoogleFonts.dmSans(fontSize: 15, color: Colors.grey[300])),
+          Text(
+            "Date of Birth: $dob",
+            style: GoogleFonts.dmSans(fontSize: 15, color: Colors.grey[300]),
+          ),
+          Text(
+            "Time of Birth: $tob",
+            style: GoogleFonts.dmSans(fontSize: 15, color: Colors.grey[300]),
+          ),
+          Text(
+            "Place of Birth: $pob",
+            style: GoogleFonts.dmSans(fontSize: 15, color: Colors.grey[300]),
+          ),
         ],
       ),
     );
@@ -161,9 +168,14 @@ class ChartPageDark extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Astro Summary",
-              style: GoogleFonts.dmSans(
-                  fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
+          Text(
+            "Astro Summary",
+            style: GoogleFonts.dmSans(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 12,
@@ -171,18 +183,20 @@ class ChartPageDark extends StatelessWidget {
             children: details
                 .map(
                   (item) => Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  "${item['label']}: ${item['value']}",
-                  style: GoogleFonts.dmSans(color: Colors.white70),
-                ),
-              ),
-            )
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "${item['label']}: ${item['value']}",
+                      style: GoogleFonts.dmSans(color: Colors.white70),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ],
@@ -232,31 +246,48 @@ class ChartPageDark extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Planetary Positions",
-              style: GoogleFonts.dmSans(
-                  fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
-          const SizedBox(height: 12),
-          ...planets.map((p) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(p['Planet']!,
-                    style: GoogleFonts.dmSans(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white70)),
-                Text(p['Sign']!,
-                    style: GoogleFonts.dmSans(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white)),
-                Text(p['House']!,
-                    style: GoogleFonts.dmSans(
-                        fontSize: 14, color: Colors.grey[400])),
-              ],
+          Text(
+            "Planetary Positions",
+            style: GoogleFonts.dmSans(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
-          )),
+          ),
+          const SizedBox(height: 12),
+          ...planets.map(
+            (p) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    p['Planet']!,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  Text(
+                    p['Sign']!,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    p['House']!,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 14,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -266,15 +297,18 @@ class ChartPageDark extends StatelessWidget {
     final doshas = [
       {
         "name": "Manglik Dosha",
-        "effect": "High energy & passion. May cause delays in marriage if unbalanced."
+        "effect":
+            "High energy & passion. May cause delays in marriage if unbalanced.",
       },
       {
         "name": "Kaal Sarp Dosha",
-        "effect": "Influences career stability. Regular spiritual practices recommended."
+        "effect":
+            "Influences career stability. Regular spiritual practices recommended.",
       },
       {
         "name": "Pitra Dosha",
-        "effect": "Signifies ancestral imbalance. Offerings advised on Amavasya."
+        "effect":
+            "Signifies ancestral imbalance. Offerings advised on Amavasya.",
       },
     ];
 
@@ -284,23 +318,36 @@ class ChartPageDark extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Detected Doshas / Yogas",
-              style: GoogleFonts.dmSans(
-                  fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
+          Text(
+            "Detected Doshas / Yogas",
+            style: GoogleFonts.dmSans(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
           const SizedBox(height: 10),
           ...doshas.map(
-                (d) => Padding(
+            (d) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(d["name"]!,
-                      style: GoogleFonts.dmSans(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          color: Colors.white)),
-                  Text(d["effect"]!,
-                      style: GoogleFonts.dmSans(fontSize: 14, color: Colors.white70)),
+                  Text(
+                    d["name"]!,
+                    style: GoogleFonts.dmSans(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    d["effect"]!,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -324,22 +371,38 @@ class ChartPageDark extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Astro Insights",
-              style: GoogleFonts.dmSans(
-                  fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
-          const SizedBox(height: 10),
-          ...insights.map((point) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("• ", style: TextStyle(fontSize: 18, color: Colors.white)),
-                Expanded(
-                    child: Text(point,
-                        style: GoogleFonts.dmSans(fontSize: 14, color: Colors.white70))),
-              ],
+          Text(
+            "Astro Insights",
+            style: GoogleFonts.dmSans(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
-          )),
+          ),
+          const SizedBox(height: 10),
+          ...insights.map(
+            (point) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "• ",
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                  Expanded(
+                    child: Text(
+                      point,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

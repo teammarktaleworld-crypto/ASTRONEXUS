@@ -39,9 +39,10 @@ class ProductSuggestion {
       description: json['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       categoryId: json['category'] ?? '',
-      images: (json['images'] as List<dynamic>?)
-          ?.map((img) => img.toString())
-          .toList() ??
+      images:
+          (json['images'] as List<dynamic>?)
+              ?.map((img) => img.toString())
+              .toList() ??
           [],
       astrologyType: json['astrologyType'] ?? 'gemstone',
       stock: json['stock'] ?? 0,

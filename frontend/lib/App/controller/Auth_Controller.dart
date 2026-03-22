@@ -36,7 +36,8 @@ class AuthController {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("auth_token", token);
-    if (newRefreshToken != null) await prefs.setString("refresh_token", refreshToken);
+    if (newRefreshToken != null)
+      await prefs.setString("refresh_token", refreshToken);
     if (newUserId != null) await prefs.setString("userId", userId);
     if (newRole != null) await prefs.setString("role", role);
   }

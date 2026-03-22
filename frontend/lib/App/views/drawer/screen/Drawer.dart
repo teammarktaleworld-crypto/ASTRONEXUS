@@ -1,152 +1,112 @@
-import 'package:astro_tale/App/views/Auth/terms%20and%20condition/termsandconditions.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../shop/product/product_details_screen.dart';
+import "package:astro_tale/core/constants/app_colors.dart";
+import "package:astro_tale/core/localization/app_localizations.dart";
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 
 class CustomDrawer extends StatefulWidget {
   final String userName;
   final String userEmail;
   final String? userAvatar;
-  final Function(String) onItemTap;
-  final Function(bool) onThemeChanged;
-  final bool isDarkMode;
+  final ValueChanged<String> onItemTap;
+  final ValueChanged<ThemeMode> onThemeModeChanged;
+  final ThemeMode currentThemeMode;
+  final Locale currentLocale;
+  final ValueChanged<Locale> onLanguageChanged;
 
   const CustomDrawer({
     required this.userName,
     required this.userEmail,
     this.userAvatar,
     required this.onItemTap,
-    required this.onThemeChanged,
-    required this.isDarkMode,
+    required this.onThemeModeChanged,
+    required this.currentThemeMode,
+    required this.currentLocale,
+    required this.onLanguageChanged,
     super.key,
   });
 
   @override
-  _CustomDrawerState createState() => _CustomDrawerState();
+  State<CustomDrawer> createState() => _CustomDrawerState();
 }
 
-class _CustomDrawerState extends State<CustomDrawer>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+class _CustomDrawerState extends State<CustomDrawer> {
+  late Locale _selectedLocale;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(-1.2, 0),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-
-    _fadeAnimation = Tween<double>(
-      begin: 0,
-      end: 0.5,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
-
-    _controller.forward();
+    _selectedLocale = widget.currentLocale;
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void didUpdateWidget(covariant CustomDrawer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentLocale.languageCode !=
+        widget.currentLocale.languageCode) {
+      _selectedLocale = widget.currentLocale;
+    }
   }
 
-  Widget _drawerItem(String title, IconData icon, int index,
-      {VoidCallback? onTap}) {
-    return TweenAnimationBuilder<double>(
-      duration: Duration(milliseconds: 300 + (index * 100)),
-      tween: Tween<double>(begin: 0, end: 1),
-      curve: Curves.easeOut,
-      builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(-50 * (1 - value), 0),
-          child: Opacity(opacity: value, child: child),
-        );
-      },
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap ?? () => widget.onItemTap(title),
-          borderRadius: BorderRadius.circular(12),
-          splashColor: Colors.blueAccent.withOpacity(0.2),
-          hoverColor: Colors.grey.withOpacity(0.1),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            child: Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(icon, color: Colors.black26, size: 26),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: GoogleFonts.dmSans(
-                    color: Colors.black87,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+  Widget _profileHeader(ThemeData theme) {
+    final colors = theme.colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            colors.primary.withOpacity(
+              theme.brightness == Brightness.dark ? 0.45 : 0.18,
             ),
-          ),
+            colors.surface,
+          ],
         ),
       ),
-    );
-  }
-
-  Widget _profileHeader() {
-    return Container(
-      height: 250,
-      width: double.infinity,
-      color: Color(0xff18122B),
       child: Column(
-        children: [
-          SizedBox(height: 20,),
+        children: <Widget>[
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.grey[200],
+              border: Border.all(
+                color: colors.primary.withOpacity(0.35),
+                width: 2,
+              ),
             ),
-            padding: const EdgeInsets.all(3),
             child: CircleAvatar(
-              radius: 52,
-              backgroundColor: Colors.grey[100],
+              radius: 44,
+              backgroundColor: colors.surface,
               child: ClipOval(
-                child: widget.userAvatar != null && widget.userAvatar!.isNotEmpty
+                child:
+                    widget.userAvatar != null && widget.userAvatar!.isNotEmpty
                     ? Image.network(
-                  widget.userAvatar!,
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.person, size: 60, color: Colors.white),
-                )
-                    : const Icon(Icons.person, size: 60, color: Colors.white),
+                        widget.userAvatar!,
+                        width: 88,
+                        height: 88,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.person,
+                          size: 46,
+                          color: colors.onSurface.withOpacity(0.7),
+                        ),
+                      )
+                    : Icon(
+                        Icons.person,
+                        size: 46,
+                        color: colors.onSurface.withOpacity(0.7),
+                      ),
               ),
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            widget.userName,
+            widget.userName.isEmpty
+                ? context.l10n.tr("guest")
+                : widget.userName,
             style: GoogleFonts.dmSans(
-              color: Colors.white,
-              fontSize: 22,
+              color: colors.onSurface,
+              fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -154,136 +114,266 @@ class _CustomDrawerState extends State<CustomDrawer>
           Text(
             widget.userEmail,
             style: GoogleFonts.dmSans(
-              color: Colors.white,
-              fontSize: 14,
+              color: colors.onSurface.withOpacity(0.75),
+              fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 30,)
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final drawerItems = [
-      {"title": "Terms & Conditions", "icon": Icons.description},
-      {"title": "wishlist", "icon": Icons.favorite_border},
-      {"title": "Match Services", "icon": Icons.miscellaneous_services},
-      {"title": "Change Language", "icon": Icons.language},
-      {"title": "Support", "icon": Icons.call},
-      {"title": "Rate Us", "icon": Icons.star_rate},
-      {"title": "Like", "icon": Icons.thumb_up},
-    ];
+  Widget _themeChooser(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDarkSelected = widget.currentThemeMode != ThemeMode.light;
 
-    return Stack(
-      children: [
-        // Overlay
-        FadeTransition(
-          opacity: _fadeAnimation,
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(color: Colors.black26),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            l10n.tr("theme"),
+            style: GoogleFonts.dmSans(
+              color: colors.onSurface,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
-
-        // Drawer
-        SlideTransition(
-          position: _slideAnimation,
-          child: SafeArea(
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.75,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(4, 0),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  _profileHeader(),
-                  const SizedBox(height: 20),
-
-                  // Scrollable drawer items
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        children: [
-                          ...drawerItems.asMap().entries.map((entry) {
-                            return _drawerItem(
-                              entry.value["title"] as String,
-                              entry.value["icon"] as IconData,
-                              entry.key,
-                              onTap: () {
-                                String title = entry.value["title"] as String;
-                                switch (title) {
-                                  case "Terms & Conditions":
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => TermsAndConditions(),
-                                      ),
-                                    );
-                                    break;
-                                  default:
-                                    widget.onItemTap(title);
-                                }
-                              },
-                            );
-                          }).toList(),
-
-                          const Divider(thickness: 1, height: 1, color: Colors.grey),
-                          const SizedBox(height: 12),
-
-                          // Theme toggle
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Dark Mode",
-                                  style: GoogleFonts.dmSans(
-                                    color: Colors.black87,
-                                    fontSize: 16, // slightly smaller
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Switch(
-                                  activeColor: Color(0xff18122B),
-                                  value: widget.isDarkMode,
-                                  onChanged: (val) => widget.onThemeChanged(val),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 120),
-
-                        ],
-                      ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: colors.outline.withOpacity(0.28)),
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    isDarkSelected
+                        ? l10n.tr("darkMode")
+                        : l10n.tr("allWhiteMode"),
+                    style: GoogleFonts.dmSans(
+                      color: colors.onSurface,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                ),
+                Switch.adaptive(
+                  value: isDarkSelected,
+                  activeThumbColor: AppColors.onDark,
+                  activeTrackColor: AppColors.appBarDark,
+                  onChanged: (enabled) {
+                    widget.onThemeModeChanged(
+                      enabled ? ThemeMode.dark : ThemeMode.light,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-
-                  const SizedBox(height: 20),
-                ],
+  Widget _languageChooser(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.language,
+            color: colors.onSurface.withOpacity(0.8),
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              l10n.tr("language"),
+              style: GoogleFonts.dmSans(
+                color: colors.onSurface,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<Locale>(
+              value: _selectedLocale,
+              borderRadius: BorderRadius.circular(12),
+              dropdownColor: colors.surface,
+              style: GoogleFonts.dmSans(
+                color: colors.onSurface,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              items: <DropdownMenuItem<Locale>>[
+                DropdownMenuItem<Locale>(
+                  value: const Locale("en"),
+                  child: Text(l10n.tr("english")),
+                ),
+                DropdownMenuItem<Locale>(
+                  value: const Locale("fr"),
+                  child: Text(l10n.tr("french")),
+                ),
+                DropdownMenuItem<Locale>(
+                  value: const Locale("de"),
+                  child: Text(l10n.tr("german")),
+                ),
+              ],
+              onChanged: (locale) {
+                if (locale == null) {
+                  return;
+                }
+                setState(() => _selectedLocale = locale);
+                widget.onLanguageChanged(locale);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _menuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      leading: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: colors.primary.withOpacity(0.14),
+          borderRadius: BorderRadius.circular(10),
         ),
-      ],
+        child: Icon(icon, color: colors.primary),
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.dmSans(
+          color: colors.onSurface,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      horizontalTitleGap: 12,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+
+    final menuItems = <_DrawerItem>[
+      _DrawerItem(
+        id: "terms",
+        label: l10n.tr("termsConditions"),
+        icon: Icons.description_outlined,
+      ),
+      _DrawerItem(
+        id: "wishlist",
+        label: l10n.tr("wishlist"),
+        icon: Icons.favorite_border,
+      ),
+      _DrawerItem(
+        id: "match",
+        label: l10n.tr("matchServices"),
+        icon: Icons.auto_awesome_motion_outlined,
+      ),
+      _DrawerItem(
+        id: "support",
+        label: l10n.tr("support"),
+        icon: Icons.support_agent,
+      ),
+      _DrawerItem(
+        id: "rate",
+        label: l10n.tr("rateUs"),
+        icon: Icons.star_border,
+      ),
+      _DrawerItem(
+        id: "like",
+        label: l10n.tr("like"),
+        icon: Icons.thumb_up_alt_outlined,
+      ),
+    ];
+
+    return Drawer(
+      width: MediaQuery.of(context).size.width * 0.82,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.backgroundSoft
+          : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: <Widget>[
+            _profileHeader(theme),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
+                children: <Widget>[
+                  ...menuItems.map(
+                    (item) => _menuItem(
+                      icon: item.icon,
+                      title: item.label,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        widget.onItemTap(item.id);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _themeChooser(context),
+                  const SizedBox(height: 12),
+                  _languageChooser(context),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
+class _DrawerItem {
+  const _DrawerItem({
+    required this.id,
+    required this.label,
+    required this.icon,
+  });
+
+  final String id;
+  final String label;
+  final IconData icon;
+}

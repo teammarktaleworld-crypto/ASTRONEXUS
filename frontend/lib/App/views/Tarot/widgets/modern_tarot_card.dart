@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -32,6 +31,17 @@ class ModernTarotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final bodyColor = isDark ? Colors.white70 : const Color(0xFF475569);
+    final accentColor = isDark
+        ? const Color(0xFFD4AF37)
+        : theme.colorScheme.primary;
+    final cardGradient = isDark
+        ? const <Color>[Color(0xFF1E1B2E), Color(0xFF141225)]
+        : const <Color>[Color(0xFFFFFFFF), Color(0xFFF1F5FF)];
+
     return GestureDetector(
       onTap: () => _showFullMeaning(context),
       child: Container(
@@ -40,20 +50,20 @@ class ModernTarotCard extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF1E1B2E), Color(0xFF141225)],
+          gradient: LinearGradient(
+            colors: cardGradient,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               blurRadius: 20,
               offset: const Offset(0, 12),
             ),
           ],
           border: Border.all(
-            color: const Color(0xFFD4AF37).withOpacity(0.3),
+            color: accentColor.withValues(alpha: 0.35),
             width: 1.2,
           ),
         ),
@@ -63,16 +73,18 @@ class ModernTarotCard extends StatelessWidget {
             Align(
               alignment: Alignment.topRight,
               child: Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37),
+                  color: accentColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   "$position",
                   style: GoogleFonts.dmSans(
-                    color: Colors.black,
+                    color: isDark ? Colors.black : Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -89,10 +101,7 @@ class ModernTarotCard extends StatelessWidget {
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [
-                    Color(0x33D4AF37),
-                    Colors.transparent,
-                  ],
+                  colors: [Color(0x33D4AF37), Colors.transparent],
                 ),
               ),
               padding: const EdgeInsets.all(16),
@@ -105,7 +114,7 @@ class ModernTarotCard extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
-                color: Colors.white,
+                color: titleColor,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -119,7 +128,7 @@ class ModernTarotCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
-                color: Colors.white70,
+                color: bodyColor,
                 fontSize: 13.5,
                 height: 1.5,
               ),
@@ -130,7 +139,7 @@ class ModernTarotCard extends StatelessWidget {
             Text(
               "Tap to reveal",
               style: GoogleFonts.dmSans(
-                color: const Color(0xFFD4AF37),
+                color: accentColor,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -158,6 +167,17 @@ class _TarotDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final bodyColor = isDark ? Colors.white70 : const Color(0xFF475569);
+    final accentColor = isDark
+        ? const Color(0xFFD4AF37)
+        : theme.colorScheme.primary;
+    final sheetGradient = isDark
+        ? const <Color>[Color(0xFF141225), Color(0xFF1E1B2E)]
+        : const <Color>[Color(0xFFFFFFFF), Color(0xFFF1F5FF)];
+    final handleColor = isDark ? Colors.white24 : const Color(0xFFCBD5E1);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
@@ -166,9 +186,9 @@ class _TarotDetailSheet extends StatelessWidget {
         return ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
           child: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF141225), Color(0xFF1E1B2E)],
+                colors: sheetGradient,
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -182,7 +202,7 @@ class _TarotDetailSheet extends StatelessWidget {
                     width: 60,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: Colors.white24,
+                      color: handleColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -191,7 +211,7 @@ class _TarotDetailSheet extends StatelessWidget {
                   Text(
                     "Card $position",
                     style: GoogleFonts.dmSans(
-                      color: const Color(0xFFD4AF37),
+                      color: accentColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -213,7 +233,7 @@ class _TarotDetailSheet extends StatelessWidget {
                     title,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.dmSans(
-                      color: Colors.white,
+                      color: titleColor,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -225,7 +245,7 @@ class _TarotDetailSheet extends StatelessWidget {
                     description,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.dmSans(
-                      color: Colors.white70,
+                      color: bodyColor,
                       height: 1.8,
                       fontSize: 15,
                     ),

@@ -32,10 +32,7 @@ class _TarotPdfState extends State<TarotPdf> {
         style: PdfFontStyle.italic,
       );
 
-      final PdfFont bodyFont = PdfStandardFont(
-        PdfFontFamily.helvetica,
-        13,
-      );
+      final PdfFont bodyFont = PdfStandardFont(PdfFontFamily.helvetica, 13);
 
       // 3️⃣ Title
       page.graphics.drawString(
@@ -90,12 +87,11 @@ Trust the energy of unity and connection in your journey.
 
       // 9️⃣ Open PDF automatically
       await OpenFilex.open(path);
-
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error generating PDF: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error generating PDF: $e')));
       }
     }
   }
@@ -116,10 +112,7 @@ Trust the energy of unity and connection in your journey.
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xffDBC33F),
             foregroundColor: Colors.black,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 14,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),

@@ -1,4 +1,5 @@
 import '../../App/Model/order_model.dart';
+import 'package:flutter/foundation.dart';
 import 'api_client.dart';
 import 'api_endpoints.dart';
 
@@ -24,14 +25,14 @@ class OrderApi {
       }
       return null;
     } catch (e) {
-      print("PLACE ORDER ERROR: $e");
+      debugPrint("PLACE ORDER ERROR: $e");
       return null;
     }
   }
 
   Future<List<OrderModel>> getMyOrders() async {
     try {
-      final data = await _client.get(ApiEndpoints.orders); // /orders/my
+      final data = await _client.get(ApiEndpoints.ordersMy);
       if (data['success'] == true && data['orders'] != null) {
         return (data['orders'] as List)
             .map((e) => OrderModel.fromJson(e))
@@ -39,7 +40,7 @@ class OrderApi {
       }
       return [];
     } catch (e) {
-      print("GET MY ORDERS ERROR: $e");
+      debugPrint("GET MY ORDERS ERROR: $e");
       return [];
     }
   }
@@ -52,9 +53,8 @@ class OrderApi {
       }
       return null;
     } catch (e) {
-      print("GET ORDER BY ID ERROR: $e");
+      debugPrint("GET ORDER BY ID ERROR: $e");
       return null;
     }
   }
 }
-

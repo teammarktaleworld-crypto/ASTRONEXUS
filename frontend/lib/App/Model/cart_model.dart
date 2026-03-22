@@ -25,17 +25,13 @@ class CartModel {
     );
   }
 
-
   /* =========================
      CART TOTAL CALCULATIONS
      ========================= */
 
   /// Sum of (price × quantity) for all items
   double get subtotal {
-    return items.fold(
-      0.0,
-          (sum, item) => sum + (item.price * item.quantity),
-    );
+    return items.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
   }
 
   /// Static discount (can be dynamic later)
@@ -87,5 +83,4 @@ class CartItemModel {
       quantity: json['quantity'] ?? 1,
     );
   }
-
 }

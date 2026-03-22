@@ -15,15 +15,17 @@ class _PasswordInputState extends State<PasswordInput> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return TextField(
       controller: widget.controller,
       obscureText: obscure,
-      style: GoogleFonts.poppins(color: Colors.black87),
-      decoration: authInput("Password", Icons.lock).copyWith(
+      style: GoogleFonts.poppins(color: isDark ? Colors.white : Colors.black87),
+      decoration: authInput(context, "Password", Icons.lock).copyWith(
         suffixIcon: IconButton(
           icon: Icon(
             obscure ? Icons.visibility : Icons.visibility_off,
-            color: Colors.black54,
+            color: isDark ? Colors.white70 : Colors.black54,
           ),
           onPressed: () => setState(() => obscure = !obscure),
         ),

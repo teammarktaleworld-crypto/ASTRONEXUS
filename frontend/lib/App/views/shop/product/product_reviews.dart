@@ -44,22 +44,19 @@ class ProductReviews extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 r['comment'] ?? '',
-                style: GoogleFonts.poppins(
-                  color: Colors.white60,
-                  fontSize: 14,
-                ),
+                style: GoogleFonts.poppins(color: Colors.white60, fontSize: 14),
               ),
               const SizedBox(height: 6),
               Row(
                 children: List.generate(
                   5,
-                      (i) => Icon(
+                  (i) => Icon(
                     i < (r['rating'] ?? 0) ? Icons.star : Icons.star_border,
                     color: Colors.amberAccent,
                     size: 16,
                   ),
                 ),
-              )
+              ),
             ],
           ),
         );

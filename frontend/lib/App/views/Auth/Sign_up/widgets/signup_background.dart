@@ -1,36 +1,24 @@
+import 'package:astro_tale/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
-
-import '../../../../../ui_componets/cosmic/cosmic_one.dart';
-import '../../../../../ui_componets/cosmic/cosmic_two.dart';
+import '../../../../../core/widgets/animated_app_background.dart';
 
 class SignupBackground extends StatelessWidget {
-  const SignupBackground({super.key});
+  final Widget child;
+
+  const SignupBackground({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xff18122B),
-                // Color(0xff1C4D8D),
-                // Color(0xff0F2854),
-                Color(0xff393053),
-
-
-                Color(0xff18122B),
-
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
-        const Positioned.fill(child: SmoothShootingStars()),
-        Container(color: Colors.black.withOpacity(0.55)),
-      ],
+    return AnimatedAppBackground(
+      showStarsInDark: true,
+      showStarsInLight: true,
+      showGlow: true,
+      child: Container(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.black.withOpacity(0.35)
+            : AppColors.lightbox,
+        child: child,
+      ),
     );
   }
 }

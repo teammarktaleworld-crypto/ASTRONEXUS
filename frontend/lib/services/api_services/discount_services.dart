@@ -5,13 +5,12 @@ import '../../App/Model/place/discount_model.dart';
 import '../API/APIservice.dart';
 
 class DiscountService {
-
   /// Get all available discounts
   static Future<List<Discount>> getDiscounts() async {
     final res = await http.get(Uri.parse("$baseurl/api/discount"));
 
     if (res.statusCode == 200) {
-      final List data = json.decode(res.body);
+      final List<dynamic> data = json.decode(res.body) as List<dynamic>;
       return data.map((e) => Discount.fromJson(e)).toList();
     } else {
       throw Exception("Failed to load discounts");
@@ -23,7 +22,7 @@ class DiscountService {
     final res = await http.get(Uri.parse("$baseurl/api/discount/$code"));
 
     if (res.statusCode == 200) {
-      return Discount.fromJson(json.decode(res.body));
+      return Discount.fromJson(json.decode(res.body) as Map<String, dynamic>);
     } else {
       throw Exception("Invalid or expired discount");
     }
@@ -36,15 +35,12 @@ class DiscountService {
   }) async {
     final res = await http.post(
       Uri.parse("$baseurl/api/discount/apply"),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        "code": code,
-        "amount": amount,
-      }),
+      headers: const {"Content-Type": "application/json"},
+      body: json.encode({"code": code, "amount": amount}),
     );
 
     if (res.statusCode == 200) {
-      return json.decode(res.body);
+      return json.decode(res.body) as Map<String, dynamic>;
     } else {
       throw Exception("Failed to apply discount");
     }

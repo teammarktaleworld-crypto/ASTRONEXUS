@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:astro_tale/core/theme/app_gradients.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'output/numerlogy_result.dart';
 import '../../../../ui_componets/cosmic/cosmic_one.dart';
@@ -25,13 +26,15 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
+        final theme = Theme.of(context);
+        final colors = theme.colorScheme;
         return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFDBC33F),
-              onPrimary: Colors.black,
-              surface: Color(0xff272727),
-              onSurface: Colors.white,
+          data: theme.copyWith(
+            colorScheme: colors.copyWith(
+              primary: colors.primary,
+              onPrimary: colors.onPrimary,
+              surface: colors.surface,
+              onSurface: colors.onSurface,
             ),
           ),
           child: child!,
@@ -41,7 +44,7 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
 
     if (picked != null) {
       dateController.text =
-      "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
+          "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
       setState(() {});
     }
   }
@@ -77,31 +80,18 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: Stack(
         children: [
-          // 🌌 Cosmic Gradient Background
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff050B1E),
-                  // Color(0xff1C4D8D),
-                  // Color(0xff0F2854),
-                  Color(0xff393053),
-                  Color(0xff050B1E),
-
-
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+            decoration: AppGradients.screenDecoration(theme),
           ),
-          // 🌟 Shooting stars overlay
-          Positioned.fill(child: SmoothShootingStars()),
-          // Dark overlay
-          Positioned.fill(child: Container(color: Colors.black.withOpacity(0.45))),
+          if (isDark) Positioned.fill(child: SmoothShootingStars()),
+          Positioned.fill(child: Container(color: AppGradients.screenOverlay(theme))),
 
           SafeArea(
             child: SingleChildScrollView(
@@ -111,7 +101,7 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
                   Text(
                     "Numerology Calculator",
                     style: GoogleFonts.dmSans(
-                      color: Colors.white,
+                      color: isDark ? Colors.white : colors.onSurface,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
@@ -122,10 +112,15 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: const Color(0xFFDBC33F), width: 1.5),
+                      border: Border.all(
+                        color: AppGradients.glassBorder(theme),
+                        width: 1.5,
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.7),
+                          color: isDark
+                              ? Colors.black.withOpacity(0.7)
+                              : Colors.black.withOpacity(0.08),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -143,7 +138,7 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
                           Text(
                             "Discover Your Numerology",
                             style: GoogleFonts.dmSans(
-                              color: Colors.white,
+                              color: isDark ? Colors.white : colors.onSurface,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -152,7 +147,9 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
                           Text(
                             "Enter details to reveal your life path number",
                             style: GoogleFonts.dmSans(
-                              color: Colors.white70,
+                              color: isDark
+                                  ? Colors.white70
+                                  : colors.onSurface.withOpacity(0.72),
                               fontSize: 13,
                             ),
                           ),
@@ -187,15 +184,17 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
                             height: 52,
                             child: Container(
                               decoration: BoxDecoration(
-                               color: Color(0xFF1C2A5A),
+                                color: colors.primary,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: const Color(0xFFDBC33F),
+                                  color: AppGradients.glassBorder(theme),
                                   width: 1.6,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.6),
+                                    color: isDark
+                                        ? Colors.black.withOpacity(0.6)
+                                        : Colors.black.withOpacity(0.08),
                                     blurRadius: 16,
                                     offset: const Offset(0, 8),
                                   ),
@@ -208,7 +207,9 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
                                 ],
                               ),
                               child: ElevatedButton(
-                                onPressed: isLoading ? null : _generateNumerology,
+                                onPressed: isLoading
+                                    ? null
+                                    : _generateNumerology,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
@@ -223,7 +224,7 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
                                     style: GoogleFonts.dmSans(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: colors.onPrimary,
                                     ),
                                   ),
                                 ),
@@ -251,14 +252,20 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
     bool readOnly = false,
     VoidCallback? onTap,
   }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: AppGradients.glassFill(theme),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: AppGradients.glassBorder(theme)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: isDark
+                ? Colors.black.withOpacity(0.5)
+                : Colors.black.withOpacity(0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -273,16 +280,18 @@ class _NumerologyScreenState extends State<NumerologyScreen> {
         controller: controller,
         readOnly: readOnly,
         onTap: onTap,
-        style: GoogleFonts.dmSans(
-          color: Colors.white,
-          fontSize: 14,
-        ),
+        style: GoogleFonts.dmSans(color: colors.onSurface, fontSize: 14),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color(0xFFDBC33F)),
+          prefixIcon: Icon(icon, color: colors.primary),
           hintText: label,
-          hintStyle: GoogleFonts.dmSans(color: Colors.white54),
+          hintStyle: GoogleFonts.dmSans(
+            color: colors.onSurface.withOpacity(0.6),
+          ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 14,
+          ),
         ),
       ),
     );

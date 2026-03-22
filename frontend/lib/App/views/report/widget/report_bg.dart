@@ -17,10 +17,7 @@ class ReportsBackground extends StatelessWidget {
                 // Color(0xff0F2854),
                 Color(0xff393053),
 
-
                 Color(0xff050B1E),
-
-
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

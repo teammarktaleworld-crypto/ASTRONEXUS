@@ -16,7 +16,7 @@ Future<Map<String, dynamic>> getCoordinates(String place) async {
     return {
       "lat": location["lat"],
       "lng": location["lng"],
-      "timezone": data["results"][0]["address_components"]
+      "timezone": data["results"][0]["address_components"],
     };
   } else {
     throw Exception("Location not found");

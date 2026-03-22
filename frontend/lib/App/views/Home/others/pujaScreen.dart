@@ -31,7 +31,10 @@ class PoojaOptionsScreenDark extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -68,12 +71,13 @@ class PoojaOptionsScreenDark extends StatelessWidget {
                   Expanded(
                     child: GridView.builder(
                       itemCount: poojaOptions.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 18,
-                        crossAxisSpacing: 18,
-                        childAspectRatio: 0.8,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 18,
+                            crossAxisSpacing: 18,
+                            childAspectRatio: 0.8,
+                          ),
                       itemBuilder: (context, index) {
                         final option = poojaOptions[index];
                         return _poojaCard(
@@ -128,7 +132,9 @@ class PoojaOptionsScreenDark extends StatelessWidget {
           children: [
             // Image section
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
               child: Image.asset(
                 image,
                 height: 120,

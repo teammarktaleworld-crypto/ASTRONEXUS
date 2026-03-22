@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
+
+import "../../sharedWidgets/common_input.dart";
 
 class StepEmail extends StatelessWidget {
   final TextEditingController controller;
@@ -13,62 +15,29 @@ class StepEmail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Explanatory text
         Text(
           "Please enter your active email address. We will use this email to send important updates, reports, and notifications.",
           style: GoogleFonts.dmSans(
-            color: Colors.white70,
+            color: isDark
+                ? Colors.white70
+                : theme.colorScheme.onSurface.withOpacity(0.72),
             fontSize: 14,
             height: 1.5,
           ),
         ),
         const SizedBox(height: 16),
-
-        // White email input field with icon
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white, // white background
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: TextField(
-            controller: controller,
-            onChanged: onChanged,
-            keyboardType: TextInputType.emailAddress,
-            style: GoogleFonts.dmSans(
-              color: Colors.black87,
-              fontSize: 15,
-            ),
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.email, color: Colors.grey),
-              hintText: "example@domain.com",
-              hintStyle: GoogleFonts.dmSans(
-                color: Colors.black87,
-                fontSize: 14,
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: Colors.blueAccent,
-                  width: 1.5,
-                ),
-              ),
-            ),
-          ),
+        CommonInput(
+          controller: controller,
+          onChanged: onChanged,
+          hint: "example@domain.com",
+          icon: Icons.alternate_email_rounded,
+          keyboardType: TextInputType.emailAddress,
         ),
       ],
     );

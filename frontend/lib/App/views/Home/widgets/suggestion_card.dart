@@ -15,6 +15,8 @@ class _SuggestionProductListState extends State<SuggestionProductList> {
   final ProductSuggestionService _service = ProductSuggestionService();
   List<ProductSuggestion> _products = [];
   bool _loading = true;
+  bool get isDark => Theme.of(context).brightness == Brightness.dark;
+
 
   @override
   void initState() {
@@ -55,22 +57,58 @@ class _SuggestionProductListState extends State<SuggestionProductList> {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
+            gradient: isDark
+                ? const LinearGradient(
+              colors: [
+                Color(0xFF3C467B),
+                Color(0xFF636CCB),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+                : const LinearGradient(
+              colors: [
+                Color(0xFFE8ECFF),
+                Color(0xFFD6DCFF),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              if (isDark)
+                BoxShadow(
+                  color: const Color(0xFF636CCB).withOpacity(0.4),
+                  blurRadius: 20,
+                  spreadRadius: 1,
+                )
+              else
+                BoxShadow(
+                  color: const Color(0xFF636CCB).withOpacity(0.15),
+                  blurRadius: 15,
+                  spreadRadius: 1,
+                ),
+            ],
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withOpacity(0.08)
+                  : const Color(0xFF636CCB).withOpacity(0.2),
+            ),
           ),
           child: Text(
             "Product Suggestions",
             style: GoogleFonts.dmSans(
-              color: Colors.white,
+              color: isDark ? Colors.white : const Color(0xFF2C3566),
               fontSize: 18,
               fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
             ),
           ),
         ),
-        SizedBox(height: 10,),
+        SizedBox(height: 10),
         SizedBox(
           height: 300,
           width: double.infinity,
@@ -132,24 +170,26 @@ class _SuggestionProductListState extends State<SuggestionProductList> {
                   ),
                   child: image != null
                       ? Image.network(
-                    image,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  )
+                          image,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        )
                       : Container(
-                    height: 180,
-                    color: Colors.white10,
-                    child: const Icon(Icons.image, color: Colors.white30),
-                  ),
+                          height: 180,
+                          color: Colors.white10,
+                          child: const Icon(Icons.image, color: Colors.white30),
+                        ),
                 ),
                 // Price Tag
                 Positioned(
                   top: 8,
                   right: 8,
                   child: Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.55),
                       borderRadius: BorderRadius.circular(12),
@@ -157,9 +197,10 @@ class _SuggestionProductListState extends State<SuggestionProductList> {
                     child: Text(
                       "₹${product.price}",
                       style: GoogleFonts.dmSans(
-                          color: Colors.amberAccent,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14),
+                        color: Colors.amberAccent,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ),
@@ -173,7 +214,10 @@ class _SuggestionProductListState extends State<SuggestionProductList> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.dmSans(
-                    color: Colors.black, fontWeight: FontWeight.w600, fontSize: 15),
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
               ),
             ),
           ],

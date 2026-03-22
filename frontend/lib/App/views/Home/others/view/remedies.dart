@@ -21,7 +21,10 @@ class AstroRemediesPage extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFDBC33F)),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFFDBC33F),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -29,9 +32,21 @@ class AstroRemediesPage extends StatelessWidget {
         child: Stack(
           children: [
             // 🌙 Decorative background circles
-            Positioned(top: -80, left: -60, child: _bgCircle(200, const Color(0x403B3B98))),
-            Positioned(bottom: -70, right: -40, child: _bgCircle(180, const Color(0x40FFC371))),
-            Positioned(top: 320, right: -100, child: _bgCircle(260, const Color(0x4080FFD2))),
+            Positioned(
+              top: -80,
+              left: -60,
+              child: _bgCircle(200, const Color(0x403B3B98)),
+            ),
+            Positioned(
+              bottom: -70,
+              right: -40,
+              child: _bgCircle(180, const Color(0x40FFC371)),
+            ),
+            Positioned(
+              top: 320,
+              right: -100,
+              child: _bgCircle(260, const Color(0x4080FFD2)),
+            ),
 
             // 🌟 Scrollable content
             SingleChildScrollView(
@@ -42,25 +57,27 @@ class AstroRemediesPage extends StatelessWidget {
                   _remedyCard(
                     title: "Shani (Saturn)",
                     description:
-                    "Shani signifies discipline, patience, and karma. Strengthening Saturn brings stability and long-term success.",
+                        "Shani signifies discipline, patience, and karma. Strengthening Saturn brings stability and long-term success.",
                     mantra: "🔯 Om Sham Shanicharaya Namah",
                     gemstone: "💎 Blue Sapphire (Neelam)",
-                    tip: "🪔 Light sesame oil lamp on Saturdays & feed black dogs.",
+                    tip:
+                        "🪔 Light sesame oil lamp on Saturdays & feed black dogs.",
                   ),
                   const SizedBox(height: 18),
                   _remedyCard(
                     title: "Surya (Sun)",
                     description:
-                    "Surya governs energy, confidence, and leadership. A strong Sun enhances authority and self-esteem.",
+                        "Surya governs energy, confidence, and leadership. A strong Sun enhances authority and self-esteem.",
                     mantra: "🔯 Om Hram Hreem Hraum Suryaya Namah",
                     gemstone: "💎 Ruby (Manik)",
-                    tip: "🌞 Offer water to the rising Sun & wear red on Sundays.",
+                    tip:
+                        "🌞 Offer water to the rising Sun & wear red on Sundays.",
                   ),
                   const SizedBox(height: 18),
                   _remedyCard(
                     title: "Chandra (Moon)",
                     description:
-                    "Chandra rules emotions and peace. Strengthening Moon brings calmness and emotional balance.",
+                        "Chandra rules emotions and peace. Strengthening Moon brings calmness and emotional balance.",
                     mantra: "🔯 Om Chandraya Namah",
                     gemstone: "💎 Pearl (Moti)",
                     tip: "🌙 Drink water from a silver vessel on Mondays.",
@@ -69,10 +86,11 @@ class AstroRemediesPage extends StatelessWidget {
                   _remedyCard(
                     title: "Mangal (Mars)",
                     description:
-                    "Mangal represents courage and strength. Balanced Mars removes anger and increases focus.",
+                        "Mangal represents courage and strength. Balanced Mars removes anger and increases focus.",
                     mantra: "🔯 Om Angarakaya Namah",
                     gemstone: "💎 Red Coral (Moonga)",
-                    tip: "🔥 Chant Hanuman Chalisa & donate red lentils on Tuesday.",
+                    tip:
+                        "🔥 Chant Hanuman Chalisa & donate red lentils on Tuesday.",
                   ),
                   const SizedBox(height: 40),
                   Text(
@@ -171,10 +189,7 @@ class AstroRemediesPage extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }

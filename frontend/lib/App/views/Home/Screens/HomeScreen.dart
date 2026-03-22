@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 import 'package:astro_tale/App/controller/Auth_Controller.dart';
@@ -15,6 +16,11 @@ import 'package:astro_tale/App/views/options/IconScreen/views/match/splashMatch.
 import 'package:astro_tale/App/views/subscription/views/subscription_screen.dart';
 import 'package:astro_tale/App/views/support/screen/support_screen.dart';
 import 'package:astro_tale/App/views/wishlist/screen/wishlist_screen.dart';
+import 'package:astro_tale/core/constants/app_colors.dart';
+import 'package:astro_tale/core/localization/app_localizations.dart';
+import 'package:astro_tale/core/settings/app_settings_controller.dart';
+import 'package:astro_tale/core/widgets/animated_app_background.dart';
+import 'package:astro_tale/helper/Astrology_flow_helper.dart';
 import 'package:astro_tale/ui_componets/glass/glass_card.dart';
 import 'package:astro_tale/util/images.dart';
 import 'package:flutter/material.dart';
@@ -54,14 +60,16 @@ class Homescreen extends StatefulWidget {
 class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   late AnimationController starController;
   late AnimationController planetController;
+  late HoroscopeData _dailyData;
+  late HoroscopeData _weeklyData;
+  late HoroscopeData _monthlyData;
+  bool _isHoroscopeRefreshing = false;
   int feedbackRating = 4;
   final TextEditingController feedbackCtrl = TextEditingController();
   Timer? _subscriptionTimer;
   String userName = "";
   String userPhone = "";
   String userAvatar = "";
-  bool _isDarkMode = false;
-
 
   final List<Map<String, dynamic>> banners = [
     {
@@ -84,7 +92,6 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   int currentBanner = 0; // track the active page
 
   int selectedTab = 0;
-  final tabs = ["Today", "Week", "Month"];
 
   @override
   FallingStarPainter? starPainter;
@@ -92,6 +99,9 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _dailyData = widget.daily;
+    _weeklyData = widget.weekly;
+    _monthlyData = widget.monthly;
     starController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 18),
@@ -111,6 +121,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
     });
 
     _loadUserData(); // load real user info here
+    _refreshHoroscopeIfNeeded();
 
     // Start subscription page timer every 2 minutes
     _subscriptionTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
@@ -150,42 +161,104 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
     });
   }
 
+  Future<void> _refreshHoroscopeIfNeeded() async {
+    final alreadyLoaded =
+        _dailyData.text.trim().isNotEmpty &&
+        _weeklyData.text.trim().isNotEmpty &&
+        _monthlyData.text.trim().isNotEmpty;
+    final zodiac = widget.zodiacSign.trim().toLowerCase();
+    if (alreadyLoaded || zodiac.isEmpty || zodiac == "unknown") {
+      return;
+    }
+
+    if (mounted) {
+      setState(() => _isHoroscopeRefreshing = true);
+    }
+
+    try {
+      final bundle = await AstrologyFlowHelper.fetchHoroscopeBundle(zodiac);
+      final freshDaily = HoroscopeData.fromJson(_asMap(bundle["daily"]));
+      final freshWeekly = HoroscopeData.fromJson(_asMap(bundle["weekly"]));
+      final freshMonthly = HoroscopeData.fromJson(_asMap(bundle["monthly"]));
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _dailyData = _mergeHoroscope(
+          current: _dailyData,
+          incoming: freshDaily,
+          defaultTitle: "Today",
+        );
+        _weeklyData = _mergeHoroscope(
+          current: _weeklyData,
+          incoming: freshWeekly,
+          defaultTitle: "This Week",
+        );
+        _monthlyData = _mergeHoroscope(
+          current: _monthlyData,
+          incoming: freshMonthly,
+          defaultTitle: "This Month",
+        );
+      });
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("daily", jsonEncode(_dailyData.toJson()));
+      await prefs.setString("weekly", jsonEncode(_weeklyData.toJson()));
+      await prefs.setString("monthly", jsonEncode(_monthlyData.toJson()));
+    } catch (_) {
+      // Keep rendering existing values when refresh fails.
+    } finally {
+      if (mounted) {
+        setState(() => _isHoroscopeRefreshing = false);
+      }
+    }
+  }
+
   void _handleDrawerItem(String item) {
     switch (item) {
-      case "Terms & Conditions":
+      case "terms":
         Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const TermsAndConditions()));
+          context,
+          MaterialPageRoute(builder: (_) => const TermsAndConditions()),
+        );
         break;
       case "wishlist":
         Navigator.push(
-            context, MaterialPageRoute(builder: (_) =>  WishlistScreen()));
+          context,
+          MaterialPageRoute(builder: (_) => WishlistScreen()),
+        );
         break;
-      case "Match Services":
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) =>  BirthChartScreen()));
+      case "match":
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => BirthChartScreen()),
+        );
         break;
-      case "Support":
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) =>  AstroSupportScreen()));
+      case "support":
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AstroSupportScreen()),
+        );
         break;
       default:
         break;
     }
   }
 
-  void _toggleTheme(bool isDark) {
-    setState(() {
-      _isDarkMode = isDark;
-      // Optionally, apply theme changes globally using Theme.of(context)
-    });
+  void _setThemeMode(ThemeMode mode) {
+    AppSettingsController.instance.setThemeMode(mode);
+  }
+
+  void _changeLanguage(Locale locale) {
+    AppSettingsController.instance.setLocale(locale);
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
+    final theme = Theme.of(context);
+    final settings = AppSettingsController.instance;
 
     return Scaffold(
       drawer: CustomDrawer(
@@ -193,116 +266,107 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
         userEmail: userName,
         userAvatar: userAvatar,
         onItemTap: _handleDrawerItem,
-        isDarkMode: _isDarkMode,
-        onThemeChanged: _toggleTheme,
+        currentThemeMode: settings.themeMode,
+        onThemeModeChanged: _setThemeMode,
+        currentLocale: settings.locale,
+        onLanguageChanged: _changeLanguage,
       ),
 
-      backgroundColor: const Color(0xff050B1E),
+      backgroundColor: theme.scaffoldBackgroundColor,
 
       appBar: _homeAppBar(context, userName, userAvatar),
 
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff050B1E),
-                  // Color(0xff1C4D8D),
-                  // Color(0xff0F2854),
-                  Color(0xff393053),
+      body: AnimatedAppBackground(
+        child: Stack(
+          children: [
+            /// STAR FALL BACKGROUND
+            // if (starPainter != null)
+            //   AnimatedBuilder(
+            //     animation: starController,
+            //     builder: (_, __) {
+            //       final painter = starPainter!;
+            //       return CustomPaint(
+            //         size: MediaQuery.of(context).size,
+            //         painter: FallingStarPainter(
+            //           starController.value,
+            //           stars: painter.stars,
+            //           sizes: painter.sizes,
+            //           speeds: painter.speeds,
+            //         ),
+            //       );
+            //     },
+            //   ),
 
-                  Color(0xff050B1E),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+            /// 🪐 MULTI PLANET LAYER
+            AnimatedBuilder(
+              animation: planetController,
+              builder: (_, __) => _planetField(),
             ),
-          ),
 
-          Positioned.fill(child: SmoothShootingStars()),
+            /// 🌠 CONTENT
+            SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  // 🔹 Banners
+                  SliverToBoxAdapter(child: BannerCarousel()),
 
-          /// STAR FALL BACKGROUND
-          // if (starPainter != null)
-          //   AnimatedBuilder(
-          //     animation: starController,
-          //     builder: (_, __) {
-          //       final painter = starPainter!;
-          //       return CustomPaint(
-          //         size: MediaQuery.of(context).size,
-          //         painter: FallingStarPainter(
-          //           starController.value,
-          //           stars: painter.stars,
-          //           sizes: painter.sizes,
-          //           speeds: painter.speeds,
-          //         ),
-          //       );
-          //     },
-          //   ),
+                  // 🔹 Sticky Tabs
+                  SliverPersistentHeader(
+                    pinned: true, // <- STICKY
+                    delegate: _SliverTabsDelegate(_tabs(), 50), // 50 is height
+                  ),
 
-          /// 🪐 MULTI PLANET LAYER
-          AnimatedBuilder(
-            animation: planetController,
-            builder: (_, __) => _planetField(),
-          ),
+                  // 🔹 Scrollable content
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Column(
+                        children: [
+                          SizedBox(height: 10),
+                          _bigPrediction(),
+                          SizedBox(height: 20),
+                          astrologyServicesRow(context),
+                          SizedBox(height: 34),
+                          SuggestionProductList(),
+                          SizedBox(height: 20),
 
-          /// 🌠 CONTENT
-          SafeArea(
-            child: CustomScrollView(
-              slivers: [
-
-                // 🔹 Banners
-                SliverToBoxAdapter(child: BannerCarousel()),
-
-                // 🔹 Sticky Tabs
-                SliverPersistentHeader(
-                  pinned: true, // <- STICKY
-                  delegate: _SliverTabsDelegate(_tabs(), 50), // 50 is height
-                ),
-
-                // 🔹 Scrollable content
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10),
-                        _bigPrediction(),
-                        SizedBox(height: 20),
-                        astrologyServicesRow(context),
-                        SizedBox(height: 34),
-                        SuggestionProductList(),
-                        SizedBox(height: 20),
-
-                        _nutritionalAstrology(),
-                        // SizedBox(height: 40),
-                        // _supportSection(),
-                        // SizedBox(height: 34),
-                        // _feedbackForm(),
-                        // SizedBox(height: 34),
-                        // _copyrightSection(),
-                        SizedBox(height: 80),
-                      ],
+                          _nutritionalAstrology(),
+                          // SizedBox(height: 40),
+                          // _supportSection(),
+                          // SizedBox(height: 34),
+                          // _feedbackForm(),
+                          // SizedBox(height: 34),
+                          // _copyrightSection(),
+                          SizedBox(height: 80),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-
 
   PreferredSizeWidget _homeAppBar(
     BuildContext context,
     String userName,
     String userAvatar,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final barColor = isDark ? AppColors.appBarDark : AppColors.lightContainer;
+    final titleColor = Colors.white;
+    final subtitleColor = Colors.white70;
+
     return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
+      backgroundColor: barColor,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      elevation: 0.8,
       toolbarHeight: 80,
       automaticallyImplyLeading: false,
       titleSpacing: 0,
@@ -310,7 +374,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
         children: [
           Builder(
             builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white),
+              icon: Icon(Icons.menu, color: titleColor),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -355,18 +419,18 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Hi, ${userName.isNotEmpty ? userName : "Guest"}",
+                  "${context.l10n.tr("greetingHi")} ${userName.isNotEmpty ? userName : context.l10n.tr("guest")}",
                   style: GoogleFonts.dmSans(
-                    color: Colors.white,
+                    color: titleColor,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.3,
                   ),
                 ),
                 Text(
-                  "Welcome back!",
+                  context.l10n.tr("welcomeBack"),
                   style: GoogleFonts.dmSans(
-                    color: Colors.white70,
+                    color: subtitleColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -379,7 +443,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
       actions: [
         // Notifications
         IconButton(
-          icon: const Icon(Icons.notifications, color: Colors.white),
+          icon: Icon(Icons.notifications, color: titleColor),
           onPressed: () {
             Navigator.push(
               context,
@@ -394,7 +458,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
 
         // Subscription / money
         IconButton(
-          icon: const Icon(Icons.money, color: Colors.white),
+          icon: Icon(Icons.money, color: titleColor),
           onPressed: () {
             Navigator.push(
               context,
@@ -696,11 +760,23 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
 
   // 📅 TABS
   Widget _tabs() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final tabs = <String>[
+      context.l10n.tr("today"),
+      context.l10n.tr("week"),
+      context.l10n.tr("month"),
+    ];
+
     return Container(
       height: 50,
       child: Column(
         children: [
-          Divider(color: Colors.white24, height: 1),
+          Divider(
+            color: isDark ? Colors.white24 : colors.outline.withOpacity(0.25),
+            height: 1,
+          ),
           Row(
             children: List.generate(tabs.length, (i) {
               final isSelected = selectedTab == i;
@@ -710,7 +786,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: 5,),
+                      SizedBox(height: 5),
                       Text(
                         tabs[i],
                         style: GoogleFonts.dmSans(
@@ -718,7 +794,9 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                           fontWeight: isSelected
                               ? FontWeight.w600
                               : FontWeight.w400,
-                          color: Colors.white70,
+                          color: isDark
+                              ? Colors.white70
+                              : colors.onSurface.withOpacity(0.8),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -727,7 +805,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                         width: 40,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xffDBC33F)
+                              ? colors.primary
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(2),
                         ),
@@ -746,21 +824,25 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   // 🔮 BIG PREDICTION
   Widget _bigPrediction() {
     final now = DateTime.now();
-    final formattedDate = "${now.day}-${now.month}-${now.year}";
-
-    String headerTitle;
-    String horoscopeText;
-
-    if (selectedTab == 0) {
-      headerTitle = widget.daily.title;
-      horoscopeText = widget.daily.text;
-    } else if (selectedTab == 1) {
-      headerTitle = widget.weekly.title;
-      horoscopeText = widget.weekly.text;
-    } else {
-      headerTitle = widget.monthly.title;
-      horoscopeText = widget.monthly.text;
-    }
+    final formattedDate =
+        "${now.day.toString().padLeft(2, "0")}-${now.month.toString().padLeft(2, "0")}-${now.year}";
+    final tabLabel = selectedTab == 0
+        ? "Today"
+        : (selectedTab == 1 ? "This Week" : "This Month");
+    final activeData = selectedTab == 0
+        ? _dailyData
+        : (selectedTab == 1 ? _weeklyData : _monthlyData);
+    final metaTitle = activeData.title.trim().isEmpty
+        ? formattedDate
+        : activeData.title.trim();
+    final horoscopeText = activeData.text.trim().isEmpty
+        ? (_isHoroscopeRefreshing
+              ? "Fetching your latest horoscope..."
+              : "Horoscope is syncing. Please check back in a moment.")
+        : activeData.text.trim();
+    final signLabel = widget.zodiacSign.trim().isEmpty
+        ? "ZODIAC"
+        : widget.zodiacSign.toUpperCase();
 
     return Container(
       width: double.infinity,
@@ -768,10 +850,15 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         gradient: const LinearGradient(
-          colors: [Color(0xFF14162E), Color(0xFF1A1D3A)],
+          colors: <Color>[
+            Color(0xFF111A34),
+            Color(0xFF1B2246),
+            Color(0xFF25203E),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.55),
@@ -785,18 +872,48 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            /// ♉ ZODIAC BADGE
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 18,
+                  color: Color(0xFFDBC33F),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  tabLabel,
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            if (_isHoroscopeRefreshing) ...<Widget>[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: const LinearProgressIndicator(
+                  minHeight: 4,
+                  backgroundColor: Color(0x55273051),
+                  color: Color(0xFFDBC33F),
+                ),
+              ),
+              const SizedBox(height: 14),
+            ],
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
               decoration: BoxDecoration(
-                color: Colors.deepPurpleAccent.withOpacity(0.22),
+                color: const Color(0xFF7C3AED).withOpacity(0.22),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.deepPurpleAccent.withOpacity(0.45),
+                  color: const Color(0xFFDBC33F).withOpacity(0.5),
                 ),
               ),
               child: Text(
-                widget.zodiacSign.toUpperCase(),
+                signLabel,
                 style: GoogleFonts.dmSans(
                   color: Colors.white,
                   fontSize: 12,
@@ -805,12 +922,9 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                 ),
               ),
             ),
-
             const SizedBox(height: 18),
-
-            /// 🌟 TITLE
             Text(
-              headerTitle,
+              metaTitle,
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
                 color: Colors.white,
@@ -818,22 +932,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                 fontWeight: FontWeight.w700,
               ),
             ),
-
-            const SizedBox(height: 6),
-
-            /// 📅 DATE
-            Text(
-              formattedDate,
-              style: GoogleFonts.dmSans(
-                color: Colors.white60,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-
             const SizedBox(height: 22),
-
-            /// SOFT GLOW DIVIDER
             Container(
               height: 1,
               width: 110,
@@ -841,23 +940,29 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                 gradient: LinearGradient(
                   colors: [
                     Colors.transparent,
-                    Colors.deepPurpleAccent.withOpacity(0.6),
+                    const Color(0xFFDBC33F).withOpacity(0.6),
                     Colors.transparent,
                   ],
                 ),
               ),
             ),
-
             const SizedBox(height: 22),
-
-            /// 🔮 HOROSCOPE TEXT
-            Text(
-              horoscopeText,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(
-                color: Colors.white70,
-                fontSize: 15.8,
-                height: 1.9,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Text(
+                horoscopeText,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.dmSans(
+                  color: Colors.white.withOpacity(0.88),
+                  fontSize: 15.3,
+                  height: 1.75,
+                ),
               ),
             ),
           ],
@@ -920,7 +1025,6 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
           // Heading
           Row(
             children: [
-
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -955,10 +1059,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
             children: services.map((service) {
               return SizedBox(
                 width: double.infinity, // two per row with spacing
-                child: ServiceCard(
-                  data: service,
-                  isPremium: false,
-                ),
+                child: ServiceCard(data: service, isPremium: false),
               );
             }).toList(),
           ),
@@ -966,9 +1067,6 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
       ),
     );
   }
-
-
-
 
   Widget _feedbackForm() {
     return glassCard(
@@ -1105,11 +1203,9 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                         offset: const Offset(0, 4),
                       ),
                     ],
-
                   ),
                   padding: const EdgeInsets.all(14),
                   child: Image.asset(
-
                     "assets/nutrition/food.png",
                     fit: BoxFit.cover,
                   ),
@@ -1163,7 +1259,6 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       color: const Color(0xff1C4D8D),
-
                     ),
                     child: Text(
                       "Try Recommendation",
@@ -1232,22 +1327,51 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   // 🧭 DRAWER
 
   // 🧊 GLASS
+  HoroscopeData _mergeHoroscope({
+    required HoroscopeData current,
+    required HoroscopeData incoming,
+    required String defaultTitle,
+  }) {
+    final title = incoming.title.trim().isNotEmpty
+        ? incoming.title.trim()
+        : (current.title.trim().isNotEmpty
+              ? current.title.trim()
+              : defaultTitle);
+    final text = incoming.text.trim().isNotEmpty
+        ? incoming.text.trim()
+        : current.text.trim();
+    return HoroscopeData(title: title, text: text);
+  }
+
+  Map<String, dynamic> _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return value.map((key, mapValue) => MapEntry(key.toString(), mapValue));
+    }
+    return <String, dynamic>{};
+  }
+
   Widget _glass({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
-        color: Color(0xFF1A1D3A).withOpacity(1),
-
-        border: Border.all(color: Colors.white24),
+        color: isDark
+            ? const Color(0xFF121C37).withOpacity(0.9)
+            : AppColors.lightContainer.withOpacity(0.94),
+        border: Border.all(
+          color: isDark ? Colors.white24 : AppColors.cardBorderLight,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.7),
+            color: Colors.black.withOpacity(isDark ? 0.62 : 0.16),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
-
       ),
       child: child,
     );
@@ -1518,8 +1642,11 @@ class _SliverTabsDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: Color(0xff050B1E).withOpacity(1), // background to match scaffold
+      color: isDark
+          ? const Color(0xFF0D1730).withOpacity(0.84)
+          : Theme.of(context).scaffoldBackgroundColor.withOpacity(0.94),
       child: child,
     );
   }

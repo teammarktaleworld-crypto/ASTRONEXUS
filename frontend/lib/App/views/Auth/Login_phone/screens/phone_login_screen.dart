@@ -1,15 +1,14 @@
-import 'package:astro_tale/App/views/Auth/Sign_up/screens/astrology_signup_timeline_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl_mobile_field/intl_mobile_field.dart';
-import 'package:astro_tale/App/views/Auth/terms%20and%20condition/termsandconditions.dart';
+import "package:astro_tale/App/views/Auth/Sign_up/screens/astrology_signup_timeline_screen.dart";
+import "package:astro_tale/core/widgets/animated_app_background.dart";
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
+import "package:astro_tale/App/views/Auth/terms%20and%20condition/termsandconditions.dart";
 
-import '../../../../../ui_componets/cosmic/cosmic_one.dart';
-import '../../../../../ui_componets/glass/glass_card.dart';
-import '../../Login_email/screens/signin_screen.dart';
-import '../controller/phone_login_controller.dart';
-import '../helper/phone_login_helpers.dart';
-import '../widgets/phone_login_widgets.dart';
+import "../../../../../ui_componets/glass/glass_card.dart";
+import "../../Login_email/screens/signin_screen.dart";
+import "../controller/phone_login_controller.dart";
+import "../helper/phone_login_helpers.dart";
+import "../widgets/phone_login_widgets.dart";
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -24,21 +23,14 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          _background(),
-          const Positioned.fill(child: SmoothShootingStars()),
-          Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.45)),
-          ),
-          _content(),
-        ],
-      ),
-    );
+    return Scaffold(body: AnimatedAppBackground(child: _content()));
   }
 
   Widget _content() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -48,12 +40,13 @@ class _LoginState extends State<Login> {
             Text(
               "Discover the stars within you",
               style: GoogleFonts.dmSans(
-                color: Colors.white70,
+                color: isDark
+                    ? Colors.white70
+                    : colors.onSurface.withValues(alpha: 0.72),
                 fontSize: 15,
               ),
             ),
             const SizedBox(height: 24),
-
             glassCard(
               child: Column(
                 children: [
@@ -62,29 +55,23 @@ class _LoginState extends State<Login> {
                     style: GoogleFonts.dmSans(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: colors.onSurface,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     "OTP verification for secure login",
                     style: GoogleFonts.dmSans(
-                      color: Colors.white54,
+                      color: colors.onSurface.withValues(alpha: 0.62),
                       fontSize: 13,
                     ),
                   ),
                   const SizedBox(height: 28),
-
                   intlPhoneInput(
-                    initialCountryCode: 'IN',
+                    initialCountryCode: "IN",
                     onChanged: (value) => phoneNumber = value,
                   ),
-
-
-
-
                   const SizedBox(height: 16),
-
                   SendOtpButton(
                     loading: loading,
                     onTap: () => PhoneLoginController.sendOtp(
@@ -94,11 +81,9 @@ class _LoginState extends State<Login> {
                       onStop: () => setState(() => loading = false),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-                  orDivider(),
+                  orDivider(context),
                   const SizedBox(height: 16),
-
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -108,7 +93,10 @@ class _LoginState extends State<Login> {
                         MaterialPageRoute(builder: (_) => const SignIn()),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white, width: 1.5),
+                        side: BorderSide(
+                          color: colors.onSurface.withValues(alpha: 0.42),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -116,31 +104,34 @@ class _LoginState extends State<Login> {
                       child: Text(
                         "Login with Email",
                         style: GoogleFonts.dmSans(
-                          color: Colors.white,
+                          color: colors.onSurface,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Don’t have an account?",
-                          style:
-                          GoogleFonts.dmSans(color: Colors.white70)),
+                      Text(
+                        "Don’t have an account?",
+                        style: GoogleFonts.dmSans(
+                          color: colors.onSurface.withValues(alpha: 0.72),
+                        ),
+                      ),
                       TextButton(
                         onPressed: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => AstrologySignupTimeline()),
+                          MaterialPageRoute(
+                            builder: (_) => AstrologySignupTimeline(),
+                          ),
                         ),
                         child: Text(
                           "Sign up",
                           style: GoogleFonts.dmSans(
-                            color: const Color(0xFFDBC33F),
+                            color: colors.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -150,40 +141,18 @@ class _LoginState extends State<Login> {
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
-
             TextButton(
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (_) => const TermsAndConditions()),
+                MaterialPageRoute(builder: (_) => const TermsAndConditions()),
               ),
               child: Text(
                 "Terms And Conditions",
-                style: GoogleFonts.dmSans(
-                  color: const Color(0xFFDBC33F),
-                ),
+                style: GoogleFonts.dmSans(color: colors.primary),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _background() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xff050B1E),
-            // Color(0xff1C4D8D),
-            // Color(0xff0F2854),
-            Color(0xff393053),
-            Color(0xff050B1E),          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
         ),
       ),
     );

@@ -68,7 +68,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
       color: Color(0xff18122B),
       child: Column(
         children: [
-          SizedBox(height: 15,),
+          SizedBox(height: 15),
           SizedBox(
             height: 180,
             child: Stack(
@@ -80,8 +80,10 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   itemBuilder: (_, i) {
                     final banner = banners[i];
                     return Padding(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -108,10 +110,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                               fit: StackFit.expand,
                               children: [
                                 // Banner image
-                                Image.asset(
-                                  banner['image'],
-                                  fit: BoxFit.cover,
-                                ),
+                                Image.asset(banner['image'], fit: BoxFit.cover),
                                 // Gradient overlay
                                 Container(
                                   decoration: BoxDecoration(
@@ -163,7 +162,6 @@ class _BannerCarouselState extends State<BannerCarousel> {
                 ),
 
                 // Page indicators
-
               ],
             ),
           ),

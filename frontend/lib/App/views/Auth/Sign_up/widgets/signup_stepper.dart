@@ -16,21 +16,31 @@ class SignupStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: EasyStepper(
         activeStep: step,
         enableStepTapping: true,
-        activeStepBackgroundColor: const Color(0xFF4C5BD4), // gradient-like color
-        finishedStepBackgroundColor: const Color(0xFF7C9CFF),
+        activeStepBackgroundColor: colors.primary,
+        finishedStepBackgroundColor: colors.primary.withOpacity(0.76),
         finishedStepIconColor: Colors.white,
         activeStepIconColor: Colors.white,
-        unreachedStepIconColor: Colors.grey[400],
-        unreachedStepBackgroundColor: Colors.grey[700],
+        unreachedStepIconColor: isDark
+            ? Colors.grey[400]
+            : colors.onSurface.withOpacity(0.5),
+        unreachedStepBackgroundColor: isDark
+            ? Colors.grey[700]
+            : colors.surfaceContainerHighest.withOpacity(0.8),
         lineStyle: LineStyle(
-          activeLineColor: const Color(0xFF4C5BD4),
-          finishedLineColor: const Color(0xFF7C9CFF),
-          unreachedLineColor: Colors.grey[500]!,
+          activeLineColor: colors.primary,
+          finishedLineColor: colors.primary.withOpacity(0.76),
+          unreachedLineColor: isDark
+              ? Colors.grey[500]!
+              : colors.outline.withOpacity(0.5),
           lineThickness: 3,
           lineLength: 50,
         ),
@@ -38,7 +48,7 @@ class SignupStepper extends StatelessWidget {
         stepRadius: 28,
         onStepReached: onStepChanged,
         titleTextStyle: GoogleFonts.dmSans(
-          color: Colors.white70,
+          color: isDark ? Colors.white70 : colors.onSurface.withOpacity(0.75),
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),

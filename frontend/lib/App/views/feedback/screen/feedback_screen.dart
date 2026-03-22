@@ -94,10 +94,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
       return Center(
         child: Text(
           'No reviews yet',
-          style: GoogleFonts.poppins(
-            color: Colors.grey.shade600,
-            fontSize: 14,
-          ),
+          style: GoogleFonts.poppins(color: Colors.grey.shade600, fontSize: 14),
         ),
       );
     }
@@ -164,7 +161,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
                           RatingBarIndicator(
                             rating: rating,
                             itemBuilder: (_, __) =>
-                            const Icon(Icons.star, color: Colors.amber),
+                                const Icon(Icons.star, color: Colors.amber),
                             itemCount: 5,
                             itemSize: 16,
                           ),

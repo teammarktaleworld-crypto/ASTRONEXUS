@@ -10,11 +10,13 @@ class PhoneInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return TextField(
       controller: controller,
       keyboardType: TextInputType.phone,
-      style: GoogleFonts.poppins(color: Colors.black87),
-      decoration: authInput("Phone Number", Icons.phone),
+      style: GoogleFonts.poppins(color: isDark ? Colors.white : Colors.black87),
+      decoration: authInput(context, "Phone Number", Icons.phone),
     );
   }
 }

@@ -22,7 +22,6 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
   late AnimationController starController;
   FallingStarPainter? starPainter;
 
-
   final List<String> bannerImages = [
     "https://images.pexels.com/photos/2150/sky-stars-night-galaxy.jpg?auto=compress&cs=tinysrgb&w=1600",
     "https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=1600",
@@ -44,44 +43,44 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
       "rating": 5,
       "experience": "13 Years",
       "price": "₹75/min",
-      "languages": "English, Hindi +1 more",
+      "languages": "English, French +1 more",
       "skills": "Life Astrology, Planetary Aspects +2 more",
       "status": "Online",
       "image":
-      "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=200"
+          "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=200",
     },
     {
       "name": "Aiden Billowe",
       "rating": 4,
       "experience": "4 Years",
       "price": "₹45/min",
-      "languages": "English, Marathi +1 more",
+      "languages": "English, German +1 more",
       "skills": "Life Astrology, Planetary Aspects +2 more",
       "status": "Offline",
       "image":
-      "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200"
+          "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200",
     },
     {
       "name": "Priya Joshi",
       "rating": 5,
       "experience": "9 Years",
       "price": "₹90/min",
-      "languages": "English, Hindi",
+      "languages": "English, French",
       "skills": "Love Astrology, Career Guidance",
       "status": "Online",
       "image":
-      "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200"
+          "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200",
     },
     {
       "name": "Rahul Mehta",
       "rating": 4,
       "experience": "6 Years",
       "price": "₹60/min",
-      "languages": "English, Tamil",
+      "languages": "English, German",
       "skills": "Life Astrology, Numerology",
       "status": "Offline",
       "image":
-      "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=200"
+          "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=200",
     },
   ];
 
@@ -125,7 +124,6 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
       backgroundColor: const Color(0xff121212),
       body: Stack(
         children: [
-
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -135,7 +133,6 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                   // Color(0xff0F2854),
                   Color(0xff393053),
                   Color(0xff050B1E),
-
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -204,7 +201,7 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     bannerImages.length,
-                        (index) => AnimatedContainer(
+                    (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       height: 6,
@@ -233,25 +230,29 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                       return Container(
                         margin: const EdgeInsets.only(right: 12),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                         color: Colors.black12,
+                          color: Colors.black12,
                           borderRadius: BorderRadius.circular(18),
-                          border:
-                          Border.all(color: Colors.white, width: 1),
+                          border: Border.all(color: Colors.white, width: 1),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withValues(alpha: 0.4),
                               blurRadius: 6,
                               offset: const Offset(2, 4),
-                            )
+                            ),
                           ],
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(service["icon"],
-                                color: Colors.white, size: 28),
+                            Icon(
+                              service["icon"],
+                              color: Colors.white,
+                              size: 28,
+                            ),
                             const SizedBox(height: 6),
                             Text(
                               service["title"],
@@ -286,7 +287,7 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                           border: Border.all(color: Colors.white12, width: 1.5),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.35),
+                              color: Colors.black.withValues(alpha: 0.35),
                               blurRadius: 8,
                               offset: const Offset(2, 4),
                             ),
@@ -308,8 +309,11 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                                         height: 70,
                                         width: 70,
                                         color: Colors.grey.shade800,
-                                        child: const Icon(Icons.person,
-                                            size: 30, color: Colors.grey),
+                                        child: const Icon(
+                                          Icons.person,
+                                          size: 30,
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                 ),
                               ),
@@ -350,8 +354,11 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                                     const SizedBox(height: 4),
                                     Row(
                                       children: [
-                                        const Icon(LucideIcons.languages,
-                                            size: 15, color: Colors.grey),
+                                        const Icon(
+                                          LucideIcons.languages,
+                                          size: 15,
+                                          color: Colors.grey,
+                                        ),
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
@@ -368,21 +375,28 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                                     const SizedBox(height: 8),
                                     Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        _infoItem(LucideIcons.award,
-                                            astro["experience"]),
-                                        _infoItem(LucideIcons.indianRupee,
-                                            astro["price"]),
+                                        _infoItem(
+                                          LucideIcons.award,
+                                          astro["experience"],
+                                        ),
+                                        _infoItem(
+                                          LucideIcons.indianRupee,
+                                          astro["price"],
+                                        ),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 2),
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: isOnline
                                                 ? Colors.green
                                                 : Colors.redAccent,
-                                            borderRadius:
-                                            BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: Text(
                                             astro["status"],
@@ -397,7 +411,7 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                                     ),
                                   ],
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -419,12 +433,12 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(22),
           border: Border.all(color: Colors.white12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               blurRadius: 14,
               offset: const Offset(0, 6),
             ),
@@ -458,7 +472,7 @@ class _AstrologerListScreenState extends State<AstrologerListScreen>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.35),
+                          color: Colors.black.withValues(alpha: 0.35),
                           blurRadius: 8,
                           spreadRadius: 1,
                           offset: const Offset(0, 4),
@@ -503,11 +517,11 @@ class FallingStarPainter extends CustomPainter {
   final List<double> speeds;
 
   FallingStarPainter(
-      this.progress, {
-        required this.stars,
-        required this.sizes,
-        required this.speeds,
-      });
+    this.progress, {
+    required this.stars,
+    required this.sizes,
+    required this.speeds,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -531,7 +545,7 @@ class FallingStarPainter extends CustomPainter {
       progress,
       stars: List.generate(
         count,
-            (_) => Offset(
+        (_) => Offset(
           random.nextDouble() * size.width,
           random.nextDouble() * size.height,
         ),
@@ -541,4 +555,3 @@ class FallingStarPainter extends CustomPainter {
     );
   }
 }
-

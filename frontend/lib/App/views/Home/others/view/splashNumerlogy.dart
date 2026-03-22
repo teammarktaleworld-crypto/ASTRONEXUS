@@ -14,7 +14,6 @@ class SplashNumerology extends StatefulWidget {
 
 class _SplashNumerologyState extends State<SplashNumerology>
     with TickerProviderStateMixin {
-
   late AnimationController starController;
   FallingStarPainter? starPainter;
 
@@ -58,7 +57,6 @@ class _SplashNumerologyState extends State<SplashNumerology>
       backgroundColor: const Color(0xFF121212),
       body: Stack(
         children: [
-
           /// 🌌 FALLING STARS BACKGROUND
           AnimatedBuilder(
             animation: starController,
@@ -83,17 +81,17 @@ class _SplashNumerologyState extends State<SplashNumerology>
               children: [
                 // Icon with subtle glow
                 Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blueAccent.withOpacity(0.2),
-                  ),
-                  child: Icon(
-                    LucideIcons.hash,
-                    size: 80,
-                    color: Colors.blueAccent,
-                  ),
-                )
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.blueAccent.withOpacity(0.2),
+                      ),
+                      child: Icon(
+                        LucideIcons.hash,
+                        size: 80,
+                        color: Colors.blueAccent,
+                      ),
+                    )
                     .animate()
                     .scale(duration: 600.ms, curve: Curves.easeOutBack)
                     .fadeIn(duration: 500.ms),
@@ -102,14 +100,14 @@ class _SplashNumerologyState extends State<SplashNumerology>
 
                 // Title
                 Text(
-                  "NUMEROLOGY",
-                  style: GoogleFonts.dmSans(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
-                  ),
-                )
+                      "NUMEROLOGY",
+                      style: GoogleFonts.dmSans(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                    )
                     .animate(delay: 200.ms)
                     .slideY(begin: 0.4, end: 0, duration: 500.ms)
                     .fadeIn(),
@@ -123,9 +121,7 @@ class _SplashNumerologyState extends State<SplashNumerology>
                     fontSize: 16,
                     color: Colors.white54,
                   ),
-                )
-                    .animate(delay: 400.ms)
-                    .fadeIn(duration: 400.ms),
+                ).animate(delay: 400.ms).fadeIn(duration: 400.ms),
               ],
             ),
           ),
@@ -143,11 +139,11 @@ class FallingStarPainter extends CustomPainter {
   final List<double> speeds;
 
   FallingStarPainter(
-      this.progress, {
-        required this.stars,
-        required this.sizes,
-        required this.speeds,
-      });
+    this.progress, {
+    required this.stars,
+    required this.sizes,
+    required this.speeds,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -171,7 +167,7 @@ class FallingStarPainter extends CustomPainter {
       progress,
       stars: List.generate(
         count,
-            (_) => Offset(
+        (_) => Offset(
           random.nextDouble() * size.width,
           random.nextDouble() * size.height,
         ),

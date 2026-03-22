@@ -1,21 +1,21 @@
 // language: dart
 import 'dart:ui';
-import 'package:astro_tale/App/views/shop/checkout/address_selector.dart';
+import 'package:astro_tale/App/Model/cart_model.dart';
+import 'package:astro_tale/App/Model/product_model.dart';
+import 'package:astro_tale/App/controller/Auth_Controller.dart';
+import 'package:astro_tale/App/controller/feedback_conroller.dart';
+import 'package:astro_tale/App/views/feedback/screen/feedback_screen.dart';
+import 'package:astro_tale/App/views/shop/cart/cart_screen.dart';
+import 'package:astro_tale/App/views/wishlist/button/wishlist_button.dart';
+import 'package:astro_tale/core/widgets/unified_dark_ui.dart';
+import 'package:astro_tale/services/api_services/api_service.dart';
+import 'package:astro_tale/services/api_services/cart_api.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-import '../../../../services/api_services/ cart_api.dart';
-import '../../../../services/api_services/api_service.dart';
-import '../../../Model/cart_model.dart';
-import '../../../Model/product_model.dart';
-import '../../../controller/Auth_Controller.dart';
-import '../../../controller/feedback_conroller.dart';
-import '../../feedback/screen/feedback_screen.dart';
-import '../../wishlist/button/wishlist_button.dart';
-import '../cart/cart_screen.dart';
-import '../checkout/checkout_screen.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final String productId;
@@ -31,10 +31,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   final CartApi _cartApi = CartApi();
 
   // typed keys so we can call \`loadFeedbacks()\` safely
-  final GlobalKey<FeedbackScreenState> feedbackListKey = GlobalKey<FeedbackScreenState>();
-  final GlobalKey<FeedbackScreenState> feedbackSheetKey = GlobalKey<FeedbackScreenState>();
-  bool isWishlisted = false; // define at class level
-
+  final GlobalKey<FeedbackScreenState> feedbackListKey =
+      GlobalKey<FeedbackScreenState>();
+  final GlobalKey<FeedbackScreenState> feedbackSheetKey =
+      GlobalKey<FeedbackScreenState>();
 
   ProductModel? product;
   CartModel? cart;
@@ -57,7 +57,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           cart = fetchedCart;
           cartCount = fetchedCart.items.fold(
             0,
-                (sum, item) => sum + item.quantity,
+            (sum, item) => sum + item.quantity,
           );
         });
       }
@@ -69,8 +69,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   // ================= FETCH PRODUCT =================
   Future<void> _fetchProduct() async {
     try {
-      final fetchedProduct =
-      await _apiService.getProductById(widget.productId.trim());
+      final fetchedProduct = await _apiService.getProductById(
+        widget.productId.trim(),
+      );
 
       if (mounted) {
         setState(() {
@@ -101,16 +102,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       await _loadCart();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Added to cart")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Added to cart")));
       }
     } catch (e) {
       debugPrint("Add to cart failed: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to add to cart: $e")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Failed to add to cart: $e")));
       }
     }
   }
@@ -118,17 +119,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar:
-      loading || product == null ? const SizedBox() : _actionButtons(),
+    final theme = Theme.of(context);
 
-      backgroundColor: const Color(0xff050B1E),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text('AstroNexus', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
+    return Scaffold(
+      bottomNavigationBar: loading || product == null
+          ? const SizedBox()
+          : _actionButtons(),
+
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: UnifiedDarkUi.appBar(
+        context,
+        title: 'Product Details',
         actions: [
           Stack(
             children: [
@@ -151,8 +152,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       color: Colors.redAccent,
                       shape: BoxShape.circle,
                     ),
-                    constraints:
-                    const BoxConstraints(minWidth: 18, minHeight: 18),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
                     child: Text(
                       cartCount.toString(),
                       textAlign: TextAlign.center,
@@ -170,11 +173,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       ),
       body: loading
           ? Center(
-        child: LoadingAnimationWidget.fourRotatingDots(
-          color: Colors.white,
-          size: 50,
-        ),
-      )
+              child: LoadingAnimationWidget.fourRotatingDots(
+                color: Colors.white,
+                size: 50,
+              ),
+            )
           : product == null
           ? _error()
           : _content(),
@@ -201,43 +204,84 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Customer Reviews",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: _openReviewBottomSheet,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white24, width: 1.2),
+                      Builder(
+                        builder: (context) {
+                          final theme = Theme.of(context);
+                          final isDark = theme.brightness == Brightness.dark;
+
+                          final titleColor = isDark
+                              ? Colors.white.withOpacity(0.95)
+                              : AppColors.lightTextPrimary;
+
+                          final buttonBg = isDark
+                              ? Colors.white.withOpacity(0.10)
+                              : AppColors.lightTextPrimary.withOpacity(0.08);
+
+                          final buttonBorder = isDark
+                              ? Colors.white24
+                              : AppColors.lightTextPrimary.withOpacity(0.25);
+
+                          final iconColor = isDark
+                              ? Colors.white
+                              : AppColors.lightTextPrimary;
+
+                          final dividerColor = isDark
+                              ? Colors.white.withOpacity(0.15)
+                              : AppColors.lightTextPrimary.withOpacity(0.25);
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Customer Reviews",
+                                    style: GoogleFonts.poppins(
+                                      color: titleColor,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: _openReviewBottomSheet,
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: buttonBg,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: buttonBorder,
+                                          width: 1.2,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.edit,
+                                        color: iconColor,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              child: Icon(Icons.edit, color: Colors.white, size: 16)
-                            ),
-                          )
-                        ],
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 2,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: dividerColor,
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          );
+                        },
                       ),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 2,
-                        width: double.infinity, // makes the divider short and elegant
-                        decoration: BoxDecoration(
-                          color: Colors.white, // accent color for visibility
-                          borderRadius: BorderRadius.circular(1), // subtle rounding
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                     ],
                   ),
                 ),
@@ -258,19 +302,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _background() => Container(
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          Color(0xff393053),
-          Color(0xff393053),
-          Color(0xff050B1E),
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ),
-    ),
-  );
+  Widget _background() =>
+      Container(decoration: UnifiedDarkUi.screenBackground(Theme.of(context)));
 
   Widget _imageSlider() {
     final images = product!.images.isNotEmpty
@@ -281,9 +314,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     int activeIndex = 0;
 
     return Container(
-
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white24, width: 1.2),
         boxShadow: [
@@ -327,7 +359,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           child: Transform.scale(
                             scale: value,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Container(
@@ -342,7 +376,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     ],
                                   ),
                                   child: AspectRatio(
-                                    aspectRatio: 4 / 3, // better image proportion
+                                    aspectRatio:
+                                        4 / 3, // better image proportion
                                     child: Image.network(
                                       images[i],
                                       fit: BoxFit.cover,
@@ -353,15 +388,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                           size: 60,
                                         ),
                                       ),
-                                      loadingBuilder:
-                                          (context, child, progress) {
+                                      loadingBuilder: (context, child, progress) {
                                         if (progress == null) return child;
                                         return Center(
                                           child: CircularProgressIndicator(
-                                            value: progress.expectedTotalBytes !=
-                                                null
+                                            value:
+                                                progress.expectedTotalBytes !=
+                                                    null
                                                 ? progress.cumulativeBytesLoaded /
-                                                progress.expectedTotalBytes!
+                                                      progress
+                                                          .expectedTotalBytes!
                                                 : null,
                                           ),
                                         );
@@ -394,8 +430,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     decoration: BoxDecoration(
                       color: isActive ? Colors.white : Colors.white24,
                       borderRadius: BorderRadius.circular(4),
-
-
                     ),
                   );
                 }),
@@ -408,89 +442,68 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   Widget _infoCard() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // stronger blur for frosted effect
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withOpacity(0.08),
-                Colors.white.withOpacity(0.04),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 20,
-                spreadRadius: 1,
-                offset: const Offset(0, 10),
-              ),
-              BoxShadow(
-                color: Colors.white12,
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Product Name
-              Text(
-                product!.name,
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
+    final theme = Theme.of(context);
 
-              // Divider
-              Container(
-                height: 1,
-                color: Colors.white30,
-              ),
-              const SizedBox(height: 12),
-
-              // Description
-              Text(
-                product!.description ?? "No description available",
-                style: GoogleFonts.poppins(
-                  color: Colors.white70,
-                  fontSize: 15,
-                  height: 1.6,
-                ),
-                maxLines: 5,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 16),
-
-              // Price
-              Text(
-                "₹${product!.price}",
-                style: GoogleFonts.poppins(
-                  color: Colors.amberAccent,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Badges or Tags
-              _badges(), // keep your existing badge widget
-            ],
-          ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            UnifiedDarkUi.cardSurface(theme),
+            UnifiedDarkUi.cardSurfaceAlt(theme),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: UnifiedDarkUi.cardBorder(theme)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 20,
+            spreadRadius: 1,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            product!.name,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(height: 1, color: Colors.white30),
+          const SizedBox(height: 12),
+          Text(
+            product!.description ?? "No description available",
+            style: GoogleFonts.poppins(
+              color: Colors.white70,
+              fontSize: 15,
+              height: 1.6,
+            ),
+            maxLines: 5,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Rs ${product!.price}",
+            style: GoogleFonts.poppins(
+              color: Colors.amberAccent,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _badges(),
+        ],
       ),
     );
   }
@@ -515,10 +528,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: chipColor.withOpacity(0.15), // subtle white/colored background
+        color: chipColor.withValues(
+          alpha: 0.15,
+        ), // subtle white/colored background
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: chipColor.withOpacity(0.3), // soft border
+          color: chipColor.withValues(alpha: 0.3), // soft border
           width: 1.2,
         ),
         boxShadow: [
@@ -540,14 +555,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _chip(String label, {Color color = Colors.black87}) {
-    return Chip(
-      backgroundColor: color.withOpacity(.2),
-      label:
-      Text(label, style: GoogleFonts.poppins(color: color, fontSize: 12)),
-    );
-  }
-
   Widget _actionButtons() {
     final disabled = product!.stock <= 0;
     bool addedToCart = false; // track if item is added
@@ -555,7 +562,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
+        color: Colors.white.withValues(alpha: 0.06),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
@@ -572,10 +579,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Wishlist Button
-          WishlistButton(
-            productId: product?.id ?? "",
-          ),
-          SizedBox(width: 10,),
+          WishlistButton(productId: product?.id ?? ""),
+          SizedBox(width: 10),
           // Add to Cart / Add Another Button
           Expanded(
             child: StatefulBuilder(
@@ -584,10 +589,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   onTap: disabled
                       ? null
                       : () async {
-                    await _addToCart();
+                          await _addToCart();
 
-                    setInnerState(() => addedToCart = true);
-                  },
+                          setInnerState(() => addedToCart = true);
+                        },
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
                     width: 160,
@@ -643,10 +648,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   bottom: MediaQuery.of(context).viewInsets.bottom + 20,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xff050B1E).withOpacity(0.4),
-                  borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(28)),
-                  border: Border.all(color: Colors.white.withOpacity(0.12)),
+                  color: const Color(0xff050B1E).withValues(alpha: 0.4),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
+                  ),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -686,10 +694,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         itemSize: 36,
                         glow: false,
                         unratedColor: Colors.white24,
-                        itemBuilder: (_, __) => const Icon(
-                          Icons.star_rounded,
-                          color: Colors.amber,
-                        ),
+                        itemBuilder: (_, __) =>
+                            const Icon(Icons.star_rounded, color: Colors.amber),
                         onRatingUpdate: (rating) {
                           setModalState(() => userRating = rating);
                         },
@@ -708,10 +714,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                       decoration: InputDecoration(
                         hintText: "Share your experience…",
-                        hintStyle:
-                        GoogleFonts.dmSans(color: Colors.white54),
+                        hintStyle: GoogleFonts.dmSans(color: Colors.white54),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.08),
+                        fillColor: Colors.white.withValues(alpha: 0.08),
                         contentPadding: const EdgeInsets.all(14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -725,92 +730,90 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     /// Submit Button / Loader
                     submitting
                         ? Center(
-                      child: LoadingAnimationWidget
-                          .fourRotatingDots(
-                        color: Colors.white,
-                        size: 36,
-                      ),
-                    )
+                            child: LoadingAnimationWidget.fourRotatingDots(
+                              color: Colors.white,
+                              size: 36,
+                            ),
+                          )
                         : SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (userRating == 0 ||
-                              reviewController.text
-                                  .trim()
-                                  .isEmpty) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    "Please add rating and review"),
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (userRating == 0 ||
+                                    reviewController.text.trim().isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Please add rating and review",
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                setModalState(() => submitting = true);
+
+                                try {
+                                  await FeedbackController().addFeedback(
+                                    productId: product!.id,
+                                    rating: userRating,
+                                    review: reviewController.text.trim(),
+                                  );
+                                  if (!context.mounted) return;
+
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.pop(context);
+                                  }
+
+                                  feedbackListKey.currentState?.loadFeedbacks();
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Review submitted successfully",
+                                      ),
+                                    ),
+                                  );
+
+                                  _openReviewsListSheet();
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Submission failed: $e"),
+                                      ),
+                                    );
+
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    setModalState(() => submitting = false);
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.amberAccent,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
-                            );
-                            return;
-                          }
-
-                          setModalState(() => submitting = true);
-
-                          try {
-                            await FeedbackController().addFeedback(
-                              productId: product!.id,
-                              rating: userRating,
-                              review: reviewController.text.trim(),
-                            );
-
-                            if (Navigator.canPop(context)) {
-                              Navigator.pop(context);
-                            }
-
-                            feedbackListKey.currentState
-                                ?.loadFeedbacks();
-
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    "Review submitted successfully"),
+                              child: Text(
+                                "Submit Review",
+                                style: GoogleFonts.dmSans(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
                               ),
-                            );
-
-                            _openReviewsListSheet();
-                          } catch (e) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                              SnackBar(
-                                content:
-                                Text("Submission failed: $e"),
-                              ),
-                            );
-
-                            Navigator.pop(context);
-                          } finally {
-                            if (mounted) {
-                              setModalState(
-                                      () => submitting = false);
-                            }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amberAccent,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(14),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          "Submit Review",
-                          style: GoogleFonts.dmSans(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -838,10 +841,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               bottom: MediaQuery.of(context).viewInsets.bottom + 16,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
-              borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(30)),
-              border: Border.all(color: Colors.white.withOpacity(0.15)),
+              color: Colors.white.withValues(alpha: 0.06),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(30),
+              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             ),
             child: SizedBox(
               height: MediaQuery.of(context).size.height * 0.78,
@@ -856,11 +860,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  Text("Reviews",
-                      style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600)),
+                  Text(
+                    "Reviews",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   Expanded(
                     child: FeedbackScreen(
@@ -877,6 +884,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _error() =>
-      Center(child: Text("Product not found", style: GoogleFonts.poppins(color: Colors.white60)));
+  Widget _error() => Center(
+    child: Text(
+      "Product not found",
+      style: GoogleFonts.poppins(color: Colors.white60),
+    ),
+  );
 }

@@ -1,15 +1,17 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:astro_tale/services/api_services/refresh_token.dart';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
+import "dart:async";
+import "dart:convert";
 
-import '../../../../../helper/Astrology_flow_helper.dart';
-import '../../../../Model/Horoscope/horoscope_model.dart';
-import '../../../../controller/Auth_Controller.dart';
-import '../../../dash/DashboardScreen.dart';
-import '../helper/login_api.dart';
+import "package:astro_tale/App/Model/Horoscope/horoscope_model.dart";
+import "package:astro_tale/App/views/dash/DashboardScreen.dart";
+import "package:astro_tale/helper/Astrology_flow_helper.dart";
+import "package:astro_tale/helper/chart_cache_helper.dart";
+import "package:astro_tale/services/api_services/chatbot/profile_services.dart";
+import "package:flutter/material.dart";
+import "package:jwt_decoder/jwt_decoder.dart";
+import "package:shared_preferences/shared_preferences.dart";
+
+import "../../../../controller/Auth_Controller.dart";
+import "../helper/login_api.dart";
 
 class LoginController extends ChangeNotifier {
   bool isLoading = false;
@@ -36,12 +38,11 @@ class LoginController extends ChangeNotifier {
     });
   }
 
-  /// ---------------- LOGIN FUNCTION ----------------
   Future<void> login(
-      BuildContext context,
-      String phone,
-      String password,
-      ) async {
+    BuildContext context,
+    String phone,
+    String password,
+  ) async {
     if (isLocked) {
       errorMessage = "Too many attempts. Try again in $secondsLeft sec";
       notifyListeners();
@@ -69,92 +70,81 @@ class LoginController extends ChangeNotifier {
       }
 
       final prefs = await SharedPreferences.getInstance();
-      final token = response["token"];
-      final refreshToken = response["refreshToken"] ?? "";
-      final user = response["user"] ?? {};
+      final token = response["token"]?.toString() ?? "";
+      final refreshToken = response["refreshToken"]?.toString() ?? "";
+      final user = _asMap(response["user"]);
+      final userId = (user["id"] ?? user["_id"] ?? "").toString();
 
-      /// ================= SAVE BASIC USER DATA =================
       await prefs.setString("auth_token", token);
       await prefs.setString("refresh_token", refreshToken);
-      await prefs.setString("userName", user["name"] ?? "");
-      await prefs.setString("userEmail", user["email"] ?? "");
-      await prefs.setString("userPhone", user["phone"] ?? "");
-      await prefs.setString("userId", user["id"] ?? "");
-      await prefs.setString("role", user["role"] ?? "");
+      await prefs.setString("userName", user["name"]?.toString() ?? "");
+      await prefs.setString("userEmail", user["email"]?.toString() ?? "");
+      await prefs.setString("userPhone", user["phone"]?.toString() ?? "");
+      await prefs.setString("userId", userId);
+      await prefs.setString("role", user["role"]?.toString() ?? "");
+      await prefs.setString(
+        "userAvatar",
+        _resolveAvatar(user["profileImage"]) ?? "",
+      );
       await prefs.setBool("isLoggedIn", true);
-
-      /// ⭐ SAVE SESSION ID (IMPORTANT FOR CHATBOT)
-      await prefs.setString("sessionId", user["sessionId"] ?? "");
+      await prefs.setString("sessionId", user["sessionId"]?.toString() ?? "");
 
       AuthController.token = token;
-      AuthController.userId = user["id"] ?? "";
-      AuthController.role = user["role"] ?? "";
+      AuthController.userId = userId;
+      AuthController.role = user["role"]?.toString() ?? "";
 
-      /// ================= TOKEN REFRESH CHECK =================
       if (JwtDecoder.isExpired(token)) {
-        if (refreshToken.isNotEmpty) {
-          final newToken = await APIService.refreshToken(refreshToken);
-          if (newToken != null) {
-            await prefs.setString("auth_token", newToken);
-            AuthController.token = newToken;
-          } else {
-            throw Exception("Session expired. Please login again.");
-          }
-        } else {
-          throw Exception("Session expired. Please login again.");
-        }
+        throw Exception("Session expired. Please login again.");
       }
 
-      /// ================= ASTROLOGY PROFILE =================
-      final profile = user["astrologyProfile"];
-      if (profile == null || profile["dateOfBirth"] == null) {
-        throw Exception("Birth details missing in profile");
+      await _cacheChartFromPayload(user);
+
+      final profile = _asMap(user["astrologyProfile"]);
+      final dobString = profile["dateOfBirth"]?.toString();
+      final timeString = profile["timeOfBirth"]?.toString() ?? "00:00";
+      final place = profile["placeOfBirth"]?.toString() ?? "Unknown";
+      final gender = user["gender"]?.toString() ?? "male";
+
+      if (dobString != null && dobString.isNotEmpty) {
+        await prefs.setString("dob", dobString);
       }
-
-      final dob = DateTime.parse(profile["dateOfBirth"]);
-      final timeString = profile["timeOfBirth"] ?? "00:00";
-      final place = profile["placeOfBirth"] ?? "Unknown";
-      final gender = user["gender"] ?? "male";
-
-      /// Save raw data for chatbot birth_input
-      await prefs.setString("dob", profile["dateOfBirth"]);
       await prefs.setString("tob", timeString);
       await prefs.setString("pob", place);
 
-      /// Convert time "HH:mm" → hour/minute/isAM
-      final parts = timeString.split(":");
-      int hour24 = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-
-      bool isAM = hour24 < 12;
-      int hour12 = hour24 % 12 == 0 ? 12 : hour24 % 12;
-
-      /// ================= DASHBOARD ASTRO DATA =================
-      final astroData = await AstrologyFlowHelper.prepareDashboardData(
-        dob: dob,
-        name: user["name"] ?? "User",
+      final zodiacFromUser = AstrologyFlowHelper.resolveZodiacFromUser(user);
+      final astroData = await _loadAstroData(
+        user: user,
+        zodiacFromUser: zodiacFromUser,
+        dobString: dobString,
+        timeString: timeString,
+        place: place,
         gender: gender,
-        placeOfBirth: place,
-        hour: hour12,
-        minute: minute,
-        isAM: isAM,
       );
 
-      final dailyData = HoroscopeData.fromJson(astroData['daily']);
-      final weeklyData = HoroscopeData.fromJson(astroData['weekly']);
-      final monthlyData = HoroscopeData.fromJson(astroData['monthly']);
+      final dailyData = HoroscopeData.fromJson(_asMap(astroData["daily"]));
+      final weeklyData = HoroscopeData.fromJson(_asMap(astroData["weekly"]));
+      final monthlyData = HoroscopeData.fromJson(_asMap(astroData["monthly"]));
 
-      await prefs.setString("zodiacSign", astroData['zodiac'] ?? '');
+      await prefs.setString(
+        "zodiacSign",
+        astroData["zodiac"]?.toString() ?? "",
+      );
       await prefs.setString("daily", jsonEncode(dailyData.toJson()));
       await prefs.setString("weekly", jsonEncode(weeklyData.toJson()));
       await prefs.setString("monthly", jsonEncode(monthlyData.toJson()));
+
+      try {
+        await ProfileService.fetchMyProfile();
+      } catch (_) {
+        // Keep login successful even if profile sync fails temporarily.
+      }
 
       if (context.mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => DashboardScreen(
-              zodiacSign: astroData['zodiac'] ?? '',
+              zodiacSign: astroData["zodiac"]?.toString() ?? "",
               daily: dailyData,
               weekly: weeklyData,
               monthly: monthlyData,
@@ -162,36 +152,130 @@ class LoginController extends ChangeNotifier {
           ),
         );
       }
-    }
-
-    on TimeoutException {
+    } on TimeoutException {
       _startTimer();
       errorMessage = "Server timeout. Try again in 30 seconds.";
       notifyListeners();
-    }
-
-    on Exception catch (e) {
+    } on Exception catch (e) {
       _startTimer();
       errorMessage = e.toString().replaceAll("Exception: ", "");
       notifyListeners();
-    }
-
-    catch (_) {
+    } catch (_) {
       _startTimer();
       errorMessage = "Login failed. Try again later.";
       notifyListeners();
-    }
-
-    finally {
+    } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
+  Future<Map<String, dynamic>> _loadAstroData({
+    required Map<String, dynamic> user,
+    required String zodiacFromUser,
+    required String? dobString,
+    required String timeString,
+    required String place,
+    required String gender,
+  }) async {
+    if (zodiacFromUser.isNotEmpty) {
+      final bundle = await AstrologyFlowHelper.fetchHoroscopeBundle(
+        zodiacFromUser,
+      );
+      return <String, dynamic>{
+        "zodiac": zodiacFromUser,
+        "daily": bundle["daily"],
+        "weekly": bundle["weekly"],
+        "monthly": bundle["monthly"],
+      };
+    }
+
+    if (dobString == null || dobString.isEmpty) {
+      throw Exception("Birth details missing in profile");
+    }
+
+    final dob = DateTime.parse(dobString);
+    final parts = timeString.split(":");
+    final hour24 =
+        int.tryParse(parts.first.replaceAll(RegExp(r"[^0-9]"), "")) ?? 0;
+    final minute = parts.length > 1
+        ? int.tryParse(parts[1].replaceAll(RegExp(r"[^0-9]"), "")) ?? 0
+        : 0;
+    final isAM = hour24 < 12;
+    final hour12 = hour24 % 12 == 0 ? 12 : hour24 % 12;
+
+    return AstrologyFlowHelper.prepareDashboardData(
+      dob: dob,
+      name: user["name"]?.toString() ?? "User",
+      gender: gender,
+      placeOfBirth: place,
+      hour: hour12,
+      minute: minute,
+      isAM: isAM,
+    );
+  }
+
+  Future<void> _cacheChartFromPayload(Map<String, dynamic> user) async {
+    final charts = user["charts"] as List<dynamic>? ?? const <dynamic>[];
+    if (charts.isEmpty) {
+      return;
+    }
+
+    final parsed = charts
+        .map(_asMap)
+        .where((chart) => chart.isNotEmpty)
+        .toList(growable: false);
+    if (parsed.isEmpty) {
+      return;
+    }
+
+    parsed.sort((a, b) {
+      final left =
+          DateTime.tryParse(a["createdAt"]?.toString() ?? "") ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final right =
+          DateTime.tryParse(b["createdAt"]?.toString() ?? "") ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      return right.compareTo(left);
+    });
+
+    final latest = parsed.first;
+    await ChartCacheHelper.cacheChart(
+      chartData: _asMap(latest["chartData"]),
+      chartImage:
+          latest["chartImage"]?.toString() ??
+          latest["chartImageUrl"]?.toString(),
+      allCharts: charts,
+      fallbackRashi: latest["rashi"]?.toString(),
+    );
+  }
 
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  String? _resolveAvatar(dynamic profileImage) {
+    if (profileImage is! Map<String, dynamic>) {
+      return null;
+    }
+    if (profileImage["url"] != null) {
+      return profileImage["url"].toString();
+    }
+    if (profileImage["publicId"] != null) {
+      return "https://res.cloudinary.com/dgad4eoty/image/upload/${profileImage["publicId"]}";
+    }
+    return null;
+  }
+
+  Map<String, dynamic> _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return value.map((key, mapValue) => MapEntry(key.toString(), mapValue));
+    }
+    return <String, dynamic>{};
   }
 }

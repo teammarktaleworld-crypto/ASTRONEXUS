@@ -1,8 +1,7 @@
+import 'package:astro_tale/App/views/Tarot/result/Tarot_result.dart';
+import 'package:astro_tale/core/widgets/animated_app_background.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:astro_tale/App/views/Tarot/result/Tarot_result.dart';
-import '../../../../ui_componets/cosmic/cosmic_one.dart';
-import '../../../../ui_componets/glass/glass_card.dart';
 
 class TarotScreen extends StatefulWidget {
   const TarotScreen({super.key});
@@ -17,14 +16,28 @@ class _TarotScreenState extends State<TarotScreen> {
 
   bool isLoading = false;
 
-  void _generateTarot() {
+  @override
+  void initState() {
+    super.initState();
+    countController.text = '3';
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    countController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _generateTarot() async {
     final name = nameController.text.trim();
-    final count = int.tryParse(countController.text);
+    final countRaw = countController.text.trim();
+    final count = int.tryParse(countRaw.isEmpty ? '3' : countRaw);
 
     if (name.isEmpty || count == null || count < 1 || count > 78) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Enter your name & choose 1–78 cards 🔮"),
+          content: Text('Enter your name and choose 1-78 cards'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -33,176 +46,177 @@ class _TarotScreenState extends State<TarotScreen> {
 
     setState(() => isLoading = true);
 
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() => isLoading = false);
-
-      Navigator.push(
+    try {
+      await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => TarotResult(
-            name: name,
-            spread: "Custom",
-            cardCount: count,
-          ),
+          builder: (_) =>
+              TarotResult(name: name, spread: 'Custom', cardCount: count),
         ),
       );
-    });
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBackground = isDark
+        ? const Color(0xFF141829).withValues(alpha: 0.92)
+        : Colors.white.withValues(alpha: 0.92);
+    final cardBorder = isDark
+        ? const Color(0xFFDBC33F).withValues(alpha: 0.35)
+        : const Color(0xFFD7E4F8);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subtitleColor = isDark ? Colors.white70 : const Color(0xFF64748B);
+    final buttonColor = isDark
+        ? const Color(0xFF1C2A5A)
+        : const Color(0xFF2563EB);
+    final buttonBorderColor = isDark
+        ? const Color(0xFFDBC33F)
+        : const Color(0xFF7FB1FF);
 
     return Scaffold(
       appBar: _tarotTopBar(context),
-      body: Stack(
-        children: [
-          /// 🌌 Background Gradient
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff050B1E),
-                  Color(0xff393053),
-                  Color(0xff050B1E),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-
-          /// 🌠 Shooting Stars
-          Positioned.fill(child: SmoothShootingStars()),
-
-          /// 🌑 Dark Overlay
-          Positioned.fill(
-              child: Container(color: Colors.black.withOpacity(0.45))),
-
-          SafeArea(
-            child: Column(
-               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                /// ✨ Custom Glass App Bar
-                Padding(
-                  padding: EdgeInsets.fromLTRB(12, topPadding + 8, 12, 20),
-                  child: Row(
+      body: AnimatedAppBackground(
+        showStarsInDark: true,
+        showStarsInLight: true,
+        child: Stack(
+          children: [
+            if (!isDark) Positioned.fill(child: _lightTarotAura()),
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 28),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: cardBackground,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: cardBorder, width: 1.3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.5)
+                            : const Color(0xFF9AADD0).withValues(alpha: 0.22),
+                        blurRadius: 20,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Column(
                     children: [
-                      /// 🔙 Back Button
-
-
-                      /// 🪄 Center Title (Perfectly Centered)
-
-
-                      /// ✨ Right Spacer (balances the back button)
-                      const SizedBox(width: 40),
+                      Text(
+                        'Let the Cards Speak',
+                        style: GoogleFonts.dmSans(
+                          color: titleColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Enter your name and choose how many cards to reveal.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.dmSans(
+                          color: subtitleColor,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _inputField(
+                        label: 'Your Name',
+                        icon: Icons.person_outline,
+                        controller: nameController,
+                      ),
+                      const SizedBox(height: 16),
+                      _inputField(
+                        label: 'Number of Cards (1-78)',
+                        icon: Icons.auto_awesome,
+                        controller: countController,
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 28),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _generateTarot,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: buttonColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(
+                                color: buttonBorderColor,
+                                width: 1.4,
+                              ),
+                            ),
+                            elevation: 8,
+                            shadowColor: Colors.black.withValues(alpha: 0.34),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'Reveal My Cards',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-
-                /// 📜 Scrollable Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        /// 🔮 Glass Card
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                                color: const Color(0xFFDBC33F), width: 1.5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.7),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: glassCard(
-                            child: Column(
-                              children: [
-                                Text(
-                                  "Let the Cards Speak",
-                                  style: GoogleFonts.dmSans(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  "Enter your name and how many cards\nthe universe should reveal ✨",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.dmSans(
-                                    color: Colors.white70,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                const SizedBox(height: 25),
-
-                                _glassInputField(
-                                  label: "Your Name",
-                                  icon: Icons.person_outline,
-                                  controller: nameController,
-                                ),
-                                const SizedBox(height: 16),
-
-                                _glassInputField(
-                                  label: "Number of Cards (1–78)",
-                                  icon: Icons.auto_awesome,
-                                  controller: countController,
-                                  keyboardType: TextInputType.number,
-                                ),
-                                const SizedBox(height: 30),
-
-                                /// ✨ Reveal Button
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 52,
-                                  child: ElevatedButton(
-                                    onPressed:
-                                    isLoading ? null : _generateTarot,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                      const Color(0xFF1C2A5A),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.circular(16),
-                                        side: const BorderSide(
-                                            color: Color(0xFFDBC33F),
-                                            width: 1.6),
-                                      ),
-                                      elevation: 8,
-                                      shadowColor:
-                                      Colors.black.withOpacity(0.6),
-                                    ),
-                                    child: isLoading
-                                        ? const CircularProgressIndicator(
-                                        color: Colors.white)
-                                        : Text(
-                                      "Reveal My Cards",
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 40),
-                      ],
-                    ),
-                  ),
+  Widget _lightTarotAura() {
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          Positioned(
+            top: -30,
+            right: -20,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: <Color>[Color(0x66C4B5FD), Color(0x00C4B5FD)],
                 ),
-              ],
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            left: -30,
+            child: Container(
+              width: 190,
+              height: 190,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: <Color>[Color(0x66FDE68A), Color(0x00FDE68A)],
+                ),
+              ),
             ),
           ),
         ],
@@ -210,30 +224,40 @@ class _TarotScreenState extends State<TarotScreen> {
     );
   }
 
-  /// 🔒 Glass Input Field
-  Widget _glassInputField({
+  Widget _inputField({
     required String label,
     required IconData icon,
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fillColor = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : Colors.white.withValues(alpha: 0.97);
+    final borderColor = isDark ? Colors.white24 : const Color(0xFFD7E3F7);
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final hintColor = isDark ? Colors.white54 : const Color(0xFF64748B);
+    final iconColor = isDark ? const Color(0xFFDBC33F) : const Color(0xFF2563EB);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: fillColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: borderColor),
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        style: GoogleFonts.dmSans(color: Colors.white, fontSize: 14),
+        style: GoogleFonts.dmSans(color: textColor, fontSize: 14),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color(0xFFDBC33F)),
+          prefixIcon: Icon(icon, color: iconColor),
           hintText: label,
-          hintStyle: GoogleFonts.dmSans(color: Colors.white54),
+          hintStyle: GoogleFonts.dmSans(color: hintColor),
           border: InputBorder.none,
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 14,
+          ),
         ),
       ),
     );
@@ -241,33 +265,34 @@ class _TarotScreenState extends State<TarotScreen> {
 }
 
 PreferredSizeWidget _tarotTopBar(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   return AppBar(
-    backgroundColor: const Color(0xff050B1E),
+    backgroundColor: isDark
+        ? const Color(0xff050B1E)
+        : Colors.white.withValues(alpha: 0.94),
     elevation: 0,
     centerTitle: true,
     leading: Padding(
       padding: const EdgeInsets.only(left: 12),
       child: GestureDetector(
         onTap: () => Navigator.pop(context),
-        child: Container(
+        child: SizedBox(
           height: 38,
           width: 38,
-          decoration: BoxDecoration(
-          ),
-          child: const Icon(
+          child: Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 18,
-            color: Colors.white,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
           ),
         ),
       ),
     ),
     title: Text(
-      "tarot Reading",
+      'Tarot Reading',
       style: GoogleFonts.dmSans(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: isDark ? Colors.white : const Color(0xFF0F172A),
       ),
     ),
   );

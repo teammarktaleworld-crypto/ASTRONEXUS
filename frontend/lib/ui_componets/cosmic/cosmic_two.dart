@@ -26,11 +26,7 @@ class StaticUniverseParticles extends StatelessWidget {
           ),
 
           /// ⭐ Static Stars / Particles
-          Positioned.fill(
-            child: CustomPaint(
-              painter: ParticlesPainter(),
-            ),
-          ),
+          Positioned.fill(child: CustomPaint(painter: ParticlesPainter())),
         ],
       ),
     );

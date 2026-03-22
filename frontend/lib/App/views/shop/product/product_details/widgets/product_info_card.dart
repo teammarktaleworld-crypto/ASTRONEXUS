@@ -23,14 +23,21 @@ class ProductInfoCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(product.name,
-                  style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700)),
-              Text("₹${product.price}",
-                  style: GoogleFonts.poppins(
-                      color: Colors.amberAccent, fontSize: 20)),
+              Text(
+                product.name,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                "₹${product.price}",
+                style: GoogleFonts.poppins(
+                  color: Colors.amberAccent,
+                  fontSize: 20,
+                ),
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -44,8 +51,10 @@ class ProductInfoCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              Text(product.description ?? '',
-                  style: GoogleFonts.poppins(color: Colors.white70)),
+              Text(
+                product.description ?? '',
+                style: GoogleFonts.poppins(color: Colors.white70),
+              ),
             ],
           ),
         ),

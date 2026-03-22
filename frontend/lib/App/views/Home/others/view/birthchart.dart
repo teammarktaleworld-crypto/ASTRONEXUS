@@ -1,13 +1,17 @@
 import 'dart:convert';
-import 'dart:ui';
+import 'package:astro_tale/App/views/Auth/sharedWidgets/place_suggestion_sheet.dart';
 import 'package:astro_tale/App/views/Home/others/output/birthchart/birthchart_result.dart';
-import 'package:astro_tale/services/API/APIservice.dart';
+import 'package:astro_tale/core/constants/api_constants.dart';
+import 'package:astro_tale/core/constants/app_colors.dart';
+import 'package:astro_tale/core/localization/app_localizations.dart';
+import 'package:astro_tale/core/theme/app_gradients.dart';
+import 'package:astro_tale/core/widgets/animated_app_background.dart';
+import 'package:astro_tale/helper/chart_cache_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../../../../../ui_componets/cosmic/cosmic_one.dart';
-import '../../../../../ui_componets/glass/glass_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BirthChartScreen extends StatefulWidget {
   const BirthChartScreen({super.key});
@@ -38,18 +42,22 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
       cancelText: "CANCEL",
       confirmText: "OK",
       builder: (context, child) {
+        final theme = Theme.of(context);
+        final colors = theme.colorScheme;
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFD4AF37), // Gold accent
-              onPrimary: Colors.black,
-              surface: Color(0xff1B1F3B), // Dialog background
-              onSurface: Colors.white,
+          data: theme.copyWith(
+            colorScheme: colors.copyWith(
+              primary: colors.primary,
+              onPrimary: colors.onPrimary,
+              surface: colors.surface,
+              onSurface: colors.onSurface,
             ),
-            dialogBackgroundColor: const Color(0xff141833),
+            dialogTheme: DialogThemeData(
+              backgroundColor: AppColors.lightContainer,
+            ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFD4AF37),
+                foregroundColor: colors.primary,
                 textStyle: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -61,10 +69,9 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
 
     if (picked != null) {
       dateController.text =
-      "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
-
 
   /// ================= TIME PICKER =================
   Future<void> _pickTime() async {
@@ -75,25 +82,27 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
       cancelText: "CANCEL",
       confirmText: "OK",
       builder: (context, child) {
+        final theme = Theme.of(context);
+        final colors = theme.colorScheme;
         return Theme(
-          data: Theme.of(context).copyWith(
-            timePickerTheme: const TimePickerThemeData(
-              backgroundColor: Color(0xff141833),
-              hourMinuteTextColor: Colors.white,
-              hourMinuteColor: Color(0xff1B1F3B),
-              dialHandColor: Color(0xFFD4AF37),
-              dialBackgroundColor: Color(0xff1B1F3B),
-              entryModeIconColor: Color(0xFFD4AF37),
+          data: theme.copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: AppColors.lightContainer,
+              hourMinuteTextColor: colors.onSurface,
+              hourMinuteColor: colors.surfaceContainerHighest,
+              dialHandColor: colors.primary,
+              dialBackgroundColor: colors.surfaceContainerHighest,
+              entryModeIconColor: colors.primary,
             ),
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFD4AF37), // Gold accent
-              onPrimary: Colors.black,
-              surface: Color(0xff141833),
-              onSurface: Colors.white,
+            colorScheme: colors.copyWith(
+              primary: colors.primary,
+              onPrimary: colors.onPrimary,
+              surface: colors.surface,
+              onSurface: colors.onSurface,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFD4AF37),
+                foregroundColor: colors.primary,
                 textStyle: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -110,6 +119,18 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
 
       timeController.text = "$hour:$minute $period";
     }
+  }
+
+  Future<void> _pickPlaceOfBirth() async {
+    final selected = await showPlaceSuggestionSheet(
+      context: context,
+      title: "Select Place of Birth",
+      initialValue: placeController.text,
+    );
+    if (selected == null || selected.trim().isEmpty) {
+      return;
+    }
+    placeController.text = selected;
   }
 
   /// ================= PARSE DATE & TIME =================
@@ -146,7 +167,7 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
 
     setState(() => isLoading = true);
 
-    final payload = {
+    final payload = <String, dynamic>{
       "name": nameController.text.trim(),
       "gender": gender,
       "birth_date": _parseBirthDate(),
@@ -157,189 +178,270 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
     };
 
     try {
-      /// 🔵 CALL API 1 → Astrology Data
-      final dataResponse = await http.post(
-        Uri.parse("https://astro-nexus-backend-9u1s.onrender.com/api/v1/chart"),
-        headers: {"Content-Type": "application/json"},
+      final response = await http.post(
+        Uri.parse(ApiConstants.birthChartGenerateApi),
+        headers: const <String, String>{"Content-Type": "application/json"},
         body: jsonEncode(payload),
       );
 
-      if (dataResponse.statusCode != 200 && dataResponse.statusCode != 201) {
-        throw Exception("Astro data failed: ${dataResponse.body}");
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception("Birth chart failed: ${response.body}");
       }
 
-      final astroData = jsonDecode(dataResponse.body);
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = body["data"] as Map<String, dynamic>? ?? <String, dynamic>{};
 
-      /// 🟣 CALL API 2 → Chart Image
-      final imageResponse = await http.post(
-        Uri.parse("https://astro-nexus-new-6-46mo.onrender.com/api/birthchart/generate"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(payload),
+      final chartImagePath = data["chartImage"]?.toString() ?? "";
+      final chartImageCandidates = ChartCacheHelper.resolveChartImageCandidates(
+        chartImagePath,
+      );
+      final chartImageUrl = chartImageCandidates.isEmpty
+          ? ""
+          : chartImageCandidates.first;
+
+      final chartData =
+          data["chartData"] as Map<String, dynamic>? ?? <String, dynamic>{};
+      if (chartImageUrl.isNotEmpty) {
+        chartData["chartImageUrl"] = chartImageUrl;
+        chartData["chartImageCandidates"] = chartImageCandidates;
+      }
+
+      await ChartCacheHelper.cacheChart(
+        chartData: chartData,
+        chartImage: chartImagePath,
+        fallbackRashi: data["rashi"]?.toString(),
       );
 
-      if (imageResponse.statusCode != 200 && imageResponse.statusCode != 201) {
-        throw Exception("Chart image failed: ${imageResponse.body}");
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("birthDate", dateController.text.trim());
+      await prefs.setString("birthTime", timeController.text.trim());
+      await prefs.setString("birthPlace", placeController.text.trim());
+      await prefs.setString("userName", nameController.text.trim());
+
+      if (!mounted) {
+        return;
       }
-
-      final imageJson = jsonDecode(imageResponse.body);
-
-      final chartImagePath = imageJson["data"]?["chartImage"];
-
-      /// 🟢 MERGE BOTH RESPONSES
-      astroData["chartImageUrl"] =
-      "$baseurl$chartImagePath";
 
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => BirthChartResult(chartData: astroData),
+          builder: (_) => BirthChartResult(chartData: chartData),
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _BirthchartTopBar(context),
-      body: Stack(
-        children: [
-          // Cosmic Gradient
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff050B1E),
-                  Color(0xff393053),
-                  Color(0xff050B1E),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          Positioned.fill(child: SmoothShootingStars()),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              child: Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                          color: const Color(0xFFDBC33F), width: 1.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.7),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                        BoxShadow(
-                          color: Colors.white.withOpacity(0.05),
-                          blurRadius: 30,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 0),
-                        ),
-                      ],
-                    ),
-                    child: glassCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 10),
-                            Center(
-                              child: RichText(
-                                text: TextSpan(
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 18,
-                                    color: Colors.white70,
-                                  ),
-                                  children: [
-                                    const TextSpan(text: "Generate Your "),
-                                    TextSpan(
-                                      text: "Birth Chart",
-                                      style: TextStyle(
-                                        color: Colors.amber,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const TextSpan(text: " Astrology"),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            _glassInput(
-                                "Full Name", Icons.person, nameController),
-                            _glassInput("Date of Birth", Icons.calendar_today,
-                                dateController,
-                                readOnly: true, onTap: _pickDate),
-                            _glassInput("Time of Birth", Icons.access_time,
-                                timeController,
-                                readOnly: true, onTap: _pickTime),
-                            _glassInput("Place of Birth", Icons.location_on,
-                                placeController),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _glassDropdown(
-                                      "Gender", gender, ["male", "female"],
-                                          (v) => setState(() => gender = v)),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _glassDropdown(
-                                      "Astrology", astrologyType,
-                                      ["vedic", "western"],
-                                          (v) =>
-                                          setState(() => astrologyType = v)),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 30),
-                            SizedBox(
-                              height: 54,
-                              child: ElevatedButton(
-                                onPressed: isLoading ? null : _generateChart,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amberAccent,
-                                  foregroundColor: Colors.black,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: isLoading
-                                    ? LoadingAnimationWidget.fourRotatingDots(
-                                  color: Colors.white,
-                                  size: 32,
-                                )
-                                    : Text(
-                                  "Generate Chart",
-                                  style: GoogleFonts.dmSans(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
-                          ],
+    return Scaffold(
+      appBar: _birthchartTopBar(context),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: AnimatedAppBackground(
+        showStarsInDark: true,
+        showStarsInLight: true,
+        child: Stack(
+          children: [
+            if (!isDark) Positioned.fill(child: _lightAuraOverlay()),
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
+                child: Column(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: isDark
+                              ? AppGradients.glassBorder(theme)
+                              : const Color(0xFFD6E3F6),
+                          width: 1.4,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.7)
+                                : const Color(
+                                    0xFF9AAECD,
+                                  ).withValues(alpha: 0.2),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppGradients.glassFill(
+                                  theme,
+                                ).withValues(alpha: 0.86)
+                              : Colors.white.withValues(alpha: 0.92),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 10),
+                              Center(
+                                child: RichText(
+                                  text: TextSpan(
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 18,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : const Color(0xFF64748B),
+                                    ),
+                                    children: [
+                                      const TextSpan(text: "Generate Your "),
+                                      TextSpan(
+                                        text: context.l10n.tr("birthChart"),
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? colors.primary
+                                              : const Color(0xFF2563EB),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const TextSpan(text: " Astrology"),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+                              _glassInput(
+                                "Full Name",
+                                Icons.person,
+                                nameController,
+                              ),
+                              _glassInput(
+                                "Date of Birth",
+                                Icons.calendar_today,
+                                dateController,
+                                readOnly: true,
+                                onTap: _pickDate,
+                              ),
+                              _glassInput(
+                                "Time of Birth",
+                                Icons.access_time,
+                                timeController,
+                                readOnly: true,
+                                onTap: _pickTime,
+                              ),
+                              _glassInput(
+                                "Place of Birth",
+                                Icons.location_on,
+                                placeController,
+                                readOnly: true,
+                                onTap: _pickPlaceOfBirth,
+                                showDropdownIndicator: true,
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _glassDropdown(
+                                      "Gender",
+                                      gender,
+                                      ["male", "female"],
+                                      (v) => setState(() => gender = v),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _glassDropdown(
+                                      "Astrology",
+                                      astrologyType,
+                                      ["vedic", "western"],
+                                      (v) => setState(() => astrologyType = v),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 30),
+                              SizedBox(
+                                height: 54,
+                                child: ElevatedButton(
+                                  onPressed: isLoading ? null : _generateChart,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: colors.primary,
+                                    foregroundColor: colors.onPrimary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: isLoading
+                                      ? LoadingAnimationWidget.fourRotatingDots(
+                                          color: colors.onPrimary,
+                                          size: 32,
+                                        )
+                                      : Text(
+                                          context.l10n.tr("generateChart"),
+                                          style: GoogleFonts.dmSans(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _lightAuraOverlay() {
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          Positioned(
+            top: -40,
+            right: -40,
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: <Color>[Color(0x66A5B4FC), Color(0x00A5B4FC)],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 60,
+            left: -40,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: <Color>[Color(0x66FDE68A), Color(0x00FDE68A)],
+                ),
               ),
             ),
           ),
@@ -349,9 +451,27 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
   }
 
   /// ================= GLASS INPUT =================
-  Widget _glassInput(String label, IconData icon,
-      TextEditingController controller,
-      {bool readOnly = false, VoidCallback? onTap}) {
+  Widget _glassInput(
+    String label,
+    IconData icon,
+    TextEditingController controller, {
+    bool readOnly = false,
+    VoidCallback? onTap,
+    bool showDropdownIndicator = false,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final fillColor = isDark
+        ? AppGradients.glassFill(theme)
+        : Colors.white.withValues(alpha: 0.97);
+    final borderColor = isDark
+        ? AppGradients.glassBorder(theme)
+        : const Color(0xFFD4E2F7);
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final hintColor = isDark ? Colors.white70 : const Color(0xFF64748B);
+    final iconBg = isDark ? Colors.white10 : const Color(0xFFEAF2FF);
+    final iconColor = isDark ? Colors.white : const Color(0xFF2563EB);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Center(
@@ -359,22 +479,40 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
           constraints: const BoxConstraints(maxWidth: 600, minWidth: 300),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: fillColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white24),
+              border: Border.all(color: borderColor),
             ),
             child: TextField(
               controller: controller,
               readOnly: readOnly,
               onTap: onTap,
-              style: GoogleFonts.dmSans(color: Colors.white),
+              style: GoogleFonts.dmSans(color: textColor),
               decoration: InputDecoration(
-                prefixIcon: Icon(icon, color: Colors.white),
+                prefixIconConstraints: const BoxConstraints(
+                  minHeight: 48,
+                  minWidth: 52,
+                ),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, color: iconColor, size: 18),
+                  ),
+                ),
                 hintText: label,
-                hintStyle: GoogleFonts.dmSans(color: Colors.white54),
+                hintStyle: GoogleFonts.dmSans(color: hintColor),
+                suffixIcon: showDropdownIndicator
+                    ? Icon(Icons.keyboard_arrow_down_rounded, color: hintColor)
+                    : null,
                 border: InputBorder.none,
-                contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
               ),
             ),
           ),
@@ -385,62 +523,100 @@ class _BirthChartScreenState extends State<BirthChartScreen> {
 
   /// ================= GLASS DROPDOWN =================
   Widget _glassDropdown(
-      String label, String value, List<String> items, ValueChanged<String> onChanged) =>
-      DropdownButtonFormField<String>(
-        value: value,
-        dropdownColor: const Color(0xff1C2A5A),
-        items: items
-            .map((e) => DropdownMenuItem(
-          value: e,
-          child: Text(e.toUpperCase(),
-              style: GoogleFonts.dmSans(color: Colors.white)),
-        ))
-            .toList(),
-        onChanged: (v) => onChanged(v!),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: GoogleFonts.dmSans(color: Colors.white70),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    String label,
+    String value,
+    List<String> items,
+    ValueChanged<String> onChanged,
+  ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final fillColor = isDark
+        ? AppGradients.glassFill(theme)
+        : Colors.white.withValues(alpha: 0.97);
+    final borderColor = isDark
+        ? AppGradients.glassBorder(theme)
+        : const Color(0xFFD4E2F7);
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final labelColor = isDark ? Colors.white70 : const Color(0xFF64748B);
+
+    return DropdownButtonFormField<String>(
+      initialValue: value,
+      dropdownColor: isDark ? theme.colorScheme.surface : Colors.white,
+      iconEnabledColor: textColor,
+      items: items
+          .map(
+            (e) => DropdownMenuItem(
+              value: e,
+              child: Text(
+                e.toUpperCase(),
+                style: GoogleFonts.dmSans(color: textColor),
+              ),
+            ),
+          )
+          .toList(),
+      onChanged: (v) => onChanged(v!),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.dmSans(color: labelColor),
+        filled: true,
+        fillColor: fillColor,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: borderColor),
         ),
-        style: GoogleFonts.dmSans(color: Colors.white),
-      );
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.55)
+                : const Color(0xFF60A5FA),
+          ),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+      ),
+      style: GoogleFonts.dmSans(color: textColor),
+    );
+  }
 }
 
 /// ================= TOP BAR =================
-PreferredSizeWidget _BirthchartTopBar(BuildContext context) {
+PreferredSizeWidget _birthchartTopBar(BuildContext context) {
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
   return AppBar(
-    backgroundColor: const Color(0xff050B1E),
+    backgroundColor: isDark
+        ? AppGradients.glassFill(theme)
+        : Colors.white.withValues(alpha: 0.94),
     elevation: 0,
     centerTitle: true,
     leading: Padding(
       padding: const EdgeInsets.only(left: 12),
       child: GestureDetector(
         onTap: () => Navigator.pop(context),
-        child: Container(
+        child: SizedBox(
           height: 38,
           width: 38,
-
-          child: const Icon(
+          child: Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 18,
-            color: Colors.white,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
           ),
         ),
       ),
     ),
     title: Text(
-      "Birth Chart",
+      context.l10n.tr("birthChart"),
       style: GoogleFonts.dmSans(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: isDark ? Colors.white : const Color(0xFF0F172A),
       ),
     ),
   );

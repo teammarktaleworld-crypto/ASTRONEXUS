@@ -9,9 +9,7 @@ class StepImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Center(
-        child: Image.asset(path, height: 140),
-      ),
+      child: Center(child: Image.asset(path, height: 140)),
     );
   }
 }

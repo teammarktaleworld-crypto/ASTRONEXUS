@@ -1,10 +1,8 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-import '../../App/Model/category_model.dart';
-import '../../App/Model/product_model.dart';
-import 'api_client.dart';
-import 'api_endpoints.dart';
+import "../../App/Model/category_model.dart";
+import "../../App/Model/product_model.dart";
+import "feedback_api.dart";
+import "api_client.dart";
+import "api_endpoints.dart";
 
 class StoreApi {
   final ApiClient _client = ApiClient();
@@ -19,9 +17,7 @@ class StoreApi {
     final res = await _client.get(path);
 
     // when API returns array directly
-    return (res as List)
-        .map((e) => ProductModel.fromJson(e))
-        .toList();
+    return (res as List).map((e) => ProductModel.fromJson(e)).toList();
   }
 
   Future<ProductModel> getProductById(String productId) async {
@@ -45,38 +41,27 @@ class StoreApi {
       throw Exception("Product not found");
     }
 
-    return ProductModel.fromJson(
-      Map<String, dynamic>.from(res['product']),
-    );
+    return ProductModel.fromJson(Map<String, dynamic>.from(res['product']));
   }
 
   // ================= CATEGORIES =================
 
   Future<List<CategoryModel>> getCategories() async {
     final data = await _client.get(ApiEndpoints.categories);
-    return (data as List)
-        .map((e) => CategoryModel.fromJson(e))
-        .toList();
+    return (data as List).map((e) => CategoryModel.fromJson(e)).toList();
   }
 
   // ================= REVIEWS =================
 
   Future<void> addProductReview(
-      String productId,
-      int rating,
-      String comment,
-      ) async {
-    final response = await http.post(
-      Uri.parse('${ApiEndpoints.products}/$productId/review'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'rating': rating,
-        'comment': comment,
-      }),
+    String productId,
+    int rating,
+    String comment,
+  ) async {
+    await FeedbackApi().submitFeedback(
+      productId: productId,
+      rating: rating.toDouble(),
+      review: comment,
     );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to submit review');
-    }
   }
 }

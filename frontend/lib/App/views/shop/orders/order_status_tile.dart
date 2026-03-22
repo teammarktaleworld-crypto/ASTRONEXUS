@@ -6,7 +6,11 @@ class OrderStatusTile extends StatelessWidget {
   final String step;
   final bool completed;
 
-  const OrderStatusTile({super.key, required this.step, this.completed = false});
+  const OrderStatusTile({
+    super.key,
+    required this.step,
+    this.completed = false,
+  });
 
   @override
   Widget build(BuildContext context) {

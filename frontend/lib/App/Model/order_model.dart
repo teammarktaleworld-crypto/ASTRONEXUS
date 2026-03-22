@@ -45,7 +45,6 @@ class OrderModel {
   }
 }
 
-
 class OrderItemModel {
   final String productId;
   final int quantity;
@@ -61,7 +60,9 @@ class OrderItemModel {
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      productId: json['product'] is Map ? json['product']['_id'] : json['product'],
+      productId: json['product'] is Map
+          ? json['product']['_id']
+          : json['product'],
       quantity: json['quantity'],
       price: (json['price'] as num).toDouble(),
       product: json['product'] != null && json['product'] is Map

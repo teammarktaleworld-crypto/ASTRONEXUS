@@ -1,22 +1,22 @@
 import 'dart:async';
 
 import 'package:astro_tale/App/views/Auth/Sign_up/helper/step_birth_time.dart';
+import 'package:astro_tale/core/constants/app_colors.dart';
+import 'package:astro_tale/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+
+import '../../../../../core/widgets/animated_app_background.dart';
 import '../../../dash/DashboardScreen.dart';
-import '../helper/step_name.dart';
-import '../helper/step_email.dart';
-import '../helper/step_phone.dart';
+import '../controller/controller.dart';
 import '../helper/StepPassword.dart';
 import '../helper/step_birth_date.dart';
 import '../helper/step_birth_place.dart';
-
-
-import '../controller/controller.dart';
-
+import '../helper/step_email.dart';
+import '../helper/step_name.dart';
+import '../helper/step_phone.dart';
 import '../widgets/signup_app_bar.dart';
-import '../widgets/signup_background.dart';
 import '../widgets/signup_card.dart';
 import '../widgets/signup_stepper.dart';
 
@@ -29,12 +29,10 @@ class AstrologySignupTimeline extends StatefulWidget {
 }
 
 class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
-  int step = 0; // current step
+  int step = 0;
   late final SignupController controller = SignupController();
   bool _isSigningUp = false;
 
-
-  // Controllers for TextFields
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
@@ -50,10 +48,11 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
     emailController = TextEditingController(text: controller.model.email);
     phoneController = TextEditingController(text: controller.model.phone);
     passwordController = TextEditingController(text: controller.model.password);
-    confirmController = TextEditingController(text: controller.model.confirmPassword);
+    confirmController = TextEditingController(
+      text: controller.model.confirmPassword,
+    );
     dobController = TextEditingController(text: controller.model.dateOfBirth);
     placeController = TextEditingController(text: controller.model.place);
-
   }
 
   @override
@@ -68,16 +67,18 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
     super.dispose();
   }
 
-  // ---------------- STEP NAVIGATION ----------------
   void nextStep() {
-    if (step < 6) setState(() => step++);
+    if (step < 6) {
+      setState(() => step++);
+    }
   }
 
   void previousStep() {
-    if (step > 0) setState(() => step--);
+    if (step > 0) {
+      setState(() => step--);
+    }
   }
 
-  // ---------------- STEP VALIDATION ----------------
   bool validateStep() {
     final model = controller.model;
 
@@ -85,7 +86,7 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
       case 0:
         return model.name.trim().isNotEmpty;
       case 1:
-        return model.email.trim().isNotEmpty && model.email.contains("@");
+        return model.email.trim().isNotEmpty && model.email.contains('@');
       case 2:
         final phone = model.phone.replaceAll(' ', '');
         return phone.isNotEmpty && phone.length >= 10;
@@ -104,55 +105,62 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
     }
   }
 
-
-  // ---------------- SUBMIT SIGNUP ----------------
   Future<void> submitSignup() async {
-    if (_isSigningUp) return; // 🚫 Block multiple taps
+    if (_isSigningUp) {
+      return;
+    }
 
     setState(() => _isSigningUp = true);
 
     try {
       final astrologyData = await controller.submitSignup();
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => DashboardScreen(
-            zodiacSign: astrologyData['zodiacSign'] ?? "",
+            zodiacSign: astrologyData['zodiacSign'] ?? '',
             daily: astrologyData['daily'],
             weekly: astrologyData['weekly'],
             monthly: astrologyData['monthly'],
           ),
         ),
       );
-    }
-
-    on TimeoutException {
-      _showError("Server is busy. Please wait and try again.");
-    }
-
-    catch (e) {
-      _showError(e.toString().replaceAll("Exception: ", ""));
-    }
-
-    finally {
-      //  Small delay prevents instant re-click spam after failure
+    } on TimeoutException {
+      _showError('Server is busy. Please wait and try again.');
+    } catch (e) {
+      _showError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
       await Future.delayed(const Duration(seconds: 2));
-      if (mounted) setState(() => _isSigningUp = false);
+      if (mounted) {
+        setState(() => _isSigningUp = false);
+      }
     }
   }
 
   void _showError(String message) {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
+
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar() // removes old one if visible
+      ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(message, style: GoogleFonts.dmSans(color: Colors.black)),
-          backgroundColor: Colors.white70,
+          content: Text(
+            message,
+            style: GoogleFonts.dmSans(color: Colors.white),
+          ),
+          backgroundColor: isDark
+              ? Colors.redAccent
+              : theme.colorScheme.primary,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
           shape: RoundedRectangleBorder(
@@ -162,32 +170,23 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
       );
   }
 
-
-
-
-
-  // ---------------- STEP CONTENT ----------------
   Widget _buildStep() {
     switch (step) {
       case 0:
         return StepName(
           controller: nameController,
           onChanged: controller.setName,
-          value: '',
         );
-
       case 1:
         return StepEmail(
           controller: emailController,
           onChanged: controller.setEmail,
         );
-
       case 2:
         return StepPhone(
           controller: phoneController,
           onChanged: controller.setPhone,
         );
-
       case 3:
         return StepPassword(
           passwordController: passwordController,
@@ -195,36 +194,30 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
           onPasswordChanged: controller.setPassword,
           onConfirmChanged: controller.setConfirmPassword,
         );
-
       case 4:
         return StepBirthDate(
           controller: dobController,
           onChanged: controller.setDateOfBirth,
-          value: '',
         );
-
       case 5:
         return StepBirthTime(
-          model: controller.model, // IMPORTANT
+          model: controller.model,
           onChanged: () => setState(() {}),
         );
-
       case 6:
         return StepBirthPlace(
           controller: placeController,
           onChanged: controller.setPlace,
-          value: '',
         );
-
       default:
         return const SizedBox();
     }
   }
 
-
-
-  // ---------------- NEXT BUTTON ----------------
   Widget _nextButton() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: SizedBox(
@@ -232,72 +225,136 @@ class _AstrologySignupTimelineState extends State<AstrologySignupTimeline> {
         width: double.infinity,
         child: ElevatedButton(
           onPressed: _isSigningUp
-              ? null // disable button while signup is in progress
+              ? null
               : () {
-            if (!validateStep()) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  width: 350,
-                  behavior: SnackBarBehavior.floating,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  content: Center(child: Text("Please complete this step correctly", style: TextStyle(color: Colors.red))),
-                  backgroundColor: Colors.white,
-                ),
-              );
-              return;
-            }
+                  if (!validateStep()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        width: 350,
+                        behavior: SnackBarBehavior.floating,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        content: Center(
+                          child: Text(
+                            'Please complete this step correctly',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                        backgroundColor: Colors.white,
+                      ),
+                    );
+                    return;
+                  }
 
-            if (step == 6) {
-              // ✅ Show loading only for signup (last step)
-              submitSignup();
-            } else {
-              nextStep();
-            }
-          },
+                  if (step == 6) {
+                    submitSignup();
+                  } else {
+                    nextStep();
+                  }
+                },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF201E43),
+            backgroundColor: colors.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
             ),
           ),
           child: step == 6 && _isSigningUp
               ? LoadingAnimationWidget.fourRotatingDots(
-            color: Colors.white70,
-            size: 24,
-          )
+                  color: colors.onPrimary,
+                  size: 24,
+                )
               : Text(
-            step == 6 ? "Done" : "Next",
-            style: GoogleFonts.dmSans(
-              color: Colors.white70,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+                  step == 6 ? 'Done' : 'Next',
+                  style: GoogleFonts.dmSans(
+                    color: colors.onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
       ),
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
+    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF050B1E),
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.transparent,
       appBar: SignupAppBar(step: step, onBack: previousStep),
       body: Stack(
         children: [
-          const SignupBackground(),
-          Column(
-            children: [
-              const SizedBox(height: 20),
-              SignupStepper(
-                step: step,
-                totalSteps: 7,
-                onStepChanged: (i) => setState(() => step = i),
+          const Positioned.fill(
+            child: AnimatedAppBackground(
+              showStarsInDark: true,
+              showGlow: true,
+              child: SizedBox(),
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.35)
+                  : AppColors.lightbox,
+            ),
+          ),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: AnimatedPadding(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              padding: EdgeInsets.only(
+                bottom: keyboardInset > 0 ? keyboardInset : 0,
               ),
-              // const SizedBox(height: 20),
-              Expanded(child: SignupCard(child: _buildStep())),
-              _nextButton(),
-            ],
+              child: Column(
+                children: [
+                  const SizedBox(height: 14),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 26),
+                    child: Column(
+                      children: [
+                        Text(
+                          l10n.tr('modernSignupTitle'),
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.dmSans(
+                            color: isDark ? Colors.white : colors.onSurface,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          l10n.tr('modernSignupSubtitle'),
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.dmSans(
+                            color: isDark
+                                ? Colors.white70
+                                : colors.onSurface.withValues(alpha: 0.72),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SignupStepper(
+                    step: step,
+                    totalSteps: 7,
+                    onStepChanged: (i) => setState(() => step = i),
+                  ),
+                  Expanded(child: SignupCard(child: _buildStep())),
+                  _nextButton(),
+                ],
+              ),
+            ),
           ),
         ],
       ),

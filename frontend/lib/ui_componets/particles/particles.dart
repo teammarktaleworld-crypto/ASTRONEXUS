@@ -15,10 +15,17 @@ class Particle {
   Color color;
   double speed;
 
-  Particle({required this.position, required this.target, required this.size, required this.color, required this.speed});
+  Particle({
+    required this.position,
+    required this.target,
+    required this.size,
+    required this.color,
+    required this.speed,
+  });
 }
 
-class _ParticleBackgroundState extends State<ParticleBackground> with SingleTickerProviderStateMixin {
+class _ParticleBackgroundState extends State<ParticleBackground>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final Random random = Random();
   final int numberOfParticles = 100;
@@ -38,12 +45,13 @@ class _ParticleBackgroundState extends State<ParticleBackground> with SingleTick
     super.initState();
     particles = List.generate(numberOfParticles, (_) => _createParticle());
 
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 100))
-      ..addListener(() {
-        _updateParticles();
-        setState(() {});
-      })
-      ..repeat();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 100))
+          ..addListener(() {
+            _updateParticles();
+            setState(() {});
+          })
+          ..repeat();
   }
 
   Particle _createParticle() {
@@ -52,7 +60,13 @@ class _ParticleBackgroundState extends State<ParticleBackground> with SingleTick
     final size = random.nextDouble() * 2 + 1;
     final color = particleColors[random.nextInt(particleColors.length)];
     final speed = random.nextDouble() * 0.002 + 0.001;
-    return Particle(position: pos, target: target, size: size, color: color, speed: speed);
+    return Particle(
+      position: pos,
+      target: target,
+      size: size,
+      color: color,
+      speed: speed,
+    );
   }
 
   void _updateParticles() {
@@ -101,7 +115,11 @@ class ParticlePainter extends CustomPainter {
 
     for (var p in particles) {
       paint.color = p.color.withOpacity(0.8);
-      canvas.drawCircle(Offset(p.position.dx * size.width, p.position.dy * size.height), p.size, paint);
+      canvas.drawCircle(
+        Offset(p.position.dx * size.width, p.position.dy * size.height),
+        p.size,
+        paint,
+      );
     }
   }
 

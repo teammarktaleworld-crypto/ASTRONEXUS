@@ -77,19 +77,25 @@ class CartItemTile extends StatelessWidget {
                         IconButton(
                           onPressed: () =>
                               onQuantityChanged?.call(quantity - 1),
-                          icon: const Icon(Icons.remove_circle_outline,
-                              color: Colors.white70),
+                          icon: const Icon(
+                            Icons.remove_circle_outline,
+                            color: Colors.white70,
+                          ),
                         ),
                         Text(
                           '$quantity',
                           style: GoogleFonts.poppins(
-                              color: Colors.white, fontWeight: FontWeight.w600),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         IconButton(
                           onPressed: () =>
                               onQuantityChanged?.call(quantity + 1),
-                          icon: const Icon(Icons.add_circle_outline,
-                              color: Colors.white70),
+                          icon: const Icon(
+                            Icons.add_circle_outline,
+                            color: Colors.white70,
+                          ),
                         ),
                       ],
                     ),

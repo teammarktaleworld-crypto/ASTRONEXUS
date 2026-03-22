@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:astro_tale/core/theme/app_gradients.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -15,7 +15,7 @@ class _StatsRowState extends State<StatsRow> {
   int planetCount = 0;
   int houseCount = 0;
   int reportsCount = 0; // Placeholder, can be fetched from API
-  int chatsCount = 0;   // Placeholder, can be fetched from API
+  int chatsCount = 0; // Placeholder, can be fetched from API
 
   @override
   void initState() {
@@ -39,11 +39,36 @@ class _StatsRowState extends State<StatsRow> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = AppGradients.glassFill(theme);
+    final borderColor = AppGradients.glassBorder(theme);
+    final iconBg = isDark
+        ? Colors.white.withValues(alpha: 0.14)
+        : Colors.white.withValues(alpha: 0.1);
+    final shadowColor = Colors.black.withValues(alpha: isDark ? 0.28 : 0.2);
+
     final stats = [
-      {"label": "Kundli", "value": planetCount.toString(), "icon": LucideIcons.star},
-      {"label": "Houses", "value": houseCount.toString(), "icon": LucideIcons.layoutDashboard},
-      {"label": "Reports", "value": reportsCount.toString(), "icon": LucideIcons.file},
-      {"label": "Chats", "value": chatsCount.toString(), "icon": LucideIcons.messageCircle},
+      {
+        "label": "Kundli",
+        "value": planetCount.toString(),
+        "icon": LucideIcons.star,
+      },
+      {
+        "label": "Houses",
+        "value": houseCount.toString(),
+        "icon": LucideIcons.layoutDashboard,
+      },
+      {
+        "label": "Reports",
+        "value": reportsCount.toString(),
+        "icon": LucideIcons.file,
+      },
+      {
+        "label": "Chats",
+        "value": chatsCount.toString(),
+        "icon": LucideIcons.messageCircle,
+      },
     ];
 
     return Row(
@@ -55,17 +80,13 @@ class _StatsRowState extends State<StatsRow> {
             padding: const EdgeInsets.symmetric(vertical: 18),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              gradient: const LinearGradient(
-                colors: [Colors.white12, Colors.white10],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(color: Colors.white24),
+              color: cardColor,
+              border: Border.all(color: borderColor),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
+                  color: shadowColor,
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -75,7 +96,7 @@ class _StatsRowState extends State<StatsRow> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.black26,
+                    color: iconBg,
                   ),
                   child: Icon(
                     e["icon"] as IconData,
@@ -96,7 +117,7 @@ class _StatsRowState extends State<StatsRow> {
                 Text(
                   e["label"] as String,
                   style: GoogleFonts.dmSans(
-                    color: Colors.white60,
+                    color: Colors.white70,
                     fontSize: 13,
                     letterSpacing: 0.3,
                   ),

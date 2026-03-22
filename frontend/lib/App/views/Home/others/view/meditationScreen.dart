@@ -29,7 +29,7 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
             color: Colors.black.withOpacity(0.45),
             blurRadius: 12,
             offset: const Offset(0, 6),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -48,19 +48,13 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
                 gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF916DBA),
-                    Color(0xFF413154),
-                  ],
+                  colors: [Color(0xFF916DBA), Color(0xFF413154)],
                 ),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFFDBC33F),
-                  width: 1.6,
-                ),
+                border: Border.all(color: const Color(0xFFDBC33F), width: 1.6),
               ),
               child: ElevatedButton(
-                onPressed: (){},
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
@@ -103,7 +97,7 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
             color: Colors.black.withOpacity(0.4),
             blurRadius: 8,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: TextField(
@@ -122,14 +116,21 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
             fontWeight: FontWeight.w400,
           ),
           border: InputBorder.none,
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 15, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 16,
+          ),
         ),
       ),
     );
   }
 
-  Widget meditationCard(String title, String subtitle, IconData icon, List<Color> colors) {
+  Widget meditationCard(
+    String title,
+    String subtitle,
+    IconData icon,
+    List<Color> colors,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
@@ -140,7 +141,7 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
             color: colors.last.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
-          )
+          ),
         ],
       ),
       padding: const EdgeInsets.all(20),
@@ -159,18 +160,25 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: GoogleFonts.dmSans(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 5),
-                Text(subtitle,
-                    style: GoogleFonts.dmSans(
-                        fontSize: 14, color: Colors.white70)),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -184,21 +192,25 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
       ),
       child: ExpansionTile(
         leading: const Icon(Icons.auto_awesome, color: Color(0xffDBC33F)),
-        title: Text(title,
-            style: GoogleFonts.dmSans(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            )),
+        title: Text(
+          title,
+          style: GoogleFonts.dmSans(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Text(content,
-                style: GoogleFonts.dmSans(
-                  fontSize: 14,
-                  color: Colors.white70,
-                  height: 1.5,
-                )),
-          )
+            child: Text(
+              content,
+              style: GoogleFonts.dmSans(
+                fontSize: 14,
+                color: Colors.white70,
+                height: 1.5,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -221,7 +233,10 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -275,21 +290,29 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
                     decoration: BoxDecoration(
                       color: const Color(0xff1E1E1E),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xffDBC33F), width: 1.3),
+                      border: Border.all(
+                        color: const Color(0xffDBC33F),
+                        width: 1.3,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.45),
                           blurRadius: 12,
                           offset: const Offset(0, 6),
-                        )
+                        ),
                       ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Meditation Types",
-                            style: GoogleFonts.dmSans(
-                                fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                        Text(
+                          "Meditation Types",
+                          style: GoogleFonts.dmSans(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.white,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         meditationCard(
                           "Mindfulness",
@@ -313,9 +336,14 @@ class _MeditationScreenDarkState extends State<MeditationScreenDark> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Text("Astro Tutorials",
-                      style: GoogleFonts.dmSans(
-                          fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                  Text(
+                    "Astro Tutorials",
+                    style: GoogleFonts.dmSans(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
                   const SizedBox(height: 5),
                   astroTile(
                     "Guided Planet Meditation",

@@ -20,8 +20,10 @@ class _SplashKundliState extends State<SplashKundli>
     super.initState();
 
     // Animation controller for fade-in effect
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
     _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _controller.forward();
@@ -29,7 +31,9 @@ class _SplashKundliState extends State<SplashKundli>
     // Navigate to KundliScreen after 2.5 seconds
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const KundliScreen()));
+        context,
+        MaterialPageRoute(builder: (_) => const KundliScreen()),
+      );
     });
   }
 
@@ -54,9 +58,10 @@ class _SplashKundliState extends State<SplashKundli>
               Text(
                 "KUNDLI ASTROLOGY",
                 style: GoogleFonts.dmSans(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 8),
               Text(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../sharedWidgets/step_image.dart';
-import '../Model/SignUp_Data_Model.dart';
+import '../model/SignUp_Data_Model.dart';
 
 class StepBirthTime extends StatelessWidget {
   final AstrologySignupModel model;
@@ -17,6 +17,10 @@ class StepBirthTime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       children: [
         const StepImage(path: "assets/images/time.png"),
@@ -25,7 +29,7 @@ class StepBirthTime extends StatelessWidget {
           "Exact birth time determines the Ascendant and house divisions.",
           textAlign: TextAlign.center,
           style: GoogleFonts.dmSans(
-            color: Colors.white,
+            color: isDark ? Colors.white : colors.onSurface,
           ),
         ),
 
@@ -34,7 +38,7 @@ class StepBirthTime extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A1633),
+            color: isDark ? const Color(0xFF0A1633) : const Color(0xFFF2F5FF),
             borderRadius: BorderRadius.circular(22),
           ),
           child: Column(
@@ -42,12 +46,12 @@ class StepBirthTime extends StatelessWidget {
               // Selected time display
               Text(
                 "${model.hour.toString().padLeft(2, '0')} : "
-                    "${model.minute.toString().padLeft(2, '0')} "
-                    "${model.isAM ? 'AM' : 'PM'}",
+                "${model.minute.toString().padLeft(2, '0')} "
+                "${model.isAM ? 'AM' : 'PM'}",
                 style: GoogleFonts.dmSans(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : colors.onSurface,
                 ),
               ),
 
@@ -56,10 +60,10 @@ class StepBirthTime extends StatelessWidget {
               SizedBox(
                 height: 160,
                 child: CupertinoTheme(
-                  data: const CupertinoThemeData(
+                  data: CupertinoThemeData(
                     textTheme: CupertinoTextThemeData(
                       pickerTextStyle: TextStyle(
-                        color: Colors.white,
+                        color: isDark ? Colors.white : colors.onSurface,
                         fontSize: 18,
                       ),
                     ),
@@ -76,10 +80,8 @@ class StepBirthTime extends StatelessWidget {
                           },
                           children: List.generate(
                             12,
-                                (i) => Center(
-                              child: Text(
-                                (i + 1).toString().padLeft(2, '0'),
-                              ),
+                            (i) => Center(
+                              child: Text((i + 1).toString().padLeft(2, '0')),
                             ),
                           ),
                         ),
@@ -95,10 +97,8 @@ class StepBirthTime extends StatelessWidget {
                           },
                           children: List.generate(
                             60,
-                                (i) => Center(
-                              child: Text(
-                                i.toString().padLeft(2, '0'),
-                              ),
+                            (i) => Center(
+                              child: Text(i.toString().padLeft(2, '0')),
                             ),
                           ),
                         ),

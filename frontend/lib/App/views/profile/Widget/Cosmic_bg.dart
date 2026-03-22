@@ -1,11 +1,11 @@
-import 'package:flutter/cupertino.dart';
+import 'package:astro_tale/core/theme/app_gradients.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../ui_componets/cosmic/cosmic_one.dart';
-import '../../Home/Screens/HomeScreen.dart';
 
 class CosmicBackground extends StatelessWidget {
   final AnimationController controller;
-  final FallingStarPainter? painter;
+  final Object? painter;
 
   const CosmicBackground({
     super.key,
@@ -15,27 +15,16 @@ class CosmicBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Stack(
       children: [
         Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xff050B1E),
-                // Color(0xff1C4D8D),
-                // Color(0xff0F2854),
-                Color(0xff393053),
-                Color(0xff050B1E),
-
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
+          decoration: AppGradients.screenDecoration(theme),
         ),
-        Positioned.fill(child: SmoothShootingStars()),
+        if (isDark) Positioned.fill(child: SmoothShootingStars()),
+        Positioned.fill(child: Container(color: AppGradients.screenOverlay(theme))),
         // AnimatedBuilder(
         //   animation: controller,
         //   builder: (_, __) {

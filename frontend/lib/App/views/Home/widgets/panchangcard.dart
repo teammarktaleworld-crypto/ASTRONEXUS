@@ -43,16 +43,47 @@ class PanchangaCard extends StatelessWidget {
           _PanchangaRow("Date", DateFormat.yMMMMd().format(panchanga.date)),
           _PanchangaRow("Weekday", panchanga.weekday),
           _PanchangaRow("Tithi", panchanga.tithi.name),
-          _PanchangaRow("Nakshatra", "${panchanga.nakshatra.name} Pada ${panchanga.nakshatra.pada}"),
+          _PanchangaRow(
+            "Nakshatra",
+            "${panchanga.nakshatra.name} Pada ${panchanga.nakshatra.pada}",
+          ),
           _PanchangaRow("Yoga", panchanga.yoga.name),
           _PanchangaRow("Karana", panchanga.karana.name),
           _PanchangaRow("Moon Rasi", panchanga.moonRasi.name),
-          _PanchangaRow("Sunrise", timeFormat.format(panchanga.sunriseString.isNotEmpty
-              ? panchanga.date.add(Duration(hours: int.parse(panchanga.sunriseString.split(':')[0])))
-              : panchanga.date)),
-          _PanchangaRow("Sunset", timeFormat.format(panchanga.date.add(Duration(hours: panchanga.sunsetTime.floor())))),
-          _PanchangaRow("Moonrise", timeFormat.format(panchanga.date.add(Duration(hours: panchanga.moonriseTime.floor())))),
-          _PanchangaRow("Moonset", timeFormat.format(panchanga.date.add(Duration(hours: panchanga.moonsetTime.floor())))),
+          _PanchangaRow(
+            "Sunrise",
+            timeFormat.format(
+              panchanga.sunriseString.isNotEmpty
+                  ? panchanga.date.add(
+                      Duration(
+                        hours: int.parse(panchanga.sunriseString.split(':')[0]),
+                      ),
+                    )
+                  : panchanga.date,
+            ),
+          ),
+          _PanchangaRow(
+            "Sunset",
+            timeFormat.format(
+              panchanga.date.add(Duration(hours: panchanga.sunsetTime.floor())),
+            ),
+          ),
+          _PanchangaRow(
+            "Moonrise",
+            timeFormat.format(
+              panchanga.date.add(
+                Duration(hours: panchanga.moonriseTime.floor()),
+              ),
+            ),
+          ),
+          _PanchangaRow(
+            "Moonset",
+            timeFormat.format(
+              panchanga.date.add(
+                Duration(hours: panchanga.moonsetTime.floor()),
+              ),
+            ),
+          ),
           _PanchangaRow("Day Length", formatHours(panchanga.dayLength)),
           _PanchangaRow("Night Length", formatHours(panchanga.nightLength)),
         ],
@@ -77,10 +108,7 @@ class _PanchangaRow extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.dmSans(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
+            style: GoogleFonts.dmSans(color: Colors.white70, fontSize: 14),
           ),
           Text(
             value,

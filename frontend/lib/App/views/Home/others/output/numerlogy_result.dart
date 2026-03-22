@@ -50,12 +50,14 @@ class NumerologyResult extends StatelessWidget {
             ),
           ),
           Positioned.fill(
-              child: IgnorePointer(
-                  ignoring: true, child: SmoothShootingStars())),
+            child: IgnorePointer(ignoring: true, child: SmoothShootingStars()),
+          ),
           Positioned.fill(
-              child: IgnorePointer(
-                  ignoring: true,
-                  child: Container(color: Colors.black.withOpacity(0.45)))),
+            child: IgnorePointer(
+              ignoring: true,
+              child: Container(color: Colors.black.withOpacity(0.45)),
+            ),
+          ),
 
           SafeArea(
             child: SingleChildScrollView(
@@ -63,13 +65,14 @@ class NumerologyResult extends StatelessWidget {
               child: Column(
                 children: [
                   // Header
-
                   _BirthchartTopBar(),
                   const SizedBox(height: 30),
                   Text(
                     "Discover your Life Path Number & insights",
                     style: GoogleFonts.dmSans(
-                        fontSize: 18, color: Colors.white70),
+                      fontSize: 18,
+                      color: Colors.white70,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
@@ -85,15 +88,18 @@ class NumerologyResult extends StatelessWidget {
                             Text(
                               "Hello, $name ✨",
                               style: GoogleFonts.dmSans(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Text(
                               "Date of Birth: $dob",
                               style: GoogleFonts.dmSans(
-                                  fontSize: 14, color: Colors.white70),
+                                fontSize: 14,
+                                color: Colors.white70,
+                              ),
                             ),
                             if (additionalInfo.isNotEmpty) ...[
                               const SizedBox(height: 6),
@@ -101,7 +107,9 @@ class NumerologyResult extends StatelessWidget {
                                 additionalInfo,
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.dmSans(
-                                    fontSize: 13, color: Colors.white54),
+                                  fontSize: 13,
+                                  color: Colors.white54,
+                                ),
                               ),
                             ],
                           ],
@@ -121,9 +129,10 @@ class NumerologyResult extends StatelessWidget {
                           Text(
                             "Your Life Path Number",
                             style: GoogleFonts.dmSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFFDBC33F)),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFFDBC33F),
+                            ),
                           ),
                           const SizedBox(height: 18),
 
@@ -150,9 +159,10 @@ class NumerologyResult extends StatelessWidget {
                             child: Text(
                               "$lifePathNumber",
                               style: GoogleFonts.dmSans(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
 
@@ -161,7 +171,10 @@ class NumerologyResult extends StatelessWidget {
                             _getLifePathDescription(lifePathNumber),
                             textAlign: TextAlign.center,
                             style: GoogleFonts.dmSans(
-                                fontSize: 14, height: 1.5, color: Colors.white70),
+                              fontSize: 14,
+                              height: 1.5,
+                              color: Colors.white70,
+                            ),
                           ),
                         ],
                       ),
@@ -178,7 +191,9 @@ class NumerologyResult extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFDBC33F),
                         padding: const EdgeInsets.symmetric(
-                            vertical: 14, horizontal: 40),
+                          vertical: 14,
+                          horizontal: 40,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -186,9 +201,10 @@ class NumerologyResult extends StatelessWidget {
                       child: Text(
                         "Back",
                         style: GoogleFonts.dmSans(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15),
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   ),

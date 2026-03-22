@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:astro_tale/core/theme/app_gradients.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +20,8 @@ class MatchingScreen extends StatefulWidget {
   State<MatchingScreen> createState() => _MatchingScreenState();
 }
 
-class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStateMixin {
+class _MatchingScreenState extends State<MatchingScreen>
+    with TickerProviderStateMixin {
   // ───────── Controllers ─────────
   final mName = TextEditingController();
   final mDob = TextEditingController();
@@ -74,22 +76,23 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
 
   // ───────── Date & Time Pickers ─────────
   Future<void> _pickDate(
-      TextEditingController display,
-      TextEditingController year,
-      TextEditingController month,
-      TextEditingController date) async {
+    TextEditingController display,
+    TextEditingController year,
+    TextEditingController month,
+    TextEditingController date,
+  ) async {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
-        data: ThemeData.dark().copyWith(
-          colorScheme: const ColorScheme.dark(
-            primary: Color(0xFFDBC33F),
-            onPrimary: Colors.black,
-            surface: Color(0xff272727),
-            onSurface: Colors.white,
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+            primary: Theme.of(context).colorScheme.primary,
+            onPrimary: Theme.of(context).colorScheme.onPrimary,
+            surface: Theme.of(context).colorScheme.surface,
+            onSurface: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         child: child!,
@@ -98,7 +101,7 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
 
     if (picked != null) {
       display.text =
-      "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
+          "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
       year.text = picked.year.toString();
       month.text = picked.month.toString();
       date.text = picked.day.toString();
@@ -107,20 +110,21 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
   }
 
   Future<void> _pickTime(
-      TextEditingController display,
-      TextEditingController hour,
-      TextEditingController minute,
-      TextEditingController second) async {
+    TextEditingController display,
+    TextEditingController hour,
+    TextEditingController minute,
+    TextEditingController second,
+  ) async {
     TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
       builder: (context, child) => Theme(
-        data: ThemeData.dark().copyWith(
-          colorScheme: const ColorScheme.dark(
-            primary: Color(0xFFDBC33F),
-            onPrimary: Colors.black,
-            surface: Color(0xff272727),
-            onSurface: Colors.white,
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+            primary: Theme.of(context).colorScheme.primary,
+            onPrimary: Theme.of(context).colorScheme.onPrimary,
+            surface: Theme.of(context).colorScheme.surface,
+            onSurface: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         child: child!,
@@ -129,7 +133,7 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
 
     if (picked != null) {
       display.text =
-      "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
+          "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
       hour.text = picked.hour.toString();
       minute.text = picked.minute.toString();
       second.text = "0";
@@ -149,14 +153,34 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
 
       final body = {
         "male": _buildPerson(
-            mName, mYear, mMonth, mDate, mHour, mMinute, mSecond, mLat, mLng, mTz),
+          mName,
+          mYear,
+          mMonth,
+          mDate,
+          mHour,
+          mMinute,
+          mSecond,
+          mLat,
+          mLng,
+          mTz,
+        ),
         "female": _buildPerson(
-            fName, fYear, fMonth, fDate, fHour, fMinute, fSecond, fLat, fLng, fTz),
+          fName,
+          fYear,
+          fMonth,
+          fDate,
+          fHour,
+          fMinute,
+          fSecond,
+          fLat,
+          fLng,
+          fTz,
+        ),
         "config": {
           "observation_point": "topocentric",
           "language": "en",
-          "ayanamsha": "lahiri"
-        }
+          "ayanamsha": "lahiri",
+        },
       };
 
       final res = await http.post(
@@ -187,36 +211,37 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
   }
 
   Map<String, dynamic> _buildPerson(
-      TextEditingController name,
-      TextEditingController year,
-      TextEditingController month,
-      TextEditingController date,
-      TextEditingController hour,
-      TextEditingController minute,
-      TextEditingController second,
-      TextEditingController lat,
-      TextEditingController lng,
-      TextEditingController tz) =>
-      {
-        "name": name.text,
-        "year": int.parse(year.text),
-        "month": int.parse(month.text),
-        "date": int.parse(date.text),
-        "hours": int.parse(hour.text),
-        "minutes": int.parse(minute.text),
-        "seconds": int.parse(second.text),
-        "latitude": double.parse(lat.text),
-        "longitude": double.parse(lng.text),
-        "timezone": double.parse(tz.text),
-      };
+    TextEditingController name,
+    TextEditingController year,
+    TextEditingController month,
+    TextEditingController date,
+    TextEditingController hour,
+    TextEditingController minute,
+    TextEditingController second,
+    TextEditingController lat,
+    TextEditingController lng,
+    TextEditingController tz,
+  ) => {
+    "name": name.text,
+    "year": int.parse(year.text),
+    "month": int.parse(month.text),
+    "date": int.parse(date.text),
+    "hours": int.parse(hour.text),
+    "minutes": int.parse(minute.text),
+    "seconds": int.parse(second.text),
+    "latitude": double.parse(lat.text),
+    "longitude": double.parse(lng.text),
+    "timezone": double.parse(tz.text),
+  };
 
   Future<void> _resolvePlace(
-      String place,
-      TextEditingController lat,
-      TextEditingController lng,
-      TextEditingController tz,
-      double fallbackLat,
-      double fallbackLng) async {
+    String place,
+    TextEditingController lat,
+    TextEditingController lng,
+    TextEditingController tz,
+    double fallbackLat,
+    double fallbackLng,
+  ) async {
     try {
       final locations = await locationFromAddress(place);
       if (locations.isNotEmpty) {
@@ -249,14 +274,20 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
     bool readOnly = false,
     VoidCallback? onTap,
   }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: AppGradients.glassFill(theme),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: AppGradients.glassBorder(theme)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: isDark
+                ? Colors.black.withOpacity(0.5)
+                : Colors.black.withOpacity(0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -272,14 +303,18 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
         readOnly: readOnly,
         onTap: onTap,
         validator: (v) => v!.isEmpty ? "Required" : null,
-        style: GoogleFonts.dmSans(color: Colors.white, fontSize: 14),
+        style: GoogleFonts.dmSans(color: colors.onSurface, fontSize: 14),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.white),
+          prefixIcon: Icon(icon, color: colors.primary),
           hintText: label,
-          hintStyle: GoogleFonts.dmSans(color: Colors.white54),
+          hintStyle: GoogleFonts.dmSans(
+            color: colors.onSurface.withOpacity(0.6),
+          ),
           border: InputBorder.none,
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 14,
+          ),
         ),
       ),
     );
@@ -287,36 +322,28 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: Stack(
         children: [
-          // Cosmic Gradient Background
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff050B1E),
-                  // Color(0xff1C4D8D),
-                  // Color(0xff0F2854),
-                  Color(0xff393053),
-                  Color(0xff050B1E),
-
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+            decoration: AppGradients.screenDecoration(theme),
           ),
 
-          Positioned.fill(child: IgnorePointer(
-            ignoring: true,
-            child: SmoothShootingStars(),
-          )),
+          if (isDark)
+            Positioned.fill(
+              child: IgnorePointer(ignoring: true, child: SmoothShootingStars()),
+            ),
 
-          Positioned.fill(child: IgnorePointer(
-            ignoring: true,
-            child: Container(color: Colors.black.withOpacity(0.45)),
-          )),
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: true,
+              child: Container(color: AppGradients.screenOverlay(theme)),
+            ),
+          ),
 
           SafeArea(
             child: SingleChildScrollView(
@@ -325,13 +352,17 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
                 key: _formKey,
                 child: Column(
                   children: [
-                    _MatchTopBar(),
+                    _matchTopBar(context),
                     const SizedBox(height: 20),
                     Text(
                       "Evaluate cosmic harmony & compatibility",
                       textAlign: TextAlign.center,
                       style: GoogleFonts.dmSans(
-                          color: Colors.white70, fontSize: 14),
+                        color: isDark
+                            ? Colors.white70
+                            : colors.onSurface.withOpacity(0.72),
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 22),
 
@@ -352,22 +383,28 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
                       child: ElevatedButton(
                         onPressed: isLoading ? null : _checkCompatibility,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1C2A5A),
+                          backgroundColor: colors.primary,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                          side: const BorderSide(
-                              color: Color(0xFFDBC33F), width: 1.6),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          side: BorderSide(
+                            color: AppGradients.glassBorder(theme),
+                            width: 1.6,
+                          ),
                         ),
                         child: isLoading
                             ? LoadingAnimationWidget.fourRotatingDots(
-                            color: Colors.white, size: 28)
+                                color: colors.onPrimary,
+                                size: 28,
+                              )
                             : Text(
-                          "Check Compatibility",
-                          style: GoogleFonts.dmSans(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
+                                "Check Compatibility",
+                                style: GoogleFonts.dmSans(
+                                  color: colors.onPrimary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -385,14 +422,19 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Male Details",
-              style: GoogleFonts.dmSans(
-                  fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(
+            "Male Details",
+            style: GoogleFonts.dmSans(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 12),
           _glassInputField(
-              label: "Full Name",
-              icon: Icons.person_outline,
-              controller: mName),
+            label: "Full Name",
+            icon: Icons.person_outline,
+            controller: mName,
+          ),
           const SizedBox(height: 12),
           _glassInputField(
             label: "Date of Birth",
@@ -411,9 +453,10 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
           ),
           const SizedBox(height: 12),
           _glassInputField(
-              label: "Place of Birth",
-              icon: Icons.location_on,
-              controller: mPlace),
+            label: "Place of Birth",
+            icon: Icons.location_on,
+            controller: mPlace,
+          ),
         ],
       ),
     );
@@ -424,14 +467,19 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Female Details",
-              style: GoogleFonts.dmSans(
-                  fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(
+            "Female Details",
+            style: GoogleFonts.dmSans(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 12),
           _glassInputField(
-              label: "Full Name",
-              icon: Icons.person_outline,
-              controller: fName),
+            label: "Full Name",
+            icon: Icons.person_outline,
+            controller: fName,
+          ),
           const SizedBox(height: 12),
           _glassInputField(
             label: "Date of Birth",
@@ -450,35 +498,34 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
           ),
           const SizedBox(height: 12),
           _glassInputField(
-              label: "Place of Birth",
-              icon: Icons.location_on,
-              controller: fPlace),
+            label: "Place of Birth",
+            icon: Icons.location_on,
+            controller: fPlace,
+          ),
         ],
       ),
     );
   }
 
-
-
   Widget _genderToggle() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: AppGradients.glassFill(theme),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: AppGradients.glassBorder(theme)),
       ),
       child: Row(
-        children: [
-          _toggleButton("Male", true),
-          _toggleButton("Female", false),
-        ],
+        children: [_toggleButton("Male", true), _toggleButton("Female", false)],
       ),
     );
   }
 
   Widget _toggleButton(String label, bool value) {
     final isSelected = showMale == value;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Expanded(
       child: GestureDetector(
@@ -487,39 +534,44 @@ class _MatchingScreenState extends State<MatchingScreen> with TickerProviderStat
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected
-                ? const Color(0xFFDBC33F).withOpacity(0.9)
-                : Colors.transparent,
+            color: isSelected ? colors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.dmSans(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.black : Colors.white70,
+              color: isSelected
+                  ? colors.onPrimary
+                  : colors.onSurface.withOpacity(0.72),
             ),
           ),
         ),
       ),
     );
   }
-
 }
 
-PreferredSizeWidget _MatchTopBar() {
+PreferredSizeWidget _matchTopBar(BuildContext context) {
+  final theme = Theme.of(context);
+  final colors = theme.colorScheme;
+  final isDark = theme.brightness == Brightness.dark;
+
   return PreferredSize(
     preferredSize: const Size.fromHeight(100),
     child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08), // glassy effect
+        color: AppGradients.glassFill(theme),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: AppGradients.glassBorder(theme)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: isDark
+                ? Colors.black.withOpacity(0.4)
+                : Colors.black.withOpacity(0.08),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -537,10 +589,10 @@ PreferredSizeWidget _MatchTopBar() {
                 // Title
                 Text(
                   "Matching",
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.dmSans(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: isDark ? Colors.white : colors.onSurface,
                   ),
                 ),
               ],
@@ -550,8 +602,4 @@ PreferredSizeWidget _MatchTopBar() {
       ),
     ),
   );
-
-
-
 }
-

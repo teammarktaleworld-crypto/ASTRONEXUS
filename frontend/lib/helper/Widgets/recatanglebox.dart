@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:astro_tale/core/responsive/responsive.dart';
 
 import 'custompara.dart';
 import 'customtext.dart';
@@ -10,7 +10,8 @@ class Screen extends StatelessWidget {
     required this.text,
     required this.bg,
 
-    required this.ontap, required this.paratext,
+    required this.ontap,
+    required this.paratext,
   });
 
   final String text;
@@ -20,9 +21,21 @@ class Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmallPhone = context.isSmallPhone;
+    final panelHeight = context.responsiveValue(
+      mobile: 300,
+      tablet: 340,
+      desktop: 360,
+    );
+    final sideInset = context.responsiveValue(
+      mobile: 20,
+      tablet: 28,
+      desktop: 36,
+    );
+
     return Container(
       width: double.infinity,
-      height: 328,
+      height: panelHeight,
       decoration: BoxDecoration(
         color: bg,
         borderRadius: const BorderRadius.only(
@@ -30,30 +43,26 @@ class Screen extends StatelessWidget {
           topRight: Radius.circular(20),
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: sideInset, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 20,),
-          Center(child: Customtext(text: text,color: Color(0xffFFB200),)),
           const SizedBox(height: 20),
           Center(
-            child: Custompara(
-              text:
-              paratext
-
-            ),
+            child: Customtext(text: text, color: Color(0xffFFB200)),
           ),
+          const SizedBox(height: 20),
+          Center(child: Custompara(text: paratext)),
           const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
-              SizedBox(width: 140,),
-              const Customtext(text: 'skip',color: Color(0xffFFB200),),
+              SizedBox(width: isSmallPhone ? 60 : 110),
+              const Customtext(text: 'skip', color: Color(0xffFFB200)),
               const SizedBox(width: 8),
-              const Icon(Icons.double_arrow_rounded,color: Color(0xffFFB400),),
-              SizedBox(width: 70,),
+              const Icon(Icons.double_arrow_rounded, color: Color(0xffFFB400)),
+              SizedBox(width: isSmallPhone ? 20 : 50),
               CircleAvatar(
                 radius: 25,
                 backgroundColor: Colors.transparent,
@@ -66,10 +75,7 @@ class Screen extends StatelessWidget {
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [
-                          Color(0xffFF7D00),
-                          Color(0xffFFB400),
-                        ],
+                        colors: [Color(0xffFF7D00), Color(0xffFFB400)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -85,9 +91,8 @@ class Screen extends StatelessWidget {
                 ),
               ),
             ],
-
           ),
-          SizedBox(height: 30,)
+          const SizedBox(height: 30),
         ],
       ),
     );

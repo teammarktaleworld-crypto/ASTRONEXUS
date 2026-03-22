@@ -17,8 +17,7 @@ class ReportsProgressPositionedBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final remaining = (total - completed).clamp(0, total);
-    final progress =
-    total == 0 ? 0.0 : (completed / total).clamp(0.0, 1.0);
+    final progress = total == 0 ? 0.0 : (completed / total).clamp(0.0, 1.0);
 
     return Positioned(
       left: 0,
@@ -35,8 +34,10 @@ class ReportsProgressPositionedBar extends StatelessWidget {
                 filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                 child: Container(
                   width: double.infinity,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(22),
@@ -66,7 +67,9 @@ class ReportsProgressPositionedBar extends StatelessWidget {
                           const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white10,
                               borderRadius: BorderRadius.circular(12),
@@ -104,7 +107,7 @@ class ReportsProgressPositionedBar extends StatelessWidget {
                       /// 🔔 Helper Text
                       Text(
                         "You’ve completed $completed of $total reports. "
-                            "Continue exploring to unlock deeper insights.",
+                        "Continue exploring to unlock deeper insights.",
                         style: GoogleFonts.dmSans(
                           color: Colors.white60,
                           fontSize: 12.5,

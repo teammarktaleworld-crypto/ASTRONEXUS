@@ -8,11 +8,14 @@ class AddressApi {
 
   // ---------------- GET USER ADDRESSES ----------------
   Future<List<Address>> getUserAddresses({required String token}) async {
-    final url = Uri.parse("$_baseUrl/addresses");
-    final response = await http.get(url, headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    });
+    final url = Uri.parse("$_baseUrl${ApiEndpoints.addresses}");
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
 
     if (response.statusCode == 200) {
       List jsonData = json.decode(response.body);
@@ -23,8 +26,11 @@ class AddressApi {
   }
 
   // ---------------- ADD ADDRESS ----------------
-  Future<Address> addAddress({required String token, required Address address}) async {
-    final url = Uri.parse("$_baseUrl/addresses/add");
+  Future<Address> addAddress({
+    required String token,
+    required Address address,
+  }) async {
+    final url = Uri.parse("$_baseUrl${ApiEndpoints.addAddress}");
     final response = await http.post(
       url,
       headers: {
@@ -51,8 +57,11 @@ class AddressApi {
   }
 
   // ---------------- UPDATE ADDRESS ----------------
-  Future<Address> updateAddress({required String token, required Address address}) async {
-    final url = Uri.parse("$_baseUrl/addresses/${address.id}");
+  Future<Address> updateAddress({
+    required String token,
+    required Address address,
+  }) async {
+    final url = Uri.parse("$_baseUrl${ApiEndpoints.addresses}/${address.id}");
     final response = await http.put(
       url,
       headers: {
@@ -79,12 +88,18 @@ class AddressApi {
   }
 
   // ---------------- DELETE ADDRESS ----------------
-  Future<void> deleteAddress({required String token, required String addressId}) async {
-    final url = Uri.parse("$_baseUrl/addresses/$addressId");
-    final response = await http.delete(url, headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    });
+  Future<void> deleteAddress({
+    required String token,
+    required String addressId,
+  }) async {
+    final url = Uri.parse("$_baseUrl${ApiEndpoints.addresses}/$addressId");
+    final response = await http.delete(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
 
     if (response.statusCode != 200) {
       throw Exception("Failed to delete address");

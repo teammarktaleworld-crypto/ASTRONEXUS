@@ -1,16 +1,17 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
+import "dart:async";
+import "dart:convert";
 
-import '../../../services/api_services/refresh_token.dart';
-import '../../Model/Horoscope/horoscope_model.dart';
-import '../../controller/Auth_Controller.dart';
-import '../Auth/Login_phone/screens/phone_login_screen.dart';
-import '../Auth/login_phone__pass/screen/login_phone_screen.dart';
-import '../dash/DashboardScreen.dart';
-import 'package:astro_tale/App/views/onboard/Screens/onboarding.dart';
+import "package:astro_tale/App/views/Auth/login_phone__pass/screen/login_phone_screen.dart";
+import "package:astro_tale/App/Model/Horoscope/horoscope_model.dart";
+import "package:astro_tale/App/views/dash/DashboardScreen.dart";
+import "package:astro_tale/App/views/onboard/Screens/onboarding.dart";
+import "package:astro_tale/core/constants/app_assets.dart";
+import "package:astro_tale/helper/Astrology_flow_helper.dart";
+import "package:astro_tale/services/api_services/chatbot/profile_services.dart";
+import "package:flutter/material.dart";
+import "package:jwt_decoder/jwt_decoder.dart";
+import "package:shared_preferences/shared_preferences.dart";
+import "../../controller/Auth_Controller.dart";
 
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
@@ -21,9 +22,10 @@ class Splashscreen extends StatefulWidget {
 
 class _SplashscreenState extends State<Splashscreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fade;
-  late Animation<double> _scale;
+  late final AnimationController _controller;
+  late final Animation<double> _fade;
+  late final Animation<double> _scale;
+  Timer? _navigationTimer;
 
   @override
   void initState() {
@@ -35,56 +37,96 @@ class _SplashscreenState extends State<Splashscreen>
     );
 
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _scale = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scale = Tween<double>(
+      begin: 0.85,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _controller.forward();
-    _handleNavigation();
+    _scheduleNavigation();
+  }
+
+  void _scheduleNavigation() {
+    _navigationTimer?.cancel();
+    _navigationTimer = Timer(const Duration(seconds: 2), () {
+      _handleNavigation();
+    });
   }
 
   Future<void> _handleNavigation() async {
-    await Future.delayed(const Duration(seconds: 2));
     final prefs = await SharedPreferences.getInstance();
 
-    final bool onboardingSeen = prefs.getBool('onboarding_seen') ?? false;
-    String? token = prefs.getString('auth_token');
+    final onboardingSeen = prefs.getBool("onboarding_seen") ?? false;
+    String? token = prefs.getString("auth_token");
 
-    // 1️⃣ Initialize AuthController
     AuthController.token = token ?? "";
-    AuthController.refreshToken = prefs.getString('refresh_token') ?? "";
-    AuthController.userId = prefs.getString('userId') ?? "";
-    AuthController.role = prefs.getString('role') ?? "";
+    AuthController.refreshToken = prefs.getString("refresh_token") ?? "";
+    AuthController.userId = prefs.getString("userId") ?? "";
+    AuthController.role = prefs.getString("role") ?? "";
 
-    // 2️⃣ Refresh token if expired
     if (token != null && JwtDecoder.isExpired(token)) {
-      final refreshToken = AuthController.refreshToken;
-      if (refreshToken.isNotEmpty) {
-        try {
-          final newToken = await APIService.refreshToken(refreshToken);
-          if (newToken != null) {
-            token = newToken;
-            AuthController.token = newToken;
-            await prefs.setString('auth_token', newToken);
-          } else {
-            token = null; // refresh failed
-          }
-        } catch (_) {
-          token = null;
-        }
-      } else {
-        token = null;
-      }
+      token = null;
+      AuthController.token = "";
+      await prefs.remove("auth_token");
+      await prefs.remove("refresh_token");
     }
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     if (token != null) {
-      // ✅ Logged in: load dashboard
-      final zodiacSign = prefs.getString('zodiacSign') ?? "";
-      final daily = HoroscopeData.fromJson(jsonDecode(prefs.getString('daily') ?? '{}'));
-      final weekly = HoroscopeData.fromJson(jsonDecode(prefs.getString('weekly') ?? '{}'));
-      final monthly = HoroscopeData.fromJson(jsonDecode(prefs.getString('monthly') ?? '{}'));
+      String zodiacSign = prefs.getString("zodiacSign") ?? "";
+      HoroscopeData daily = HoroscopeData.fromJson(
+        _safeJsonMap(prefs.getString("daily")),
+      );
+      HoroscopeData weekly = HoroscopeData.fromJson(
+        _safeJsonMap(prefs.getString("weekly")),
+      );
+      HoroscopeData monthly = HoroscopeData.fromJson(
+        _safeJsonMap(prefs.getString("monthly")),
+      );
+
+      final missingLocalData =
+          zodiacSign.isEmpty ||
+          daily.text.trim().isEmpty ||
+          weekly.text.trim().isEmpty ||
+          monthly.text.trim().isEmpty;
+
+      if (missingLocalData) {
+        try {
+          await ProfileService.fetchMyProfile();
+          zodiacSign = prefs.getString("zodiacSign") ?? zodiacSign;
+        } catch (_) {
+          // Continue with cached data when profile sync fails.
+        }
+      }
+
+      if (zodiacSign.isNotEmpty &&
+          (daily.text.trim().isEmpty ||
+              weekly.text.trim().isEmpty ||
+              monthly.text.trim().isEmpty)) {
+        try {
+          final bundle = await AstrologyFlowHelper.fetchHoroscopeBundle(
+            zodiacSign,
+          );
+          daily = HoroscopeData.fromJson(
+            bundle["daily"] as Map<String, dynamic>,
+          );
+          weekly = HoroscopeData.fromJson(
+            bundle["weekly"] as Map<String, dynamic>,
+          );
+          monthly = HoroscopeData.fromJson(
+            bundle["monthly"] as Map<String, dynamic>,
+          );
+
+          await prefs.setString("daily", jsonEncode(daily.toJson()));
+          await prefs.setString("weekly", jsonEncode(weekly.toJson()));
+          await prefs.setString("monthly", jsonEncode(monthly.toJson()));
+        } catch (_) {
+          // Keep opening app with existing cached values.
+        }
+      }
 
       Navigator.pushReplacement(
         context,
@@ -98,15 +140,21 @@ class _SplashscreenState extends State<Splashscreen>
         ),
       );
     } else if (!onboardingSeen) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      );
     } else {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginPhoneScreen()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPhoneScreen()),
+      );
     }
   }
 
-
   @override
   void dispose() {
+    _navigationTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -117,7 +165,7 @@ class _SplashscreenState extends State<Splashscreen>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
+            colors: <Color>[
               Color(0xff050B1E),
               Color(0xff1B1A3A),
               Color(0xff050B1E),
@@ -133,14 +181,13 @@ class _SplashscreenState extends State<Splashscreen>
               scale: _scale,
               child: Stack(
                 alignment: Alignment.center,
-                children: [
-                  // Soft glow
+                children: <Widget>[
                   Container(
                     width: 180,
                     height: 180,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      boxShadow: [
+                      boxShadow: <BoxShadow>[
                         BoxShadow(
                           color: Color(0xff1B1A3A),
                           blurRadius: 80,
@@ -149,11 +196,7 @@ class _SplashscreenState extends State<Splashscreen>
                       ],
                     ),
                   ),
-                  // Logo
-                  Image.asset(
-                    "assets/images/logo.png",
-                    width: 140,
-                  ),
+                  Image.asset(AppAssets.logo, width: 140),
                 ],
               ),
             ),
@@ -161,5 +204,23 @@ class _SplashscreenState extends State<Splashscreen>
         ),
       ),
     );
+  }
+
+  Map<String, dynamic> _safeJsonMap(String? raw) {
+    if (raw == null || raw.isEmpty) {
+      return <String, dynamic>{};
+    }
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      if (decoded is Map) {
+        return decoded.map((key, value) => MapEntry(key.toString(), value));
+      }
+    } catch (_) {
+      // keep empty fallback
+    }
+    return <String, dynamic>{};
   }
 }

@@ -5,27 +5,66 @@ import '../../../../Model/place/place_suggestion.dart';
 
 class PlaceApiService {
   static Future<List<PlaceSuggestion>> searchPlaces(String query) async {
-    if (query.trim().isEmpty) return [];
+    final cleaned = query.trim();
+    if (cleaned.isEmpty) {
+      return const <PlaceSuggestion>[];
+    }
 
-    final url = Uri.parse(
-      "https://photon.komoot.io/api/"
-          "?q=${Uri.encodeComponent(query)}"
-          "&limit=8"
-          "&osm_tag=place",
+    final url = Uri.parse("https://nominatim.openstreetmap.org/search").replace(
+      queryParameters: <String, String>{
+        "q": cleaned,
+        "format": "json",
+        "limit": "5",
+        "addressdetails": "1",
+      },
     );
 
-    final res = await http.get(url);
+    final res = await http.get(
+      url,
+      headers: const <String, String>{"User-Agent": "astro-nexus-app"},
+    );
 
     if (res.statusCode == 200) {
       final data = jsonDecode(res.body);
-      final features = data['features'] as List;
+      if (data is! List) {
+        return const <PlaceSuggestion>[];
+      }
 
-      return features
-          .map((e) => PlaceSuggestion.fromJson(e))
-          .where((p) => p.country.isNotEmpty)
-          .toList();
+      return data
+          .whereType<Map>()
+          .map(
+            (item) => item.map((key, value) => MapEntry(key.toString(), value)),
+          )
+          .where(_isCityLike)
+          .map(PlaceSuggestion.fromNominatim)
+          .where((p) => p.name.trim().isNotEmpty)
+          .toList(growable: false);
     }
 
-    return [];
+    return const <PlaceSuggestion>[];
+  }
+
+  static bool _isCityLike(Map<String, dynamic> item) {
+    final type = (item["type"] ?? "").toString().toLowerCase();
+    final addresstype = (item["addresstype"] ?? "").toString().toLowerCase();
+    const cityLike = <String>{
+      "city",
+      "town",
+      "village",
+      "municipality",
+      "hamlet",
+    };
+    if (cityLike.contains(type) || cityLike.contains(addresstype)) {
+      return true;
+    }
+
+    final address = item["address"];
+    if (address is! Map) {
+      return false;
+    }
+    return address["city"] != null ||
+        address["town"] != null ||
+        address["village"] != null ||
+        address["municipality"] != null;
   }
 }

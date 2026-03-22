@@ -10,17 +10,17 @@ class CounselorScreen extends StatelessWidget {
       {
         "name": "Astro Meena",
         "expertise": "Love & Marriage",
-        "image": "https://cdn-icons-png.flaticon.com/512/4140/4140037.png"
+        "image": "https://cdn-icons-png.flaticon.com/512/4140/4140037.png",
       },
       {
         "name": "Pandit Rajesh",
         "expertise": "Career & Finance",
-        "image": "https://cdn-icons-png.flaticon.com/512/4140/4140061.png"
+        "image": "https://cdn-icons-png.flaticon.com/512/4140/4140061.png",
       },
       {
         "name": "Guru Aditi",
         "expertise": "Health & Peace",
-        "image": "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
+        "image": "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
       },
     ];
 
@@ -49,18 +49,13 @@ class CounselorScreen extends StatelessWidget {
             tween: Tween<double>(begin: 0.9, end: 1.0),
             duration: const Duration(milliseconds: 500),
             curve: Curves.easeOutBack,
-            builder: (context, scale, child) => Transform.scale(
-              scale: scale,
-              child: child,
-            ),
+            builder: (context, scale, child) =>
+                Transform.scale(scale: scale, child: child),
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    const Color(0xffE9E7FD),
-                    const Color(0xffF3EDFF),
-                  ],
+                  colors: [const Color(0xffE9E7FD), const Color(0xffF3EDFF)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -75,7 +70,9 @@ class CounselorScreen extends StatelessWidget {
               ),
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 14),
+                  horizontal: 20,
+                  vertical: 14,
+                ),
                 leading: CircleAvatar(
                   radius: 28,
                   backgroundColor: const Color(0xff3B3B98).withOpacity(0.1),
@@ -109,10 +106,15 @@ class CounselorScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                   ),
-                  icon: const Icon(Icons.chat_bubble_outline,
-                      color: Colors.white, size: 17),
+                  icon: const Icon(
+                    Icons.chat_bubble_outline,
+                    color: Colors.white,
+                    size: 17,
+                  ),
                   label: Text(
                     "Chat",
                     style: GoogleFonts.dmSans(

@@ -1,21 +1,22 @@
 import 'dart:convert';
 import 'package:astro_tale/services/API/APIservice.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../App/Model/wallet_model.dart';
 
 class WalletApi {
-
   static Future<Wallet> getWallet(String userId) async {
     final url = '$baseurl/user/$userId';
-    print('GET WALLET => $url');
+    debugPrint('GET WALLET => $url');
 
     final response = await http.get(Uri.parse(url));
-    print('STATUS: ${response.statusCode}');
-    print('BODY: ${response.body}');
+    debugPrint('STATUS: ${response.statusCode}');
 
     if (response.statusCode == 200) {
-      return Wallet.fromJson(json.decode(response.body));
+      return Wallet.fromJson(
+        json.decode(response.body) as Map<String, dynamic>,
+      );
     } else {
       throw Exception('Failed to load wallet');
     }
@@ -29,7 +30,8 @@ class WalletApi {
     );
 
     if (response.statusCode == 200) {
-      return (json.decode(response.body)['balance'] as num).toDouble();
+      final body = json.decode(response.body) as Map<String, dynamic>;
+      return (body['balance'] as num).toDouble();
     } else {
       throw Exception('Deposit failed');
     }
@@ -43,9 +45,11 @@ class WalletApi {
     );
 
     if (response.statusCode == 200) {
-      return (json.decode(response.body)['balance'] as num).toDouble();
+      final body = json.decode(response.body) as Map<String, dynamic>;
+      return (body['balance'] as num).toDouble();
     } else {
-      throw Exception(json.decode(response.body)['message']);
+      final body = json.decode(response.body) as Map<String, dynamic>;
+      throw Exception(body['message'] ?? 'Withdraw failed');
     }
   }
 }

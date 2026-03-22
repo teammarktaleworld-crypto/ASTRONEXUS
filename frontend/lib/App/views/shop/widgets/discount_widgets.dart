@@ -247,10 +247,13 @@ class _CouponBottomSheetState extends State<CouponBottomSheet> {
                   ),
                 ),
                 child: loading
-                    ?  SizedBox(
+                    ? SizedBox(
                         height: 22,
                         width: 22,
-                        child: LoadingAnimationWidget.fourRotatingDots(color: Colors.black54, size: 22)
+                        child: LoadingAnimationWidget.fourRotatingDots(
+                          color: Colors.black54,
+                          size: 22,
+                        ),
                       )
                     : const Text(
                         "Apply Coupon",

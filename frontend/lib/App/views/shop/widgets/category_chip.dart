@@ -16,7 +16,12 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = isSelected ? Colors.blueAccent : Colors.white12;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final baseColor = isSelected
+        ? colors.primary
+        : (isDark ? Colors.white24 : colors.outline.withOpacity(0.3));
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
@@ -32,10 +37,14 @@ class CategoryChip extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.dmSans(
                 fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                color: isSelected
+                    ? (isDark ? Colors.white : colors.onPrimary)
+                    : (isDark
+                          ? Colors.white.withOpacity(0.88)
+                          : colors.onSurface.withOpacity(0.8)),
               ),
             ),
           ),

@@ -9,7 +9,12 @@ class PaymentScreen extends StatefulWidget {
   final OrderModel order;
   final String userToken;
 
-  const PaymentScreen({super.key, required this.order, required this.userToken, required payment});
+  const PaymentScreen({
+    super.key,
+    required this.order,
+    required this.userToken,
+    required payment,
+  });
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -34,7 +39,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     try {
       // 1️⃣ Create payment
-      PaymentModel payment = await _paymentApi.createPayment(widget.order.totalAmount);
+      PaymentModel payment = await _paymentApi.createPayment(
+        widget.order.totalAmount,
+      );
 
       // 2️⃣ Simulate transaction id (for demo)
       String transactionId = "TXN${DateTime.now().millisecondsSinceEpoch}";
@@ -48,20 +55,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
       setState(() => loading = false);
 
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Payment Successful!")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Payment Successful!")));
         // Navigate to dashboard or order success screen
         Navigator.popUntil(context, (route) => route.isFirst);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Payment Failed")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Payment Failed")));
       }
     } catch (e) {
       setState(() => loading = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -110,22 +118,28 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...widget.order.items.map((item) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "${item.product?.name ?? "Item"} x${item.quantity}",
-                                style: GoogleFonts.dmSans(color: Colors.white70),
-                              ),
-                              Text(
-                                "₹${(item.price * item.quantity).toStringAsFixed(2)}",
-                                style: GoogleFonts.dmSans(color: Colors.white70),
-                              ),
-                            ],
+                        ...widget.order.items.map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "${item.product?.name ?? "Item"} x${item.quantity}",
+                                  style: GoogleFonts.dmSans(
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                Text(
+                                  "₹${(item.price * item.quantity).toStringAsFixed(2)}",
+                                  style: GoogleFonts.dmSans(
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        )),
+                        ),
                         const Divider(color: Colors.white24, height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -133,15 +147,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             Text(
                               "Total",
                               style: GoogleFonts.dmSans(
-                                  color: Colors.white, fontWeight: FontWeight.w700),
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             Text(
                               "₹${widget.order.totalAmount.toStringAsFixed(2)}",
                               style: GoogleFonts.dmSans(
-                                  color: Colors.amberAccent, fontWeight: FontWeight.w700),
+                                color: Colors.amberAccent,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -161,7 +179,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         Text(
                           "Select Payment Method",
                           style: GoogleFonts.dmSans(
-                              color: Colors.white, fontWeight: FontWeight.w700),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         ...paymentMethods.map((method) {
@@ -190,7 +210,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     onPressed: loading ? null : _makePayment,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amberAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 32,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -198,12 +221,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     child: loading
                         ? const CircularProgressIndicator(color: Colors.black)
                         : Text(
-                      "Pay ₹${widget.order.totalAmount.toStringAsFixed(2)}",
-                      style: GoogleFonts.dmSans(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700),
-                    ),
+                            "Pay ₹${widget.order.totalAmount.toStringAsFixed(2)}",
+                            style: GoogleFonts.dmSans(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -219,11 +243,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Color(0xff393053),
-            Color(0xff393053),
-            Color(0xff050B1E),
-          ],
+          colors: [Color(0xff393053), Color(0xff393053), Color(0xff050B1E)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),

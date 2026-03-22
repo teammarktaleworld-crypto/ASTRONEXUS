@@ -1,9 +1,9 @@
 import 'dart:ui';
+import 'package:astro_tale/App/Model/address_model.dart';
+import 'package:astro_tale/core/widgets/unified_dark_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../../../services/api_services/adress_api.dart';
-import '../../../Model/address_model.dart';
+import 'package:astro_tale/services/api_services/adress_api.dart';
 
 class AddAddressScreen extends StatefulWidget {
   final String token;
@@ -67,53 +67,28 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       } else {
         await _api.updateAddress(token: widget.token, address: address);
       }
+      if (!mounted) return;
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
 
+    if (!mounted) return;
     setState(() => loading = false);
-  }
-
-  InputDecoration _dec(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: GoogleFonts.dmSans(color: Colors.white70),
-      filled: true,
-      fillColor: Colors.white.withOpacity(0.05),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.amberAccent, width: 2),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.white24, width: 1),
-      ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xff050B1E),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.existing == null ? "Add Address" : "Edit Address",
-          style: GoogleFonts.dmSans(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: UnifiedDarkUi.appBar(
+        context,
+        title: widget.existing == null ? "Add Address" : "Edit Address",
       ),
 
       body: Stack(
@@ -138,10 +113,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -154,14 +129,12 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                           "Set as default address",
                           style: TextStyle(color: Colors.white70),
                         ),
-                        activeColor: Colors.amberAccent,
+                        activeThumbColor: Colors.amberAccent,
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.center,
-                      child: _saveButton(),
-                    ),],
+                    Align(alignment: Alignment.center, child: _saveButton()),
+                  ],
                 ),
               ),
             ),
@@ -172,86 +145,104 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   }
 
   Widget _field(TextEditingController controller, String label) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: TweenAnimationBuilder<Color?>(
-        duration: const Duration(milliseconds: 300),
-        tween: ColorTween(
-          begin: Colors.white24.withOpacity(0.05),
-          end: Colors.white24.withOpacity(0.05),
-        ),
-        builder: (context, color, child) {
-          return Focus(
-            onFocusChange: (hasFocus) => setState(() {}),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.02),
-                    Colors.white.withOpacity(0.05)
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 0),
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: TextFormField(
-                    controller: controller,
-                    style: GoogleFonts.dmSans(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    validator: (v) =>
-                    v == null || v.isEmpty ? "Required" : null,
-                    decoration: InputDecoration(
-                      labelText: label,
-                      labelStyle: GoogleFonts.dmSans(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.05),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 18, horizontal: 18),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide(
-                          color: Colors.white24,
-                          width: 1.2,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: const BorderSide(
-                          color: Colors.amberAccent,
-                          width: 2.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+      child: Focus(
+        onFocusChange: (_) => setState(() {}),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: isDark
+                ? LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.02),
+                Colors.white.withOpacity(0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+                : LinearGradient(
+              colors: [
+                Colors.white,
+                const Color(0xFFF4F6FF),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          );
-        },
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withOpacity(0.25)
+                    : Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: isDark
+                ? BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: _buildTextField(controller, label, isDark),
+            )
+                : _buildTextField(controller, label, isDark),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+      TextEditingController controller,
+      String label,
+      bool isDark,
+      ) {
+    return TextFormField(
+      controller: controller,
+      style: GoogleFonts.dmSans(
+        color: isDark ? Colors.white : const Color(0xFF332D56),
+        fontWeight: FontWeight.w500,
+      ),
+      validator: (v) => v == null || v.isEmpty ? "Required" : null,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.dmSans(
+          color: isDark
+              ? Colors.white70
+              : const Color(0xFF555879),
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: isDark
+            ? Colors.white.withOpacity(0.05)
+            : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: 18,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white24
+                : const Color(0xFF555879).withOpacity(0.25),
+            width: 1.2,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.amberAccent
+                : const Color(0xFF332D56),
+            width: 2.0,
+          ),
+        ),
       ),
     );
   }
@@ -274,26 +265,20 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         child: loading
             ? const CircularProgressIndicator(color: Colors.black)
             : Text(
-          "Save Address",
-          style: GoogleFonts.dmSans(
-            color: Colors.black,
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-          ),
-        ),
+                "Save Address",
+                style: GoogleFonts.dmSans(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
       ),
     );
   }
 
   Widget _background() {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xff393053), Color(0xff393053), Color(0xff050B1E)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      decoration: UnifiedDarkUi.screenBackground(Theme.of(context)),
     );
   }
 }

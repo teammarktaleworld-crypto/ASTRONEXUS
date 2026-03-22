@@ -18,7 +18,7 @@ class ProductImageSlider extends StatelessWidget {
           list[i],
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) =>
-          const Center(child: Icon(Icons.broken_image)),
+              const Center(child: Icon(Icons.broken_image)),
         ),
       ),
     );

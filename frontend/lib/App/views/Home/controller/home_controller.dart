@@ -22,7 +22,7 @@ class HomeController with ChangeNotifier {
   void startSubscriptionTimer(VoidCallback callback) {
     subscriptionTimer = Timer.periodic(
       const Duration(minutes: 5),
-          (_) => callback(),
+      (_) => callback(),
     );
   }
 

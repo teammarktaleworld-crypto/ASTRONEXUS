@@ -10,31 +10,34 @@ class LoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return SizedBox(
       height: 52,
       width: double.infinity,
       child: ElevatedButton(
         onPressed: loading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF332D56),
+          backgroundColor: colors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          elevation: 0,
+          elevation: 8,
+          shadowColor: Colors.black.withValues(alpha: 0.24),
         ),
         child: loading
             ? LoadingAnimationWidget.fourRotatingDots(
-          color: Colors.white,
-          size: 26,
-        )
+                color: colors.onPrimary,
+                size: 26,
+              )
             : Text(
-          "Login",
-          style: GoogleFonts.dmSans(
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-            color: Colors.white,
-          ),
-        ),
+                "Login",
+                style: GoogleFonts.dmSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: colors.onPrimary,
+                ),
+              ),
       ),
     );
   }

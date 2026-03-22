@@ -39,15 +39,14 @@ class ReportsManualSection extends StatelessWidget {
                   endIndent: 16, // space from right
                 ),
 
-
                 const SizedBox(height: 8),
 
                 /// 📝 Description
                 Text(
                   "This section provides a detailed overview of all your generated reports. "
-                      "Each report reflects insights based on your activity and selected parameters. "
-                      "Use filters to refine results, explore individual entries for deeper analysis, "
-                      "and track progress over time in a structured and transparent manner.",
+                  "Each report reflects insights based on your activity and selected parameters. "
+                  "Use filters to refine results, explore individual entries for deeper analysis, "
+                  "and track progress over time in a structured and transparent manner.",
                   style: GoogleFonts.dmSans(
                     color: Colors.white70,
                     fontSize: 13.5,

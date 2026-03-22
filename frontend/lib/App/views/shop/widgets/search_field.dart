@@ -1,6 +1,8 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import "dart:ui";
+
+import "package:astro_tale/core/localization/app_localizations.dart";
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 
 class SearchField extends StatelessWidget {
   final TextEditingController controller;
@@ -18,31 +20,62 @@ class SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(18),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white12),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[
+                colors.surface.withOpacity(isDark ? 0.68 : 0.98),
+                colors.surface.withOpacity(isDark ? 0.56 : 0.92),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withOpacity(0.14)
+                  : colors.primary.withOpacity(0.16),
+            ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.25 : 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: TextField(
             controller: controller,
             onChanged: onChanged,
-            style: GoogleFonts.poppins(color: Colors.white),
+            style: GoogleFonts.dmSans(
+              color: colors.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
             decoration: InputDecoration(
-              hintText: "Search products...",
-              hintStyle: GoogleFonts.poppins(color: Colors.white54),
+              hintText: context.l10n.tr("searchProducts"),
+              hintStyle: GoogleFonts.dmSans(
+                color: colors.onSurface.withOpacity(0.52),
+                fontWeight: FontWeight.w500,
+              ),
               border: InputBorder.none,
-              icon: const Icon(Icons.search, color: Colors.white70),
+              icon: Icon(Icons.search_rounded, color: colors.primary, size: 22),
               suffixIcon: isSearching
                   ? IconButton(
-                icon: const Icon(Icons.close, color: Colors.white70),
-                onPressed: onClear,
-              )
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: colors.onSurface.withOpacity(0.72),
+                      ),
+                      onPressed: onClear,
+                    )
                   : null,
             ),
           ),

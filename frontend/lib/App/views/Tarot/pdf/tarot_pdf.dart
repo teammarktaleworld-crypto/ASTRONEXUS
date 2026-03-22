@@ -17,10 +17,9 @@ class TarotPdfService {
       final pdf = pw.Document();
 
       /// Load logo image
-      final logoBytes =
-      (await rootBundle.load('assets/images/astrologo.png'))
-          .buffer
-          .asUint8List();
+      final logoBytes = (await rootBundle.load(
+        'assets/images/astrologo.png',
+      )).buffer.asUint8List();
       final logoImage = pw.MemoryImage(logoBytes);
 
       final headerStyle = pw.TextStyle(
@@ -60,8 +59,7 @@ class TarotPdfService {
                     pw.Text("Tarot Reading Report", style: headerStyle),
                     pw.SizedBox(height: 4),
                     pw.Text(
-                      DateFormat("dd MMM yyyy, hh:mm a")
-                          .format(DateTime.now()),
+                      DateFormat("dd MMM yyyy, hh:mm a").format(DateTime.now()),
                       style: const pw.TextStyle(fontSize: 10),
                     ),
                   ],
@@ -166,17 +164,18 @@ class TarotPdfService {
 
   /// Info table row
   static pw.TableRow _infoRow(String title, String value) {
-    return pw.TableRow(children: [
-      pw.Padding(
-        padding: const pw.EdgeInsets.all(8),
-        child: pw.Text(title,
-            style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-      ),
-      pw.Padding(
-        padding: const pw.EdgeInsets.all(8),
-        child: pw.Text(value),
-      ),
-    ]);
+    return pw.TableRow(
+      children: [
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(8),
+          child: pw.Text(
+            title,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+          ),
+        ),
+        pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text(value)),
+      ],
+    );
   }
 
   /// Table cell

@@ -46,7 +46,9 @@ class MatchingScoreScreen extends StatelessWidget {
                     "Cosmic Compatibility Overview",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.dmSans(
-                        fontSize: 12, color: Colors.white70),
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
                   ),
 
                   const SizedBox(height: 12),
@@ -74,10 +76,13 @@ class MatchingScoreScreen extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text("Ashtakoota Score",
-                              style: GoogleFonts.dmSans(
-                                  fontSize: 12,
-                                  color: Colors.white70)),
+                          Text(
+                            "Ashtakoota Score",
+                            style: GoogleFonts.dmSans(
+                              fontSize: 12,
+                              color: Colors.white70,
+                            ),
+                          ),
                           const SizedBox(height: 6),
                           Text(
                             "${totalScore.toStringAsFixed(1)} / $outOf",
@@ -120,8 +125,7 @@ class MatchingScoreScreen extends StatelessWidget {
                   glassCard(
                     child: ElevatedButton.icon(
                       onPressed: () => _downloadPdf(context),
-                      icon:
-                      const Icon(Icons.download, color: Colors.black),
+                      icon: const Icon(Icons.download, color: Colors.black),
                       label: Text(
                         "Download PDF",
                         style: GoogleFonts.dmSans(
@@ -131,8 +135,7 @@ class MatchingScoreScreen extends StatelessWidget {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accent,
-                        padding:
-                        const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -157,13 +160,11 @@ class MatchingScoreScreen extends StatelessWidget {
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
-
                 Color(0xff050B1E),
                 // Color(0xff1C4D8D),
                 // Color(0xff0F2854),
                 Color(0xff393053),
                 Color(0xff050B1E),
-
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -171,10 +172,7 @@ class MatchingScoreScreen extends StatelessWidget {
           ),
         ),
         Positioned.fill(
-          child: IgnorePointer(
-            ignoring: true,
-            child: SmoothShootingStars(),
-          ),
+          child: IgnorePointer(ignoring: true, child: SmoothShootingStars()),
         ),
         Positioned.fill(
           child: Container(color: Colors.black.withOpacity(0.45)),
@@ -188,14 +186,16 @@ class MatchingScoreScreen extends StatelessWidget {
   Widget _topBar(BuildContext context) {
     return glassCard(
       child: Padding(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
           children: [
             IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back_ios_new,
-                  color: Colors.white, size: 18),
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -222,18 +222,24 @@ class MatchingScoreScreen extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label,
-            style: GoogleFonts.dmSans(
-                color: accent,
-                fontSize: 12,
-                fontWeight: FontWeight.w700)),
+        Text(
+          label,
+          style: GoogleFonts.dmSans(
+            color: accent,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(name,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.dmSans(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w700)),
+        Text(
+          name,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.dmSans(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ],
     );
   }
@@ -266,14 +272,17 @@ class MatchingScoreScreen extends StatelessWidget {
               Text(
                 e.key,
                 style: GoogleFonts.dmSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: BorderRadius.circular(12),
@@ -281,9 +290,10 @@ class MatchingScoreScreen extends StatelessWidget {
                 child: Text(
                   "$score / $outOf",
                   style: GoogleFonts.dmSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ],
@@ -321,8 +331,9 @@ class MatchingScoreScreen extends StatelessWidget {
               pw.Text(
                 "Matching Compatibility Report",
                 style: pw.TextStyle(
-                    fontSize: 22,
-                    fontWeight: pw.FontWeight.bold),
+                  fontSize: 22,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
 
               pw.SizedBox(height: 12),
@@ -335,8 +346,9 @@ class MatchingScoreScreen extends StatelessWidget {
               pw.Text(
                 "Total Score: ${totalScore.toStringAsFixed(1)} / $outOf",
                 style: pw.TextStyle(
-                    fontSize: 16,
-                    fontWeight: pw.FontWeight.bold),
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
 
               pw.SizedBox(height: 6),
@@ -346,8 +358,7 @@ class MatchingScoreScreen extends StatelessWidget {
 
               pw.Table.fromTextArray(
                 headers: const ["Koot", "Score"],
-                headerStyle: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 data: _pdfTableData(),
               ),
             ],
@@ -376,8 +387,7 @@ class MatchingScoreScreen extends StatelessWidget {
     };
 
     return koots.entries
-        .map((e) =>
-    ["${e.key}", "${e.value["score"]} / ${e.value["out_of"]}"])
+        .map((e) => ["${e.key}", "${e.value["score"]} / ${e.value["out_of"]}"])
         .toList();
   }
 }

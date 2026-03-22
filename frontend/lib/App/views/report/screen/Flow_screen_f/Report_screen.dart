@@ -188,7 +188,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final filters = ["All reports", "Self", "Wealth"];
 
     // Get the position of the icon
-    final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        key.currentContext!.findRenderObject() as RenderBox;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
     final Size size = renderBox.size;
 
@@ -204,13 +205,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
       items: filters
           .map(
             (f) => PopupMenuItem<String>(
-          value: f,
-          child: Text(
-            f,
-            style: GoogleFonts.dmSans(color: Colors.black87, fontSize: 16),
-          ),
-        ),
-      )
+              value: f,
+              child: Text(
+                f,
+                style: GoogleFonts.dmSans(color: Colors.black87, fontSize: 16),
+              ),
+            ),
+          )
           .toList(),
       elevation: 8,
       color: Colors.white,
@@ -223,29 +224,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
-    final selfReports =
-    reports.where((e) => e.category == ReportCategory.self).toList();
+    final selfReports = reports
+        .where((e) => e.category == ReportCategory.self)
+        .toList();
 
-    final wealthReports =
-    reports.where((e) => e.category == ReportCategory.wealth).toList();
+    final wealthReports = reports
+        .where((e) => e.category == ReportCategory.wealth)
+        .toList();
 
-    final selfFeatured =
-    selfReports.where((e) => e.highlight).toList();
+    final selfFeatured = selfReports.where((e) => e.highlight).toList();
 
-    final selfNormal =
-    selfReports.where((e) => !e.highlight).toList();
+    final selfNormal = selfReports.where((e) => !e.highlight).toList();
 
-    final wealthFeatured =
-    wealthReports.where((e) => e.highlight).toList();
+    final wealthFeatured = wealthReports.where((e) => e.highlight).toList();
 
-    final wealthNormal =
-    wealthReports.where((e) => !e.highlight).toList();
-
+    final wealthNormal = wealthReports.where((e) => !e.highlight).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -266,7 +261,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
       body: Stack(
         children: [
           const ReportsBackground(),
-
 
           SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 140),
@@ -289,7 +283,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   const ReportsManualSection(),
 
                   const SizedBox(height: 28),
-                   SectionTitle("Understand Yourself"),
+                  SectionTitle("Understand Yourself"),
                   Divider(
                     color: Colors.white.withOpacity(0.6),
                     thickness: 2, // height of the line
@@ -314,17 +308,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       reports: reports.skip(i).take(3).toList(),
                       onTap: _onReportTap,
                     ),
-
                 ],
               ),
             ),
           ),
 
           /// 📊 Floating Progress Bar
-          const ReportsProgressPositionedBar(
-            completed: 3,
-            total: 8,
-          ),
+          const ReportsProgressPositionedBar(completed: 3, total: 8),
         ],
       ),
     );

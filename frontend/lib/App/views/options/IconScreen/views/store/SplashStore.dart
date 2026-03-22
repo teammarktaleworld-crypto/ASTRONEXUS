@@ -13,7 +13,6 @@ class SplashStore extends StatefulWidget {
 }
 
 class _SplashStoreState extends State<SplashStore> {
-
   @override
   void initState() {
     super.initState();
@@ -34,13 +33,8 @@ class _SplashStoreState extends State<SplashStore> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             /// 🛍 Store Icon
-            Icon(
-              LucideIcons.shoppingBag,
-              size: 80,
-              color: Colors.tealAccent,
-            )
+            Icon(LucideIcons.shoppingBag, size: 80, color: Colors.tealAccent)
                 .animate()
                 .fadeIn(duration: 500.ms)
                 .scale(begin: const Offset(0.85, 0.85), end: const Offset(1, 1))
@@ -51,13 +45,13 @@ class _SplashStoreState extends State<SplashStore> {
 
             /// ✨ Title
             Text(
-              "ASTRO STORE",
-              style: GoogleFonts.dmSans(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            )
+                  "ASTRO STORE",
+                  style: GoogleFonts.dmSans(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                )
                 .animate()
                 .fadeIn(delay: 300.ms, duration: 400.ms)
                 .slideY(begin: 0.25, end: 0),
@@ -67,13 +61,8 @@ class _SplashStoreState extends State<SplashStore> {
             /// 🪐 Subtitle
             Text(
               "Explore cosmic products",
-              style: GoogleFonts.dmSans(
-                fontSize: 16,
-                color: Colors.white54,
-              ),
-            )
-                .animate()
-                .fadeIn(delay: 500.ms, duration: 300.ms),
+              style: GoogleFonts.dmSans(fontSize: 16, color: Colors.white54),
+            ).animate().fadeIn(delay: 500.ms, duration: 300.ms),
           ],
         ),
       ),

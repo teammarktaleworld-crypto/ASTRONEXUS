@@ -56,11 +56,17 @@ class HomeTopBar extends StatelessWidget implements PreferredSizeWidget {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.notifications_none, color: Colors.white70),
+                        icon: const Icon(
+                          Icons.notifications_none,
+                          color: Colors.white70,
+                        ),
                         onPressed: onNotificationTap,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.monetization_on, color: Colors.white70),
+                        icon: const Icon(
+                          Icons.monetization_on,
+                          color: Colors.white70,
+                        ),
                         onPressed: onSubscriptionTap,
                       ),
                     ],

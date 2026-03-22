@@ -1,10 +1,11 @@
+import 'package:astro_tale/App/Model/wishlist_model.dart';
+import 'package:astro_tale/App/controller/Auth_Controller.dart';
+import 'package:astro_tale/App/views/shop/product/product_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../../services/api_services/wishlist_service.dart';
-import '../../../Model/wishlist_model.dart';
-import '../../../controller/Auth_Controller.dart';
-import '../../shop/product/product_details_screen.dart';
+import 'package:astro_tale/core/widgets/unified_dark_ui.dart';
+import 'package:astro_tale/services/api_services/wishlist_service.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -24,8 +25,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
     _service = WishlistService(token: AuthController.token);
     _wishlistFuture = _service.getWishlist();
   }
-
-
 
   Future<void> _removeItem(String productId) async {
     setState(() => _loading = true);
@@ -48,28 +47,19 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xff050B1E),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          "Wishlist",
-          style: GoogleFonts.dmSans(
-            fontSize: 26,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: UnifiedDarkUi.appBar(context, title: "Wishlist"),
       body: Stack(
         children: [
           _background(),
           FutureBuilder<WishlistModel>(
             future: _wishlistFuture,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting || _loading) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  _loading) {
                 return _shimmerGrid();
               }
 
@@ -77,7 +67,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 return Center(
                   child: Text(
                     "Your wishlist is empty",
-                    style: GoogleFonts.dmSans(color: Colors.white60, fontSize: 16),
+                    style: GoogleFonts.dmSans(
+                      color: Colors.white60,
+                      fontSize: 16,
+                    ),
                   ),
                 );
               }
@@ -102,21 +95,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
     );
   }
 
-  Widget _background() => Container(
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          Color(0xff393053),
-          Color(0xff393053),
-          Color(0xff050B1E),
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ),
-    ),
-  );
+  Widget _background() =>
+      Container(decoration: UnifiedDarkUi.screenBackground(Theme.of(context)));
 
   Widget _wishlistCard(Product product) {
+    final theme = Theme.of(context);
     final image = product.images.isNotEmpty ? product.images.first : null;
 
     return Material(
@@ -129,20 +112,20 @@ class _WishlistScreenState extends State<WishlistScreen> {
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               colors: [
-                Colors.white.withOpacity(0.05),
-                Colors.white.withOpacity(0.08),
+                UnifiedDarkUi.cardSurface(theme),
+                UnifiedDarkUi.cardSurfaceAlt(theme),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
             ],
-            border: Border.all(color: Colors.white12),
+            border: Border.all(color: UnifiedDarkUi.cardBorder(theme)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,25 +138,40 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       topRight: Radius.circular(20),
                     ),
                     child: image != null
-                        ? Image.network(image, height: 180, width: double.infinity, fit: BoxFit.cover)
+                        ? Image.network(
+                            image,
+                            height: 180,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          )
                         : Container(
-                      height: 180,
-                      color: Colors.white10,
-                      child: const Icon(Icons.image, color: Colors.white30),
-                    ),
+                            height: 180,
+                            color: Colors.white10,
+                            child: const Icon(
+                              Icons.image,
+                              color: Colors.white30,
+                            ),
+                          ),
                   ),
                   Positioned(
                     top: 8,
                     right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.55),
+                        color: Colors.black.withValues(alpha: 0.55),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        "₹${product.price}",
-                        style: GoogleFonts.dmSans(color: Colors.amberAccent, fontWeight: FontWeight.w700, fontSize: 14),
+                        "Rs ${product.price}",
+                        style: GoogleFonts.dmSans(
+                          color: Colors.amberAccent,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
@@ -186,22 +184,33 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.55),
+                          color: Colors.black.withValues(alpha: 0.55),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.favorite, size: 16, color: Colors.redAccent),
+                        child: const Icon(
+                          Icons.favorite,
+                          size: 16,
+                          color: Colors.redAccent,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 child: Text(
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.dmSans(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ],
@@ -225,7 +234,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
         baseColor: Colors.white10,
         highlightColor: Colors.white24,
         child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.white10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white10,
+          ),
         ),
       ),
     );

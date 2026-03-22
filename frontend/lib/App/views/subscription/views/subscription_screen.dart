@@ -1,36 +1,42 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:astro_tale/ui_componets/cosmic/cosmic_one.dart';
+import "package:astro_tale/core/localization/app_localizations.dart";
+import "package:astro_tale/ui_componets/cosmic/cosmic_one.dart";
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 
 class SubscriptionPage extends StatelessWidget {
   const SubscriptionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xff050B1E),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // 🌌 Background
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xff050B1E),
-                  Color(0xff393053),
-                  Color(0xff050B1E),
-                ],
+                colors: isDark
+                    ? const <Color>[
+                        Color(0xff050B1E),
+                        Color(0xff393053),
+                        Color(0xff050B1E),
+                      ]
+                    : const <Color>[
+                        Color(0xFFF7FAFF),
+                        Color(0xFFEAF1FF),
+                        Color(0xFFF7FAFF),
+                      ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
             ),
           ),
-
-          Positioned.fill(child: SmoothShootingStars()),
-
+          if (isDark) const Positioned.fill(child: SmoothShootingStars()),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -38,60 +44,68 @@ class SubscriptionPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _header(context),
-                  const SizedBox(height: 10),
-                  _subtitle(),
-                  const SizedBox(height: 18),
-                  _banner(),
-                  const SizedBox(height: 22),
-
+                  const SizedBox(height: 12),
                   Text(
-                    "Subscription Plans",
+                    l10n.tr("subscriptionHint"),
                     style: GoogleFonts.dmSans(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? Colors.white70
+                          : colors.onSurface.withOpacity(0.72),
+                      fontSize: 13,
+                      height: 1.55,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  _promoBanner(context),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.tr("subscriptionPlans"),
+                    style: GoogleFonts.dmSans(
+                      color: isDark ? Colors.white : colors.onSurface,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 14),
-
                   Expanded(
                     child: ListView(
                       physics: const BouncingScrollPhysics(),
-                      children: const [
-                        CalmPlanCard(
+                      children: [
+                        ModernPlanCard(
                           title: "Weekly",
                           price: "₹199",
-                          description: "Gentle start for guidance",
-                          features: [
+                          tagline: "Gentle start for guidance",
+                          features: const [
                             "Daily Horoscope",
                             "Basic Insights",
+                            "Priority reminders",
                           ],
                         ),
-                        SizedBox(height: 14),
-                        CalmPlanCard(
+                        const SizedBox(height: 14),
+                        ModernPlanCard(
                           title: "Monthly",
                           price: "₹699",
-                          description: "Complete astrological support",
+                          tagline: "Complete astrological support",
                           highlight: true,
-                          features: [
+                          features: const [
                             "Daily Horoscope",
                             "Nutritional Astrology",
                             "Exclusive Videos",
                             "Chat Support",
                           ],
                         ),
-                        SizedBox(height: 14),
-                        CalmPlanCard(
+                        const SizedBox(height: 14),
+                        ModernPlanCard(
                           title: "Yearly",
                           price: "₹6,999",
-                          description: "Deep long-term guidance",
-                          features: [
+                          tagline: "Deep long-term guidance",
+                          features: const [
                             "All Monthly Features",
                             "Priority Astrologer Support",
                             "Premium Content",
                           ],
                         ),
-                        SizedBox(height: 28),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
@@ -104,146 +118,207 @@ class SubscriptionPage extends StatelessWidget {
     );
   }
 
-  // ================= HEADER =================
-
   Widget _header(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       children: [
         Expanded(
           child: Text(
-            "Upgrade Your Journey",
+            context.l10n.tr("upgradeJourney"),
             style: GoogleFonts.dmSans(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : colors.onSurface,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
-        GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            width: 36,
-            height: 36,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white12,
-            ),
-            child: const Icon(Icons.close, color: Colors.white70, size: 20),
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(
+            Icons.close,
+            color: isDark ? Colors.white70 : colors.onSurface,
           ),
         ),
       ],
     );
   }
 
-  Widget _subtitle() {
-    return Text(
-      "Choose a plan that aligns with your spiritual path and unlock deeper astrological insights.",
-      style: GoogleFonts.dmSans(
-        color: Colors.white60,
-        fontSize: 13,
-        height: 1.5,
-      ),
-    );
-  }
+  Widget _promoBanner(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colors = theme.colorScheme;
 
-  Widget _banner() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: Image.asset(
-        "assets/images/bg_card.png",
-        height: 120,
-        width: double.infinity,
-        fit: BoxFit.cover,
+    return Container(
+      height: 132,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: isDark
+              ? const <Color>[Color(0xFF2E3F8D), Color(0xFF5C45A0)]
+              : <Color>[
+                  colors.primary.withOpacity(0.88),
+                  colors.secondary.withOpacity(0.82),
+                ],
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.25 : 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -10,
+            top: -14,
+            child: Icon(Icons.auto_awesome, size: 120, color: Colors.white12),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Premium Cosmic Access",
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  "Unlock complete reports and priority support.",
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ================= PLAN CARD =================
-
-class CalmPlanCard extends StatelessWidget {
+class ModernPlanCard extends StatelessWidget {
   final String title;
   final String price;
-  final String description;
+  final String tagline;
   final List<String> features;
   final bool highlight;
 
-  const CalmPlanCard({
+  const ModernPlanCard({
     super.key,
     required this.title,
     required this.price,
-    required this.description,
+    required this.tagline,
     required this.features,
     this.highlight = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final border = highlight
+        ? colors.primary.withOpacity(0.8)
+        : (isDark ? Colors.white12 : colors.outline.withOpacity(0.3));
 
+    return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: highlight
-              ? Colors.black.withOpacity(0.3)
-              : Colors.black.withOpacity(0.15),
-          width: highlight ? 1.4 : 1,
-        ),
+        color: colors.surface.withOpacity(isDark ? 0.82 : 0.96),
+        border: Border.all(color: border, width: highlight ? 1.3 : 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.7),
-            blurRadius:  5 ,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(isDark ? 0.28 : 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: GoogleFonts.dmSans(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : colors.onSurface,
+                  ),
+                ),
+              ),
+              if (highlight)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Text(
+                    context.l10n.tr("new"),
+                    style: GoogleFonts.dmSans(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 5),
           Text(
-            description,
+            tagline,
             style: GoogleFonts.dmSans(
-              fontSize: 12,
-              color: Colors.black54,
+              fontSize: 13,
+              color: isDark
+                  ? Colors.white.withOpacity(0.72)
+                  : colors.onSurface.withOpacity(0.72),
             ),
           ),
           const SizedBox(height: 14),
           Text(
             price,
             style: GoogleFonts.dmSans(
-              fontSize: 26,
+              fontSize: 28,
               fontWeight: FontWeight.w800,
+              color: isDark ? Colors.white : colors.onSurface,
             ),
           ),
-          const SizedBox(height: 14),
-
+          const SizedBox(height: 16),
           ...features.map(
-                (f) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+            (feature) => Padding(
+              padding: const EdgeInsets.only(bottom: 7),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.check_circle_outline,
-                    size: 16,
-                    color: Colors.black87,
-                  ),
+                  Icon(Icons.check_circle, size: 16, color: colors.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      f,
+                      feature,
                       style: GoogleFonts.dmSans(
-                        fontSize: 13,
-                        color: Colors.black87,
+                        fontSize: 13.5,
+                        color: isDark
+                            ? Colors.white.withOpacity(0.88)
+                            : colors.onSurface.withOpacity(0.9),
                       ),
                     ),
                   ),
@@ -251,27 +326,25 @@ class CalmPlanCard extends StatelessWidget {
               ),
             ),
           ),
-
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xff18122B),
                 elevation: 0,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                 ),
               ),
               onPressed: () {},
               child: Text(
-                "Subscribe",
+                context.l10n.tr("subscribe"),
                 style: GoogleFonts.dmSans(
                   fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

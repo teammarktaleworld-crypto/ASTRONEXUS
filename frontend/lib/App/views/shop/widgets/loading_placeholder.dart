@@ -51,8 +51,7 @@ class _LoadingPlaceholderState extends State<LoadingPlaceholder>
               height: widget.height,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.05),
-                borderRadius:
-                widget.borderRadius ?? BorderRadius.circular(16),
+                borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
                 border: Border.all(color: Colors.white12),
               ),
               child: ShaderMask(
@@ -69,9 +68,7 @@ class _LoadingPlaceholderState extends State<LoadingPlaceholder>
                   ).createShader(rect);
                 },
                 blendMode: BlendMode.srcATop,
-                child: Container(
-                  color: Colors.white.withOpacity(0.05),
-                ),
+                child: Container(color: Colors.white.withOpacity(0.05)),
               ),
             );
           },

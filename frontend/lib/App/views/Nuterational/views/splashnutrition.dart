@@ -12,7 +12,6 @@ class Splashnutrition extends StatefulWidget {
 }
 
 class _SplashnutritionState extends State<Splashnutrition> {
-
   @override
   void initState() {
     super.initState();
@@ -20,9 +19,7 @@ class _SplashnutritionState extends State<Splashnutrition> {
     Future.delayed(const Duration(milliseconds: 1000), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const NutritionalAstrologyScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const NutritionalAstrologyScreen()),
       );
     });
   }
@@ -35,46 +32,45 @@ class _SplashnutritionState extends State<Splashnutrition> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             /// 🌿 Leaf icon with healthy glow
             Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.greenAccent.withOpacity(0.45),
-                    blurRadius: 28,
-                    spreadRadius: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.greenAccent.withOpacity(0.45),
+                        blurRadius: 28,
+                        spreadRadius: 8,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Icon(
-                LucideIcons.leaf,
-                size: 90,
-                color: Colors.greenAccent,
-              ),
-            )
+                  child: const Icon(
+                    LucideIcons.leaf,
+                    size: 90,
+                    color: Colors.greenAccent,
+                  ),
+                )
                 .animate()
                 .fadeIn(duration: 400.ms)
                 .scale(begin: const Offset(0.88, 0.88), end: const Offset(1, 1))
                 .then()
                 .scale(
-              begin: const Offset(1, 1),
-              end: const Offset(1.05, 1.05),
-              duration: 300.ms,
-            ),
+                  begin: const Offset(1, 1),
+                  end: const Offset(1.05, 1.05),
+                  duration: 300.ms,
+                ),
 
             const SizedBox(height: 28),
 
             /// 🥗 Title
             Text(
-              "NUTRITIONAL ASTROLOGY",
-              style: GoogleFonts.dmSans(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            )
+                  "NUTRITIONAL ASTROLOGY",
+                  style: GoogleFonts.dmSans(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                )
                 .animate()
                 .fadeIn(delay: 300.ms, duration: 400.ms)
                 .slideY(begin: 0.25, end: 0),
@@ -84,13 +80,8 @@ class _SplashnutritionState extends State<Splashnutrition> {
             /// ✨ Subtitle
             Text(
               "Discover your cosmic diet",
-              style: GoogleFonts.dmSans(
-                fontSize: 16,
-                color: Colors.white54,
-              ),
-            )
-                .animate()
-                .fadeIn(delay: 500.ms, duration: 300.ms),
+              style: GoogleFonts.dmSans(fontSize: 16, color: Colors.white54),
+            ).animate().fadeIn(delay: 500.ms, duration: 300.ms),
           ],
         ),
       ),

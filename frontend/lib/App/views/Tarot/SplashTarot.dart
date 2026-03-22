@@ -57,18 +57,14 @@ class _SplashtarotState extends State<Splashtarot> {
           children: [
             /// 🔮 Animated Tarot Image
             Container(
-              width: 110,
-              height: 110,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-
-
-              ),
-              child: Image.asset(
-                "assets/images/tarot_card.png",
-                fit: BoxFit.cover,
-              ),
-            )
+                  width: 110,
+                  height: 110,
+                  decoration: BoxDecoration(shape: BoxShape.circle),
+                  child: Image.asset(
+                    "assets/images/tarot_card.png",
+                    fit: BoxFit.cover,
+                  ),
+                )
                 .animate(onPlay: (c) => c.repeat(reverse: true))
                 .moveY(begin: -6, end: 6, duration: 3.seconds)
                 .fadeIn(duration: 600.ms)
@@ -78,14 +74,14 @@ class _SplashtarotState extends State<Splashtarot> {
 
             /// Title
             Text(
-              "TAROT",
-              style: GoogleFonts.dmSans(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 3,
-                color: Colors.white,
-              ),
-            )
+                  "TAROT",
+                  style: GoogleFonts.dmSans(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 3,
+                    color: Colors.white,
+                  ),
+                )
                 .animate()
                 .fadeIn(delay: 300.ms, duration: 500.ms)
                 .slideY(begin: 0.3, end: 0),
@@ -95,10 +91,7 @@ class _SplashtarotState extends State<Splashtarot> {
             /// Subtitle
             Text(
               "Reveal Your Destiny",
-              style: GoogleFonts.dmSans(
-                fontSize: 15,
-                color: Colors.white60,
-              ),
+              style: GoogleFonts.dmSans(fontSize: 15, color: Colors.white60),
             ).animate().fadeIn(delay: 500.ms),
 
             const SizedBox(height: 26),
@@ -113,10 +106,7 @@ class _SplashtarotState extends State<Splashtarot> {
                 const SizedBox(width: 8),
                 _optionChip(Icons.nightlight_round, "Future"),
               ],
-            )
-                .animate()
-                .fadeIn(delay: 700.ms)
-                .slideY(begin: 0.4, end: 0),
+            ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.4, end: 0),
           ],
         ),
       ),

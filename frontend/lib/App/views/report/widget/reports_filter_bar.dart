@@ -21,7 +21,7 @@ class ReportsFilterBar extends StatelessWidget {
     void _openFilterMenu() async {
       // Get the icon position
       final RenderBox renderBox =
-      iconKey.currentContext!.findRenderObject() as RenderBox;
+          iconKey.currentContext!.findRenderObject() as RenderBox;
       final Offset offset = renderBox.localToGlobal(Offset.zero);
       final Size size = renderBox.size;
 
@@ -36,17 +36,17 @@ class ReportsFilterBar extends StatelessWidget {
         items: filters
             .map(
               (f) => PopupMenuItem<String>(
-            value: f,
+                value: f,
 
-            child: Text(
-              f,
-              style: GoogleFonts.dmSans(
-                color: Colors.black87,
-                fontSize: 16,
+                child: Text(
+                  f,
+                  style: GoogleFonts.dmSans(
+                    color: Colors.black87,
+                    fontSize: 16,
+                  ),
+                ),
               ),
-            ),
-          ),
-        )
+            )
             .toList(),
         elevation: 20,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -81,7 +81,9 @@ class ReportsFilterBar extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 6),
+                    horizontal: 20,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white10,
                     borderRadius: BorderRadius.circular(14),

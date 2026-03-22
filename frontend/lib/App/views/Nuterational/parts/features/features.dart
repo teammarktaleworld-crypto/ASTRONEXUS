@@ -8,8 +8,7 @@ class AriesDietProfileScreen extends StatefulWidget {
   const AriesDietProfileScreen({super.key});
 
   @override
-  State<AriesDietProfileScreen> createState() =>
-      _AriesDietProfileScreenState();
+  State<AriesDietProfileScreen> createState() => _AriesDietProfileScreenState();
 }
 
 class _AriesDietProfileScreenState extends State<AriesDietProfileScreen> {
@@ -18,15 +17,14 @@ class _AriesDietProfileScreenState extends State<AriesDietProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.asset(
-      'assets/animation/back.mp4',
-    )..initialize().then((_) {
-      _videoController
-        ..setLooping(true)
-        ..setVolume(0)
-        ..play();
-      setState(() {});
-    });
+    _videoController = VideoPlayerController.asset('assets/animation/back.mp4')
+      ..initialize().then((_) {
+        _videoController
+          ..setLooping(true)
+          ..setVolume(0)
+          ..play();
+        setState(() {});
+      });
   }
 
   @override
@@ -57,16 +55,12 @@ class _AriesDietProfileScreenState extends State<AriesDietProfileScreen> {
           /// STRONG DARK OVERLAY
           Container(color: Colors.black.withOpacity(0.75)),
 
-
           /// CONTENT
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
-                children: [
-                  SizedBox(height: 60,),
-                  const _DietProfileCard(),
-                ],
+                children: [SizedBox(height: 60), const _DietProfileCard()],
               ),
             ),
           ),
@@ -87,7 +81,6 @@ class _DietProfileCard extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
         child: Container(
-
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: const Color(0xFF0E0E11).withOpacity(0.92),
@@ -137,8 +130,7 @@ class _DietProfileCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Icon(LucideIcons.mars,
-                      color: Colors.redAccent),
+                  const Icon(LucideIcons.mars, color: Colors.redAccent),
                 ],
               ),
 
@@ -156,11 +148,9 @@ class _DietProfileCard extends StatelessWidget {
               const _SectionTitle("Foods to Avoid"),
               const Row(
                 children: [
-                  _FoodAvoid(
-                      icon: LucideIcons.flame, label: "Excess Spice"),
+                  _FoodAvoid(icon: LucideIcons.flame, label: "Excess Spice"),
                   SizedBox(width: 12),
-                  _FoodAvoid(
-                      icon: LucideIcons.trash2, label: "Processed Food"),
+                  _FoodAvoid(icon: LucideIcons.trash2, label: "Processed Food"),
                 ],
               ),
 
@@ -173,11 +163,7 @@ class _DietProfileCard extends StatelessWidget {
                 height: 90,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  children: const [
-                    _MealImage(),
-                    _MealImage(),
-                    _MealImage(),
-                  ],
+                  children: const [_MealImage(), _MealImage(), _MealImage()],
                 ),
               ),
 
@@ -188,35 +174,35 @@ class _DietProfileCard extends StatelessWidget {
               const _InfoBox(
                 "Cooling herbs, leafy greens, turmeric, ginger, grounding roots.",
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               const _InfoBox(
                 "Cooling herbs, leafy greens, turmeric, ginger, grounding roots.",
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               const _InfoBox(
                 "Cooling herbs, leafy greens, turmeric, ginger, grounding roots.",
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               const _InfoBox(
                 "Cooling herbs, leafy greens, turmeric, ginger, grounding roots.",
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               const _InfoBox(
                 "Cooling herbs, leafy greens, turmeric, ginger, grounding roots.",
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               const _InfoBox(
                 "Cooling herbs, leafy greens, turmeric, ginger, grounding roots.",
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               const _InfoBox(
                 "Cooling herbs, leafy greens, turmeric, ginger, grounding roots.",
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               const _InfoBox(
                 "Cooling herbs, leafy greens, turmeric, ginger, grounding roots.",
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
             ],
           ),
         ),
@@ -294,10 +280,7 @@ class _FoodAvoid extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               label,
-              style: GoogleFonts.dmSans(
-                fontSize: 12,
-                color: Colors.white70,
-              ),
+              style: GoogleFonts.dmSans(fontSize: 12, color: Colors.white70),
             ),
           ],
         ),
@@ -320,10 +303,7 @@ class _MealImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white10),
       ),
-      child: const Icon(
-        LucideIcons.utensils,
-        color: Colors.white54,
-      ),
+      child: const Icon(LucideIcons.utensils, color: Colors.white54),
     );
   }
 }

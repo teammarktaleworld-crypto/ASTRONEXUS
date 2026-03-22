@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:astro_tale/core/localization/app_localizations.dart';
+import 'package:astro_tale/core/theme/app_gradients.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:astro_tale/App/views/Home/others/view/birthchart.dart'; // Example import
 
@@ -20,21 +22,29 @@ class _KundliScreenState extends State<KundliScreen> {
   Widget build(BuildContext context) {
     // Get screen width for responsive container
     final double screenWidth = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/bg.png"), // Replace with your image path
-                fit: BoxFit.cover,
+          if (isDark)
+            Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/bg.png"),
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
+            )
+          else
+            Container(decoration: AppGradients.screenDecoration(theme)),
+          Container(
+            color: isDark
+                ? Colors.black.withOpacity(0.18)
+                : AppGradients.screenOverlay(theme),
           ),
-          // Semi-transparent overlay
-          Container(color: Colors.black.withOpacity(0.18)),
 
           SafeArea(
             child: SingleChildScrollView(
@@ -54,7 +64,10 @@ class _KundliScreenState extends State<KundliScreen> {
                             color: Colors.transparent,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.arrow_back, color: Colors.white),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: isDark ? Colors.white : colors.onSurface,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -62,18 +75,21 @@ class _KundliScreenState extends State<KundliScreen> {
                       // Title centered
                       Expanded(
                         child: Text(
-                          "Create Your Kundli",
-                          textAlign: TextAlign.center, // Center the text within the Expanded
+                          context.l10n.tr("birthChart"),
+                          textAlign: TextAlign
+                              .center, // Center the text within the Expanded
                           style: GoogleFonts.dmSans(
                             fontWeight: FontWeight.w700,
                             fontSize: 22,
-                            color: Colors.white,
+                            color: isDark ? Colors.white : colors.onSurface,
                           ),
                         ),
                       ),
 
                       // Empty space to balance back button
-                      SizedBox(width: 40), // same width as back button + padding
+                      SizedBox(
+                        width: 40,
+                      ), // same width as back button + padding
                     ],
                   ),
 
@@ -81,29 +97,52 @@ class _KundliScreenState extends State<KundliScreen> {
                   Text(
                     "Enter your birth details to generate your personalized Kundli chart.",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.dmSans(fontSize: 14, color: Colors.white70),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 14,
+                      color: isDark
+                          ? Colors.white70
+                          : colors.onSurface.withOpacity(0.72),
+                    ),
                   ),
                   const SizedBox(height: 30),
 
                   // Adaptive Form Container
                   Center(
                     child: Container(
-                      width: screenWidth > 500 ? 500 : screenWidth * 0.95, // Responsive width
+                      width: screenWidth > 500
+                          ? 500
+                          : screenWidth * 0.95, // Responsive width
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: Color(0xff1A1A1F),
-                        border: Border.all(color: const Color(0xFFDBC33F), width: 1.5),
+                        color: AppGradients.glassFill(theme),
+                        border: Border.all(
+                          color: AppGradients.glassBorder(theme),
+                          width: 1.5,
+                        ),
                       ),
                       child: Column(
                         children: [
-                          _buildInputField(nameController, "Full Name", Icons.person_outline),
                           _buildInputField(
-                              birthDateController, "Date of Birth", Icons.calendar_today_outlined),
+                            nameController,
+                            "Full Name",
+                            Icons.person_outline,
+                          ),
                           _buildInputField(
-                              birthTimeController, "Time of Birth", Icons.access_time_outlined),
+                            birthDateController,
+                            "Date of Birth",
+                            Icons.calendar_today_outlined,
+                          ),
                           _buildInputField(
-                              birthPlaceController, "Place of Birth", Icons.location_on_outlined),
+                            birthTimeController,
+                            "Time of Birth",
+                            Icons.access_time_outlined,
+                          ),
+                          _buildInputField(
+                            birthPlaceController,
+                            "Place of Birth",
+                            Icons.location_on_outlined,
+                          ),
                           const SizedBox(height: 15),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -116,12 +155,14 @@ class _KundliScreenState extends State<KundliScreen> {
                           const SizedBox(height: 35),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xffDBC33F),
+                              backgroundColor: colors.primary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 60, vertical: 14),
+                                horizontal: 60,
+                                vertical: 14,
+                              ),
                             ),
                             onPressed: () {
                               if (nameController.text.isNotEmpty &&
@@ -132,19 +173,23 @@ class _KundliScreenState extends State<KundliScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (_) => const BirthChartScreen()),
+                                    builder: (_) => const BirthChartScreen(),
+                                  ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text("Please fill all details")),
+                                    content: Text("Please fill all details"),
+                                  ),
                                 );
                               }
                             },
                             child: Text(
                               "Generate Kundli",
                               style: GoogleFonts.dmSans(
-                                  fontWeight: FontWeight.w600, color: Colors.black),
+                                fontWeight: FontWeight.w600,
+                                color: colors.onPrimary,
+                              ),
                             ),
                           ),
                         ],
@@ -161,20 +206,35 @@ class _KundliScreenState extends State<KundliScreen> {
   }
 
   Widget _buildInputField(
-      TextEditingController controller, String label, IconData icon) {
+    TextEditingController controller,
+    String label,
+    IconData icon,
+  ) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
-        style: GoogleFonts.dmSans(color: Colors.white),
+        style: GoogleFonts.dmSans(color: colors.onSurface),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color(0xffDBC33F)),
+          prefixIcon: Icon(icon, color: colors.primary),
           labelText: label,
-          labelStyle: GoogleFonts.dmSans(color: Colors.white70),
+          labelStyle: GoogleFonts.dmSans(
+            color: isDark
+                ? Colors.white70
+                : colors.onSurface.withOpacity(0.72),
+          ),
           filled: true,
-          fillColor: Colors.black.withOpacity(0.4),
+          fillColor: isDark
+              ? Colors.black.withOpacity(0.25)
+              : Colors.white.withOpacity(0.86),
           border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
     );
@@ -182,21 +242,39 @@ class _KundliScreenState extends State<KundliScreen> {
 
   Widget _genderChip(String gender, IconData icon) {
     final bool isSelected = selectedGender == gender;
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => setState(() => selectedGender = gender),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xffDBC33F) : Colors.black.withOpacity(0.4),
+          color: isSelected
+              ? colors.primary
+              : (isDark
+                    ? Colors.black.withOpacity(0.35)
+                    : colors.surfaceContainerHighest),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: isSelected ? Colors.black : Colors.white),
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected
+                  ? colors.onPrimary
+                  : (isDark ? Colors.white : colors.onSurface),
+            ),
             const SizedBox(width: 6),
-            Text(gender,
-                style: GoogleFonts.dmSans(color: isSelected ? Colors.black : Colors.white)),
+            Text(
+              gender,
+              style: GoogleFonts.dmSans(
+                color: isSelected
+                    ? colors.onPrimary
+                    : (isDark ? Colors.white : colors.onSurface),
+              ),
+            ),
           ],
         ),
       ),

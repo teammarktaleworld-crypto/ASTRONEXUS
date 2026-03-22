@@ -80,25 +80,25 @@ class _WishlistButtonState extends State<WishlistButton> {
               color: Colors.black.withOpacity(0.4),
               blurRadius: 10,
               offset: const Offset(0, 6),
-            )
+            ),
           ],
         ),
         child: loading
             ? const Center(
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white,
-            ),
-          ),
-        )
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                ),
+              )
             : Icon(
-          isWishlisted ? Icons.favorite : Icons.favorite_border,
-          color: Colors.white,
-          size: 28,
-        ),
+                isWishlisted ? Icons.favorite : Icons.favorite_border,
+                color: Colors.white,
+                size: 28,
+              ),
       ),
     );
   }

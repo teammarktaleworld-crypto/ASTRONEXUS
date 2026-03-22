@@ -38,11 +38,17 @@ class AstrologySignupModel {
     final hour24 = isAM ? hour % 12 : (hour % 12) + 12;
     final timeString =
         '${hour24.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+    var sanitizedPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (sanitizedPhone.length == 11 && sanitizedPhone.startsWith('0')) {
+      sanitizedPhone = sanitizedPhone.substring(1);
+    } else if (sanitizedPhone.length == 12 && sanitizedPhone.startsWith('91')) {
+      sanitizedPhone = sanitizedPhone.substring(2);
+    }
 
     return {
       "name": name.trim(),
       "email": email.trim(),
-      "phone": phone.trim(),
+      "phone": sanitizedPhone,
       "password": password,
       "confirmPassword": confirmPassword,
       "dateOfBirth": dateOfBirth,

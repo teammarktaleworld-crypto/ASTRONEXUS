@@ -14,8 +14,7 @@ class AstrologerListVideoScreen extends StatefulWidget {
       _AstrologerListVideoScreenState();
 }
 
-class _AstrologerListVideoScreenState
-    extends State<AstrologerListVideoScreen>
+class _AstrologerListVideoScreenState extends State<AstrologerListVideoScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _starController;
   late StarField _starField;
@@ -54,7 +53,6 @@ class _AstrologerListVideoScreenState
                   Color(0xff1C4D8D),
                   Color(0xff0F2854),
                   Color(0xff050B1E),
-
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -181,14 +179,15 @@ class _AstrologerListVideoScreenState
               children: [
                 Text(
                   categories[index]["title"]!,
-                  style: GoogleFonts.dmSans(
-                      fontSize: 14, color: Colors.white),
+                  style: GoogleFonts.dmSans(fontSize: 14, color: Colors.white),
                 ),
                 const Spacer(),
                 Text(
                   "${categories[index]["count"]} experts",
                   style: GoogleFonts.dmSans(
-                      fontSize: 12, color: Colors.white60),
+                    fontSize: 12,
+                    color: Colors.white60,
+                  ),
                 ),
               ],
             ),
@@ -210,9 +209,8 @@ class _AstrologerListVideoScreenState
             color: Colors.black.withOpacity(0.7), // your desired color
             blurRadius: 12, // how soft the shadow is
             offset: const Offset(0, 6), // position of the shadow
-          )
-
-        ]
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -233,15 +231,18 @@ class _AstrologerListVideoScreenState
                 Text(
                   "Rahul Mehta",
                   style: GoogleFonts.dmSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   "Life Astrology & Numerology",
                   style: GoogleFonts.dmSans(
-                      fontSize: 13, color: Colors.white70),
+                    fontSize: 13,
+                    color: Colors.white70,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -250,7 +251,7 @@ class _AstrologerListVideoScreenState
                     const SizedBox(width: 8),
                     _badge("₹80/min"),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -262,7 +263,7 @@ class _AstrologerListVideoScreenState
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(LucideIcons.video, color: Colors.white),
-          )
+          ),
         ],
       ),
     );
@@ -296,16 +297,12 @@ class _AstrologerListVideoScreenState
             color: Colors.black54.withOpacity(0.5), // your desired color
             blurRadius: 12, // how soft the shadow is
             offset: const Offset(0, 6), // position of the shadow
-          )
-
-        ]
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: _liveTag(),
-          ),
+          Align(alignment: Alignment.topRight, child: _liveTag()),
           const SizedBox(height: 6),
           const CircleAvatar(
             radius: 38,
@@ -314,26 +311,32 @@ class _AstrologerListVideoScreenState
             ),
           ),
           const SizedBox(height: 10),
-          Text("Ananya Sharma",
-              style: GoogleFonts.dmSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white)),
-          Text("Tarot Specialist",
-              style: GoogleFonts.dmSans(
-                  fontSize: 12, color: Colors.white60)),
+          Text(
+            "Ananya Sharma",
+            style: GoogleFonts.dmSans(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          Text(
+            "Tarot Specialist",
+            style: GoogleFonts.dmSans(fontSize: 12, color: Colors.white60),
+          ),
           const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("₹65/min",
-                  style: GoogleFonts.dmSans(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.greenAccent)),
-              const Icon(LucideIcons.video,
-                  color: Colors.white70, size: 20),
+              Text(
+                "₹65/min",
+                style: GoogleFonts.dmSans(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.greenAccent,
+                ),
+              ),
+              const Icon(LucideIcons.video, color: Colors.white70, size: 20),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -349,19 +352,23 @@ class _AstrologerListVideoScreenState
       child: const Text(
         "LIVE",
         style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: Colors.white),
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
     );
   }
 
   Widget _sectionTitle(String title) {
-    return Text(title,
-        style: GoogleFonts.dmSans(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Colors.white));
+    return Text(
+      title,
+      style: GoogleFonts.dmSans(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+      ),
+    );
   }
 
   Widget _badge(String text) {
@@ -371,9 +378,10 @@ class _AstrologerListVideoScreenState
         color: Colors.white12,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(text,
-          style:
-          GoogleFonts.dmSans(fontSize: 12, color: Colors.white70)),
+      child: Text(
+        text,
+        style: GoogleFonts.dmSans(fontSize: 12, color: Colors.white70),
+      ),
     );
   }
 }
@@ -392,8 +400,7 @@ class StarField {
   static StarField generate({int count = 80}) {
     final r = Random();
     return StarField(
-      List.generate(
-          count, (_) => Offset(r.nextDouble(), r.nextDouble())),
+      List.generate(count, (_) => Offset(r.nextDouble(), r.nextDouble())),
       List.generate(count, (_) => r.nextDouble() * 1.5 + 0.5),
       List.generate(count, (_) => r.nextDouble() * 400 + 60),
     );
@@ -412,8 +419,8 @@ class StarPainter extends CustomPainter {
 
     for (int i = 0; i < field.positions.length; i++) {
       final x = field.positions[i].dx * size.width;
-      final y = (field.positions[i].dy * size.height +
-          progress * field.speeds[i]) %
+      final y =
+          (field.positions[i].dy * size.height + progress * field.speeds[i]) %
           size.height;
 
       canvas.drawCircle(Offset(x, y), field.sizes[i], paint);

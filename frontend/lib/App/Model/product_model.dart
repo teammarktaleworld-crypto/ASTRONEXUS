@@ -1,14 +1,6 @@
-enum AstrologyType {
-  gemstone,
-  pooja,
-  report,
-  consultation,
-}
+enum AstrologyType { gemstone, pooja, report, consultation }
 
-enum DeliveryType {
-  physical,
-  digital,
-}
+enum DeliveryType { physical, digital }
 
 class ProductModel {
   final String id;
@@ -54,10 +46,11 @@ class ProductModel {
       name: json['name'] ?? '',
       description: json['description'], // nullable
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      category: category != null ? category : null, // keep null if category missing
-      images: (json['images'] as List?)
-          ?.map((e) => e.toString())
-          .toList() ?? [],
+      category: category != null
+          ? category
+          : null, // keep null if category missing
+      images:
+          (json['images'] as List?)?.map((e) => e.toString()).toList() ?? [],
       astrologyType: _parseAstrologyType(json['astrologyType']),
       stock: json['stock'] ?? 0,
       deliveryType: _parseDeliveryType(json['deliveryType']),
@@ -67,7 +60,6 @@ class ProductModel {
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
     );
   }
-
 
   /// Useful for Add / Update product (Admin)
   Map<String, dynamic> toJson() {

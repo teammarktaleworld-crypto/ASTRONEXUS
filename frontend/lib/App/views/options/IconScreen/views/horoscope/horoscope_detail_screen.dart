@@ -1,10 +1,9 @@
-import 'package:astro_tale/App/views/subscription/views/subscription_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../../../../../../services/api_services/horoscope_api.dart';
-import '../../../../../../ui_componets/cosmic/cosmic_one.dart';
-import '../../../../../../ui_componets/glass/glass_card.dart';
+import "package:astro_tale/core/theme/app_gradients.dart";
+import "package:astro_tale/core/widgets/themed_shimmer.dart";
+import "package:astro_tale/services/api_services/horoscope_api.dart";
+import "package:astro_tale/ui_componets/cosmic/cosmic_one.dart";
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 
 class HoroscopeDetailScreen extends StatefulWidget {
   final String sign;
@@ -12,8 +11,7 @@ class HoroscopeDetailScreen extends StatefulWidget {
   const HoroscopeDetailScreen({super.key, required this.sign});
 
   @override
-  State<HoroscopeDetailScreen> createState() =>
-      _HoroscopeDetailScreenState();
+  State<HoroscopeDetailScreen> createState() => _HoroscopeDetailScreenState();
 }
 
 class _HoroscopeDetailScreenState extends State<HoroscopeDetailScreen>
@@ -25,226 +23,266 @@ class _HoroscopeDetailScreenState extends State<HoroscopeDetailScreen>
   String? horoscopeText;
   Map<String, dynamic>? extraData;
 
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
+  late final AnimationController controller;
+  late final Animation<double> fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _fetchHoroscope();
-
-    _controller = AnimationController(
+    controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 450),
     );
+    fadeAnimation = CurvedAnimation(parent: controller, curve: Curves.easeOut);
+    _fetchHoroscope();
+  }
 
-    _fadeAnimation =
-        CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchHoroscope() async {
+    if (!mounted) {
+      return;
+    }
     setState(() => isLoading = true);
-
-    final result = await HoroscopeApi.fetchHoroscope(
-      sign: widget.sign,
-      type: selectedType,
-    );
-
-    setState(() {
-      title = result["title"];
-      horoscopeText = result["horoscope"];
-      extraData = result["extra"];
-      isLoading = false;
-    });
-
-    _controller.forward(from: 0);
+    try {
+      final result = await HoroscopeApi.fetchHoroscope(
+        sign: widget.sign,
+        type: selectedType,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        title = result["title"]?.toString() ?? "";
+        horoscopeText = result["horoscope"]?.toString() ?? "";
+        extraData = result["extra"] as Map<String, dynamic>?;
+        isLoading = false;
+      });
+      controller.forward(from: 0);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        title = "";
+        horoscopeText = "";
+        extraData = null;
+        isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final signName = _displaySign(widget.sign);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final bodyColor = isDark
+        ? Colors.white.withValues(alpha: 0.9)
+        : const Color(0xFF334155);
+    final mutedColor = isDark ? Colors.white70 : const Color(0xFF64748B);
+    final accentColor = isDark
+        ? const Color(0xFFDBC33F)
+        : const Color(0xFF1D4ED8);
+    final borderColor = isDark ? Colors.white24 : const Color(0xFFD8E4F8);
+    final cardFill = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.white.withValues(alpha: 0.92);
+    final previewAsset = "assets/horoscope/${widget.sign.toLowerCase()}.png";
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: isDark
+            ? AppGradients.glassFill(theme)
+            : Colors.white.withValues(alpha: 0.94),
+        foregroundColor: titleColor,
+        iconTheme: IconThemeData(color: titleColor),
+        actionsIconTheme: IconThemeData(color: titleColor),
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        title: Text(
+          "$signName Horoscope",
+          style: GoogleFonts.dmSans(
+            fontWeight: FontWeight.w700,
+            color: titleColor,
+          ),
+        ),
+      ),
       body: Stack(
-        children: [
-          /// 🌌 Background
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff050B1E),
-                  // Color(0xff1C4D8D),
-                  // Color(0xff0F2854),
-                  Color(0xff393053),
-                  Color(0xff050B1E),
-
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-
-          Positioned.fill(child: SmoothShootingStars()),
+        children: <Widget>[
+          Container(decoration: AppGradients.screenDecoration(theme)),
+          if (isDark) const Positioned.fill(child: SmoothShootingStars()),
           Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.45)),
+            child: Container(color: AppGradients.screenOverlay(theme)),
           ),
-
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                children: [
-                  /// 🔙 Header
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "${widget.sign} Horoscope",
-                        style: GoogleFonts.dmSans(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFFDBC33F),
-                        ),
-                      ),
-                      const Spacer(),
-                      const SizedBox(width: 40),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// 🔘 Toggle
+                children: <Widget>[
                   _buildToggleRow(),
-
-                  const SizedBox(height: 18),
-
-                  /// 🪐 Visual Section
+                  const SizedBox(height: 14),
                   Container(
-                    height: 140,
+                    height: 132,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white24),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(color: borderColor),
+                      color: cardFill,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
-                      child: Image.asset(
-                        "assets/reports/investment.png",
-                        fit: BoxFit.cover,
+                    clipBehavior: Clip.antiAlias,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 14,
                       ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  /// 📜 Horoscope Content
-                  Expanded(
-                    child: glassCard(
-                      child: isLoading
-                          ? Center(
-                        child: LoadingAnimationWidget.threeArchedCircle(
-                          color: Colors.white,
-                          size: 46,
-                        ),
-                      )
-                          : FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Text(
-                                "Cosmic Insight for ${widget.sign}",
-                                style: GoogleFonts.dmSans(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  fontSize: 18,
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.12)
+                                  : Colors.white,
+                              border: Border.all(color: borderColor),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Image.asset(
+                                previewAsset,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.auto_awesome_rounded,
+                                  color: accentColor,
+                                  size: 30,
                                 ),
                               ),
-
-                              if (title != null) ...[
-                                const SizedBox(height: 6),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
                                 Text(
-                                  title!,
+                                  signName.toUpperCase(),
                                   style: GoogleFonts.dmSans(
-                                    color: Colors.yellow,
-                                    fontSize: 14,
+                                    color: accentColor,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _titleForType(selectedType),
+                                  style: GoogleFonts.dmSans(
+                                    color: titleColor,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "Tap another tab for weekly or monthly guidance",
+                                  style: GoogleFonts.dmSans(
+                                    color: mutedColor,
+                                    fontSize: 12.5,
                                   ),
                                 ),
                               ],
-
-                              /// 🌙 Monthly Meta
-                              if (selectedType == "monthly" &&
-                                  extraData != null) ...[
-                                const SizedBox(height: 16),
-                                Container(
-                                  width: 300,
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white10,
-                                    borderRadius:
-                                    BorderRadius.circular(16),
-                                    border: Border.all(
-                                        color: Colors.white24),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        "Standout Days",
-                                        style: GoogleFonts.dmSans(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: cardFill,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: borderColor),
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.32)
+                                : const Color(
+                                    0xFF9AAECE,
+                                  ).withValues(alpha: 0.22),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: isLoading
+                          ? const ThemedShimmerCard(height: 260)
+                          : FadeTransition(
+                              opacity: fadeAnimation,
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      "Cosmic Insight for $signName",
+                                      style: GoogleFonts.dmSans(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 18,
+                                        color: titleColor,
                                       ),
-                                      const SizedBox(height: 4),
+                                    ),
+                                    if ((title ?? "").isNotEmpty) ...<Widget>[
+                                      const SizedBox(height: 6),
                                       Text(
-                                        extraData!["standout_days"],
+                                        title!,
                                         style: GoogleFonts.dmSans(
-                                          color: Colors.white70,
-                                          fontSize: 19,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        "Challenging Days",
-                                        style: GoogleFonts.dmSans(
-                                          color: Colors.redAccent,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        extraData!["challenging_days"],
-                                        style: GoogleFonts.dmSans(
-                                          color: Colors.white60,
-                                          fontSize: 19,
+                                          color: accentColor,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ],
-                                  ),
-                                ),
-                              ],
-
-                              const SizedBox(height: 16),
-                              const Divider(color: Colors.white24),
-                              const SizedBox(height: 12),
-
-                              Text(
-                                horoscopeText ?? "",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 15,
-                                  height: 1.7,
-                                  color: Colors.white70,
+                                    const SizedBox(height: 16),
+                                    Divider(color: borderColor),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      horoscopeText?.trim().isEmpty == true
+                                          ? "Horoscope not available"
+                                          : horoscopeText!,
+                                      style: GoogleFonts.dmSans(
+                                        fontSize: 15,
+                                        height: 1.7,
+                                        color: bodyColor,
+                                      ),
+                                    ),
+                                    if (selectedType == "monthly" &&
+                                        extraData != null) ...<Widget>[
+                                      const SizedBox(height: 16),
+                                      _monthlyMeta(
+                                        "Standout Days",
+                                        _asList(extraData!["standout_days"]),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      _monthlyMeta(
+                                        "Challenging Days",
+                                        _asList(extraData!["challenging_days"]),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
+                            ),
                     ),
                   ),
                 ],
@@ -256,44 +294,126 @@ class _HoroscopeDetailScreenState extends State<HoroscopeDetailScreen>
     );
   }
 
-  /// 🔘 Toggle Buttons
   Widget _buildToggleRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: <Widget>[
         _toggleButton("Daily", "daily"),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         _toggleButton("Weekly", "weekly"),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         _toggleButton("Monthly", "monthly"),
       ],
     );
   }
 
   Widget _toggleButton(String label, String type) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final selectedFill = isDark
+        ? const Color(0xFFDBC33F)
+        : const Color(0xFF1D4ED8);
+    final idleFill = isDark
+        ? Colors.white10
+        : const Color(0xFFE2E8F0).withValues(alpha: 0.7);
+    final borderColor = isDark ? Colors.white24 : const Color(0xFFD8E4F8);
+    final activeText = isDark ? Colors.black : Colors.white;
+    final inactiveText = isDark ? Colors.white70 : const Color(0xFF334155);
     final isSelected = selectedType == type;
 
-    return GestureDetector(
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
       onTap: () {
         setState(() => selectedType = type);
         _fetchHoroscope();
       },
-      child: Container(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color:
-          isSelected ? const Color(0xFFDBC33F) : Colors.white10,
-          borderRadius: BorderRadius.circular(14),
+          color: isSelected ? selectedFill : idleFill,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor),
         ),
         child: Text(
           label,
           style: GoogleFonts.dmSans(
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.black : Colors.white70,
+            fontWeight: FontWeight.w700,
+            color: isSelected ? activeText : inactiveText,
           ),
         ),
       ),
     );
+  }
+
+  Widget _monthlyMeta(String label, List<String> items) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final valueColor = isDark ? Colors.white70 : const Color(0xFF475569);
+    final fillColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.white.withValues(alpha: 0.88);
+    final borderColor = isDark ? Colors.white24 : const Color(0xFFD8E4F8);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: fillColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            label,
+            style: GoogleFonts.dmSans(
+              color: titleColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            items.isEmpty ? "-" : items.join(", "),
+            style: GoogleFonts.dmSans(color: valueColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _titleForType(String type) {
+    switch (type) {
+      case "daily":
+        return "Daily Guidance";
+      case "weekly":
+        return "Weekly Guidance";
+      case "monthly":
+        return "Monthly Guidance";
+      default:
+        return "Horoscope";
+    }
+  }
+
+  String _displaySign(String raw) {
+    final cleaned = raw.trim();
+    if (cleaned.isEmpty) {
+      return "Zodiac";
+    }
+    return cleaned[0].toUpperCase() + cleaned.substring(1).toLowerCase();
+  }
+
+  List<String> _asList(dynamic value) {
+    if (value is List) {
+      return value.map((e) => e.toString()).toList(growable: false);
+    }
+    if (value == null) {
+      return const <String>[];
+    }
+    final text = value.toString().trim();
+    if (text.isEmpty) {
+      return const <String>[];
+    }
+    return <String>[text];
   }
 }

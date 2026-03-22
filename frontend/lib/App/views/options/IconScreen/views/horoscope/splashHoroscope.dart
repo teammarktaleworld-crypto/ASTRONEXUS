@@ -12,7 +12,6 @@ class SplashHoroscope extends StatefulWidget {
 }
 
 class _SplashHoroscopeState extends State<SplashHoroscope> {
-
   @override
   void initState() {
     super.initState();
@@ -40,10 +39,7 @@ class _SplashHoroscopeState extends State<SplashHoroscope> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: GoogleFonts.dmSans(
-              fontSize: 14,
-              color: Colors.white,
-            ),
+            style: GoogleFonts.dmSans(fontSize: 14, color: Colors.white),
           ),
         ],
       ),
@@ -58,25 +54,24 @@ class _SplashHoroscopeState extends State<SplashHoroscope> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             /// 🌞 Sun icon
             Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.yellow.withOpacity(0.1),
-                    blurRadius: 30,
-                    spreadRadius: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.yellow.withOpacity(0.1),
+                        blurRadius: 30,
+                        spreadRadius: 8,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Icon(
-                LucideIcons.sun,
-                size: 80,
-                color: Colors.yellow,
-              ),
-            )
+                  child: const Icon(
+                    LucideIcons.sun,
+                    size: 80,
+                    color: Colors.yellow,
+                  ),
+                )
                 .animate()
                 .fadeIn(duration: 400.ms)
                 .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1)),
@@ -85,13 +80,13 @@ class _SplashHoroscopeState extends State<SplashHoroscope> {
 
             /// Title
             Text(
-              "HOROSCOPE",
-              style: GoogleFonts.dmSans(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            )
+                  "HOROSCOPE",
+                  style: GoogleFonts.dmSans(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                )
                 .animate()
                 .fadeIn(delay: 300.ms, duration: 400.ms)
                 .slideY(begin: 0.2, end: 0),
@@ -101,27 +96,22 @@ class _SplashHoroscopeState extends State<SplashHoroscope> {
             /// Subtitle
             Text(
               "Check your daily zodiac insights",
-              style: GoogleFonts.dmSans(
-                fontSize: 16,
-                color: Colors.white54,
-              ),
-            )
-                .animate()
-                .fadeIn(delay: 450.ms, duration: 300.ms),
+              style: GoogleFonts.dmSans(fontSize: 16, color: Colors.white54),
+            ).animate().fadeIn(delay: 450.ms, duration: 300.ms),
 
             const SizedBox(height: 24),
 
             /// 🔹 Options Row
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _optionChip(LucideIcons.sunrise, "Daily"),
-                const SizedBox(width: 12),
-                _optionChip(LucideIcons.calendar, "Weekly"),
-                const SizedBox(width: 12),
-                _optionChip(LucideIcons.star, "Monthly"),
-              ],
-            )
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _optionChip(LucideIcons.sunrise, "Daily"),
+                    const SizedBox(width: 12),
+                    _optionChip(LucideIcons.calendar, "Weekly"),
+                    const SizedBox(width: 12),
+                    _optionChip(LucideIcons.star, "Monthly"),
+                  ],
+                )
                 .animate()
                 .fadeIn(delay: 600.ms, duration: 400.ms)
                 .slideY(begin: 0.3, end: 0),

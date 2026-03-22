@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../App/Model/wishlist_model.dart';
 import '../API/APIservice.dart';
+import 'package:flutter/foundation.dart';
 
 class WishlistService {
   final String token;
@@ -18,12 +19,10 @@ class WishlistService {
       },
     );
 
-    print("GET Wishlist Response Code: ${res.statusCode}");
-    print("GET Wishlist Response Body: ${res.body}");
+    debugPrint("GET Wishlist Response Code: ${res.statusCode}");
 
     if (res.statusCode == 200) {
-      final decoded = jsonDecode(res.body);
-      print("Decoded Wishlist JSON: $decoded");
+      final decoded = jsonDecode(res.body) as Map<String, dynamic>;
       return WishlistModel.fromJson(decoded);
     }
 

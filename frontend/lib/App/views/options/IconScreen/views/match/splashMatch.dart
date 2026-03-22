@@ -12,7 +12,6 @@ class SplashMatch extends StatefulWidget {
 }
 
 class _SplashMatchState extends State<SplashMatch> {
-
   @override
   void initState() {
     super.initState();
@@ -33,46 +32,45 @@ class _SplashMatchState extends State<SplashMatch> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             /// 💗 Heart icon with romantic glow
             Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(0.5),
-                    blurRadius: 30,
-                    spreadRadius: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.5),
+                        blurRadius: 30,
+                        spreadRadius: 8,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Icon(
-                LucideIcons.heart,
-                size: 80,
-                color: Colors.pinkAccent,
-              ),
-            )
+                  child: const Icon(
+                    LucideIcons.heart,
+                    size: 80,
+                    color: Colors.pinkAccent,
+                  ),
+                )
                 .animate()
                 .fadeIn(duration: 400.ms)
                 .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1))
                 .then()
                 .scale(
-              begin: const Offset(1, 1),
-              end: const Offset(1.06, 1.06),
-              duration: 300.ms,
-            ),
+                  begin: const Offset(1, 1),
+                  end: const Offset(1.06, 1.06),
+                  duration: 300.ms,
+                ),
 
             const SizedBox(height: 20),
 
             /// ✨ Title
             Text(
-              "LOVE MATCH",
-              style: GoogleFonts.dmSans(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            )
+                  "LOVE MATCH",
+                  style: GoogleFonts.dmSans(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                )
                 .animate()
                 .fadeIn(delay: 300.ms, duration: 400.ms)
                 .slideY(begin: 0.2, end: 0),
@@ -82,13 +80,8 @@ class _SplashMatchState extends State<SplashMatch> {
             /// 💞 Subtitle
             Text(
               "Find your perfect zodiac match",
-              style: GoogleFonts.dmSans(
-                fontSize: 16,
-                color: Colors.white54,
-              ),
-            )
-                .animate()
-                .fadeIn(delay: 500.ms, duration: 300.ms),
+              style: GoogleFonts.dmSans(fontSize: 16, color: Colors.white54),
+            ).animate().fadeIn(delay: 500.ms, duration: 300.ms),
           ],
         ),
       ),

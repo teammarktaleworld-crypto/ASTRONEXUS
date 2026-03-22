@@ -32,27 +32,25 @@ class _AddressWidgetState extends State<AddressWidget> {
   }
 
   void _loadAddresses() {
-    _addressesFuture =
-        _apiService.getUserAddresses(token: widget.userToken);
+    _addressesFuture = _apiService.getUserAddresses(token: widget.userToken);
   }
 
   // ===================== ADDRESS FORM =====================
   void _showAddressForm({Address? address}) {
     final formKey = GlobalKey<FormState>();
-    final fullNameController =
-    TextEditingController(text: address?.fullName ?? '');
-    final phoneController =
-    TextEditingController(text: address?.phone ?? '');
-    final streetController =
-    TextEditingController(text: address?.street ?? '');
-    final cityController =
-    TextEditingController(text: address?.city ?? '');
-    final stateController =
-    TextEditingController(text: address?.state ?? '');
-    final countryController =
-    TextEditingController(text: address?.country ?? '');
-    final postalCodeController =
-    TextEditingController(text: address?.postalCode ?? '');
+    final fullNameController = TextEditingController(
+      text: address?.fullName ?? '',
+    );
+    final phoneController = TextEditingController(text: address?.phone ?? '');
+    final streetController = TextEditingController(text: address?.street ?? '');
+    final cityController = TextEditingController(text: address?.city ?? '');
+    final stateController = TextEditingController(text: address?.state ?? '');
+    final countryController = TextEditingController(
+      text: address?.country ?? '',
+    );
+    final postalCodeController = TextEditingController(
+      text: address?.postalCode ?? '',
+    );
 
     bool isDefault = address?.isDefault ?? false;
 
@@ -99,13 +97,29 @@ class _AddressWidgetState extends State<AddressWidget> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      _buildTextField(fullNameController, "Full Name", Icons.person),
+                      _buildTextField(
+                        fullNameController,
+                        "Full Name",
+                        Icons.person,
+                      ),
                       _buildTextField(phoneController, "Phone", Icons.phone),
-                      _buildTextField(streetController, "Street", Icons.location_on),
-                      _buildTextField(cityController, "City", Icons.location_city),
+                      _buildTextField(
+                        streetController,
+                        "Street",
+                        Icons.location_on,
+                      ),
+                      _buildTextField(
+                        cityController,
+                        "City",
+                        Icons.location_city,
+                      ),
                       _buildTextField(stateController, "State", Icons.map),
                       _buildTextField(countryController, "Country", Icons.flag),
-                      _buildTextField(postalCodeController, "Postal Code", Icons.mail),
+                      _buildTextField(
+                        postalCodeController,
+                        "Postal Code",
+                        Icons.mail,
+                      ),
                       Row(
                         children: [
                           Checkbox(
@@ -114,8 +128,10 @@ class _AddressWidgetState extends State<AddressWidget> {
                                 setModalState(() => isDefault = val ?? false),
                             activeColor: Colors.amberAccent,
                           ),
-                          Text("Set as default",
-                              style: GoogleFonts.poppins(color: Colors.white70)),
+                          Text(
+                            "Set as default",
+                            style: GoogleFonts.poppins(color: Colors.white70),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -148,10 +164,14 @@ class _AddressWidgetState extends State<AddressWidget> {
                             try {
                               if (address == null) {
                                 await _apiService.addAddress(
-                                    token: widget.userToken, address: newAddress);
+                                  token: widget.userToken,
+                                  address: newAddress,
+                                );
                               } else {
                                 await _apiService.updateAddress(
-                                    token: widget.userToken, address: newAddress);
+                                  token: widget.userToken,
+                                  address: newAddress,
+                                );
                               }
                               Navigator.pop(context);
                               setState(_loadAddresses);
@@ -182,7 +202,10 @@ class _AddressWidgetState extends State<AddressWidget> {
   }
 
   Widget _buildTextField(
-      TextEditingController controller, String label, IconData icon) {
+    TextEditingController controller,
+    String label,
+    IconData icon,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: TextFormField(
@@ -217,12 +240,15 @@ class _AddressWidgetState extends State<AddressWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: Colors.amberAccent));
+            child: CircularProgressIndicator(color: Colors.amberAccent),
+          );
         }
         if (snapshot.hasError) {
           return Center(
-            child: Text("Error loading addresses",
-                style: GoogleFonts.poppins(color: Colors.white70)),
+            child: Text(
+              "Error loading addresses",
+              style: GoogleFonts.poppins(color: Colors.white70),
+            ),
           );
         }
 
@@ -231,11 +257,14 @@ class _AddressWidgetState extends State<AddressWidget> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Select Delivery Address",
-                style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700)),
+            Text(
+              "Select Delivery Address",
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(height: 14),
             Expanded(
               child: ListView.builder(
@@ -259,7 +288,9 @@ class _AddressWidgetState extends State<AddressWidget> {
                         color: const Color(0xff18122B),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: isSelected ? Colors.amberAccent : Colors.white10,
+                          color: isSelected
+                              ? Colors.amberAccent
+                              : Colors.white10,
                           width: 1.5,
                         ),
                         boxShadow: [
@@ -276,17 +307,28 @@ class _AddressWidgetState extends State<AddressWidget> {
                           /// Header: Icon + Name + Default Check
                           Row(
                             children: [
-                              Icon(Icons.location_on_rounded,
-                                  color: isSelected ? Colors.amberAccent : Colors.white54),
+                              Icon(
+                                Icons.location_on_rounded,
+                                color: isSelected
+                                    ? Colors.amberAccent
+                                    : Colors.white54,
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: Text(addr.fullName,
-                                    style: GoogleFonts.poppins(
-                                        color: Colors.white, fontWeight: FontWeight.w600)),
+                                child: Text(
+                                  addr.fullName,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                               if (addr.isDefault)
-                                const Icon(Icons.check_circle,
-                                    color: Colors.greenAccent, size: 18),
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.greenAccent,
+                                  size: 18,
+                                ),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -294,11 +336,17 @@ class _AddressWidgetState extends State<AddressWidget> {
                           /// Address details
                           Text(
                             "${addr.street}, ${addr.city}, ${addr.state}",
-                            style: GoogleFonts.poppins(color: Colors.white70, fontSize: 13),
+                            style: GoogleFonts.poppins(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
                           ),
                           Text(
                             "${addr.country} - ${addr.postalCode}",
-                            style: GoogleFonts.poppins(color: Colors.white54, fontSize: 12),
+                            style: GoogleFonts.poppins(
+                              color: Colors.white54,
+                              fontSize: 12,
+                            ),
                           ),
                           const SizedBox(height: 12),
 
@@ -313,20 +361,28 @@ class _AddressWidgetState extends State<AddressWidget> {
                                 onTap: () => _showAddressForm(address: addr),
                                 borderRadius: BorderRadius.circular(12),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.amberAccent.withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.edit_rounded,
-                                          size: 16, color: Colors.amberAccent),
+                                      const Icon(
+                                        Icons.edit_rounded,
+                                        size: 16,
+                                        color: Colors.amberAccent,
+                                      ),
                                       const SizedBox(width: 6),
                                       Text(
                                         "Edit",
                                         style: GoogleFonts.poppins(
-                                            color: Colors.amberAccent, fontWeight: FontWeight.w600),
+                                          color: Colors.amberAccent,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -339,20 +395,28 @@ class _AddressWidgetState extends State<AddressWidget> {
                                 onTap: () => _deleteAddress(addr.id),
                                 borderRadius: BorderRadius.circular(12),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.redAccent.withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.delete_rounded,
-                                          size: 16, color: Colors.white),
+                                      const Icon(
+                                        Icons.delete_rounded,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
                                       const SizedBox(width: 6),
                                       Text(
                                         "Delete",
                                         style: GoogleFonts.poppins(
-                                            color: Colors.white, fontWeight: FontWeight.w600),
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -362,7 +426,7 @@ class _AddressWidgetState extends State<AddressWidget> {
                           ),
                         ],
                       ),
-                    )
+                    ),
                   );
                 },
               ),
@@ -396,7 +460,7 @@ class _AddressWidgetState extends State<AddressWidget> {
                   ),
                 ),
               ),
-            )
+            ),
           ],
         );
       },

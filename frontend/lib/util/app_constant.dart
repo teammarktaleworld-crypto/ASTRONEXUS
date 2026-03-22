@@ -1,15 +1,20 @@
+import "package:astro_tale/core/constants/app_assets.dart";
+import "package:astro_tale/core/constants/app_colors.dart";
+import "package:astro_tale/core/constants/app_constants.dart";
+import "package:flutter/material.dart";
 
-import 'dart:ui';
+class AppConstant {
+  const AppConstant._();
 
-class AppConstant{
+  static const String appName = AppConstants.appName;
+  static const String AppName = appName;
 
-  static const String AppName = "AstroTale";
+  static const Color lightprimary = AppColors.lightPrimary;
+  static const Color secondary = AppColors.secondary;
+  static const Color darkprimary = AppColors.darkPrimary;
 
-  static const Color lightprimary = Color(0xff212121);
-  static const Color secondary = Color(0xff526D82);
-  static const Color darkprimary = Color(0xff1B262C);
-  static const String birthchartAPI = "https://astro-nexus-backend.onrender.com/api/v1/chart";
-  static const banner_shop1 = 'assets/images/banner_shop_one.jpeg';
-  static const banner_shop2 = 'assets/images/banner_shop_two.jpeg';
+  static const String birthchartAPI = AppConstants.birthchartApi;
 
+  static const String banner_shop1 = AppAssets.bannerShopOne;
+  static const String banner_shop2 = AppAssets.bannerShopTwo;
 }

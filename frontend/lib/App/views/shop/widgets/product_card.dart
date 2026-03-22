@@ -52,7 +52,7 @@ class ProductCard extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         Colors.white.withOpacity(.1),
-                        Colors.white.withOpacity(.05)
+                        Colors.white.withOpacity(.05),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,

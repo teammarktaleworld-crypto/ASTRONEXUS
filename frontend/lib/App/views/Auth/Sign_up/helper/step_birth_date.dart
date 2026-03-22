@@ -6,13 +6,13 @@ import 'package:intl/intl.dart';
 import '../../sharedWidgets/step_image.dart';
 
 class StepBirthDate extends StatefulWidget {
-  final String value;
+  final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
   const StepBirthDate({
     super.key,
-    required this.value,
-    required this.onChanged, required TextEditingController controller,
+    required this.controller,
+    required this.onChanged,
   });
 
   @override
@@ -21,7 +21,18 @@ class StepBirthDate extends StatefulWidget {
 
 class _StepBirthDateState extends State<StepBirthDate> {
   final List<String> months = [
-    "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
   late List<int> days;
   late List<int> years;
@@ -38,9 +49,9 @@ class _StepBirthDateState extends State<StepBirthDate> {
     years = List.generate(50, (i) => 1970 + i);
 
     // If a value exists, parse it
-    if (widget.value.isNotEmpty) {
+    if (widget.controller.text.isNotEmpty) {
       try {
-        final dt = DateTime.parse(widget.value);
+        final dt = DateTime.parse(widget.controller.text);
         selectedMonth = dt.month - 1;
         selectedDay = dt.day;
         selectedYear = dt.year;
@@ -50,39 +61,61 @@ class _StepBirthDateState extends State<StepBirthDate> {
 
   void _updateDate() {
     final monthNum = selectedMonth + 1;
-    final dateStr = DateFormat('yyyy-MM-dd').format(
-      DateTime(selectedYear, monthNum, selectedDay),
-    );
+    final dateStr = DateFormat(
+      'yyyy-MM-dd',
+    ).format(DateTime(selectedYear, monthNum, selectedDay));
+    widget.controller.text = dateStr;
     widget.onChanged(dateStr);
   }
 
-  Widget picker(List items, int selectedIndex, ValueChanged<int> onSelected) {
+  Widget picker(
+    BuildContext context,
+    List items,
+    int selectedIndex,
+    ValueChanged<int> onSelected,
+  ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return CupertinoPicker(
       itemExtent: 40,
       scrollController: FixedExtentScrollController(initialItem: selectedIndex),
-      backgroundColor: const Color(0xFF0A1633),
+      backgroundColor: isDark
+          ? const Color(0xFF0A1633)
+          : const Color(0xFFF2F5FF),
       onSelectedItemChanged: (i) {
         onSelected(i);
         _updateDate();
       },
-      children: items.map((e) => Center(
-        child: Text(
-          "$e",
-          style: GoogleFonts.dmSans(color: Colors.white),
-        ),
-      )).toList(),
+      children: items
+          .map(
+            (e) => Center(
+              child: Text(
+                "$e",
+                style: GoogleFonts.dmSans(
+                  color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Column(
       children: [
         const StepImage(path: "assets/images/time.png"),
         Text(
           "The date of birth reveals planetary positions at the moment your journey began.",
           textAlign: TextAlign.center,
-          style: GoogleFonts.dmSans(color: Colors.white54),
+          style: GoogleFonts.dmSans(
+            color: isDark
+                ? Colors.white54
+                : theme.colorScheme.onSurface.withOpacity(0.72),
+          ),
         ),
         const SizedBox(height: 24),
         SizedBox(
@@ -90,13 +123,28 @@ class _StepBirthDateState extends State<StepBirthDate> {
           child: Row(
             children: [
               Expanded(
-                child: picker(months, selectedMonth, (i) => setState(() => selectedMonth = i)),
+                child: picker(
+                  context,
+                  months,
+                  selectedMonth,
+                  (i) => setState(() => selectedMonth = i),
+                ),
               ),
               Expanded(
-                child: picker(days, selectedDay - 1, (i) => setState(() => selectedDay = i + 1)),
+                child: picker(
+                  context,
+                  days,
+                  selectedDay - 1,
+                  (i) => setState(() => selectedDay = i + 1),
+                ),
               ),
               Expanded(
-                child: picker(years, selectedYear - 1970, (i) => setState(() => selectedYear = 1970 + i)),
+                child: picker(
+                  context,
+                  years,
+                  selectedYear - 1970,
+                  (i) => setState(() => selectedYear = 1970 + i),
+                ),
               ),
             ],
           ),

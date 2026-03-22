@@ -1,22 +1,24 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:astro_tale/App/controller/Auth_Controller.dart';
 import 'package:astro_tale/App/views/shop/product/product_details_screen.dart';
 import 'package:astro_tale/App/views/shop/widgets/search_field.dart';
 import 'package:astro_tale/App/views/wishlist/screen/wishlist_screen.dart';
+import 'package:astro_tale/core/localization/app_localizations.dart';
+import 'package:astro_tale/core/widgets/animated_app_background.dart';
+import 'package:astro_tale/core/widgets/unified_dark_ui.dart';
 import 'package:astro_tale/util/app_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:astro_tale/App/views/shop/widgets/category_chip.dart';
-import 'package:astro_tale/App/views/shop/widgets/loading_placeholder.dart';
-import 'package:astro_tale/App/views/shop/widgets/product_card.dart';
 import 'package:flutter_skeleton_ui/flutter_skeleton_ui.dart'; // <-- skeleton import
 
+import '../../../services/api_services/cart_api.dart';
 import '../../../services/api_services/store_api.dart';
-import '../../Model/category_model.dart';
-import '../../Model/product_model.dart';
+import '../../../services/api_services/wishlist_service.dart';
+import 'package:astro_tale/App/Model/category_model.dart';
+import 'package:astro_tale/App/Model/product_model.dart';
 
 import 'cart/cart_screen.dart';
 import 'orders/my_orders_screen.dart';
@@ -30,11 +32,13 @@ class StoreScreen extends StatefulWidget {
 
 class _StoreScreenState extends State<StoreScreen> {
   final StoreApi _storeApi = StoreApi();
+  final CartApi _cartApi = CartApi();
   final TextEditingController _searchController = TextEditingController();
 
   bool isSearching = false;
   bool loading = true;
-  int cartCount = 0; // number of items in cart
+  int cartCount = 0;
+  int wishlistCount = 0;
 
   List<ProductModel> products = [];
   List<ProductModel> filteredProducts = [];
@@ -57,6 +61,7 @@ class _StoreScreenState extends State<StoreScreen> {
   void initState() {
     super.initState();
     _fetchStoreData();
+    _syncBadges();
     _startBannerAutoScroll();
   }
 
@@ -106,6 +111,7 @@ class _StoreScreenState extends State<StoreScreen> {
       debugPrint("Store fetch error: $e");
     }
     if (mounted) setState(() => loading = false);
+    _syncBadges();
   }
 
   Future<void> _fetchProductsByCategory(String? categoryId) async {
@@ -119,6 +125,49 @@ class _StoreScreenState extends State<StoreScreen> {
       debugPrint("Category fetch error: $e");
     }
     if (mounted) setState(() => loading = false);
+  }
+
+  Future<void> _syncBadges() async {
+    if (!AuthController.isLoggedIn || AuthController.token.isEmpty) {
+      if (mounted) {
+        setState(() {
+          cartCount = 0;
+          wishlistCount = 0;
+        });
+      }
+      return;
+    }
+
+    int resolvedCart = cartCount;
+    int resolvedWishlist = wishlistCount;
+
+    try {
+      final cart = await _cartApi.getCart();
+      resolvedCart = cart.items.fold<int>(
+        0,
+        (sum, item) => sum + item.quantity,
+      );
+    } catch (e) {
+      debugPrint("Badge cart sync error: $e");
+    }
+
+    try {
+      final wishlist = await WishlistService(
+        token: AuthController.token,
+      ).getWishlist();
+      resolvedWishlist = wishlist.products.length;
+    } catch (e) {
+      debugPrint("Badge wishlist sync error: $e");
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      cartCount = resolvedCart;
+      wishlistCount = resolvedWishlist;
+    });
   }
 
   // ================= SEARCH =================
@@ -144,136 +193,130 @@ class _StoreScreenState extends State<StoreScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xff050B1E),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          "Shop",
-          style: GoogleFonts.dmSans(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 26,
-          ),
-        ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: UnifiedDarkUi.appBar(
+        context,
+        title: context.l10n.tr("shop"),
+        centerTitle: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => WishlistScreen()),
-            ),
+          _iconWithBadge(
+            icon: Icons.favorite_border,
+            count: wishlistCount,
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => WishlistScreen()),
+              );
+              _syncBadges();
+            },
           ),
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => CartScreen()),
-                ),
-              ),
-              if (cartCount > 0) // only show badge if count > 0
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 18,
-                      minHeight: 18,
-                    ),
-                    child: Center(
-                      child: Text(
-                        "$cartCount",
-                        style: GoogleFonts.dmSans(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+          _iconWithBadge(
+            icon: Icons.shopping_cart_outlined,
+            count: cartCount,
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => CartScreen()),
+              );
+              _syncBadges();
+            },
           ),
           IconButton(
             icon: const Icon(Icons.list_alt_outlined),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => MyOrdersScreen()),
-            ),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => MyOrdersScreen()),
+              );
+              _syncBadges();
+            },
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          _background(),
-          SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  loading
-                      ? SkeletonItem(
-                    child: SkeletonParagraph(
-                      style: SkeletonParagraphStyle(
-                        lines: 1,
-                        spacing: 12,
-                        lineStyle: SkeletonLineStyle(
-                          height: 160,
-                          borderRadius: BorderRadius.circular(16),
+      body: AnimatedAppBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                loading
+                    ? SkeletonItem(
+                        child: SkeletonParagraph(
+                          style: SkeletonParagraphStyle(
+                            lines: 1,
+                            spacing: 12,
+                            lineStyle: SkeletonLineStyle(
+                              height: 160,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  )
-                      : _bannerSlider(),
-                  const SizedBox(height: 16),
-                  SearchField(
-                    controller: _searchController,
-                    isSearching: isSearching,
-                    onChanged: _onSearchChanged,
-                    onClear: () {
-                      _searchController.clear();
-                      _onSearchChanged("");
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  loading ? _categorySkeleton() : _categoryChips(),
-                  const SizedBox(height: 20),
-                  _productGrid(),
-                ],
-              ),
+                      )
+                    : _bannerSlider(),
+                const SizedBox(height: 16),
+                SearchField(
+                  controller: _searchController,
+                  isSearching: isSearching,
+                  onChanged: _onSearchChanged,
+                  onClear: () {
+                    _searchController.clear();
+                    _onSearchChanged("");
+                  },
+                ),
+                const SizedBox(height: 16),
+                loading ? _categorySkeleton() : _categoryChips(),
+                const SizedBox(height: 20),
+                _productGrid(),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _background() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xff393053),
-            Color(0xff393053),
-            Color(0xff050B1E),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+  Widget _iconWithBadge({
+    required IconData icon,
+    required int count,
+    required VoidCallback onTap,
+  }) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          icon: Icon(icon, color: Colors.white),
+          onPressed: onTap,
         ),
-      ),
+        if (count > 0)
+          Positioned(
+            right: 4,
+            top: 4,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1),
+              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              child: Center(
+                child: Text(
+                  "$count",
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -288,10 +331,7 @@ class _StoreScreenState extends State<StoreScreen> {
         itemBuilder: (_, index) {
           return ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.asset(
-              banners[index],
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset(banners[index], fit: BoxFit.cover),
           );
         },
       ),
@@ -354,6 +394,9 @@ class _StoreScreenState extends State<StoreScreen> {
 
   Widget _productGrid() {
     final list = isSearching ? filteredProducts : products;
+    final theme = Theme.of(context);
+    final cardStart = UnifiedDarkUi.cardSurface(theme);
+    final cardEnd = UnifiedDarkUi.cardSurfaceAlt(theme);
 
     if (loading) {
       // Show skeleton shimmer cards
@@ -368,6 +411,7 @@ class _StoreScreenState extends State<StoreScreen> {
         ),
         itemCount: 4,
         itemBuilder: (_, __) => SkeletonItem(
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -405,7 +449,10 @@ class _StoreScreenState extends State<StoreScreen> {
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Text(
             "No products found",
-            style: GoogleFonts.dmSans(color: Colors.white60, fontSize: 16),
+            style: GoogleFonts.dmSans(
+              color: UnifiedDarkUi.mutedOnCard(theme),
+              fontSize: 16,
+            ),
           ),
         ),
       );
@@ -427,34 +474,32 @@ class _StoreScreenState extends State<StoreScreen> {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(20),
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) =>
                       ProductDetailsScreen(productId: product.id.trim()),
                 ),
               );
+              _syncBadges();
             },
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.05),
-                    Colors.white.withOpacity(0.08),
-                  ],
+                  colors: [cardStart, cardEnd],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.25),
+                    color: Colors.black.withValues(alpha: 0.25),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
                 ],
-                border: Border.all(color: Colors.white12),
+                border: Border.all(color: UnifiedDarkUi.cardBorder(theme)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,13 +526,15 @@ class _StoreScreenState extends State<StoreScreen> {
                         right: 8,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            "₹${product.price.toStringAsFixed(2)}",
+                            "Rs ${product.price.toStringAsFixed(2)}",
                             style: GoogleFonts.dmSans(
                               color: Colors.amberAccent,
                               fontWeight: FontWeight.w700,
@@ -499,8 +546,10 @@ class _StoreScreenState extends State<StoreScreen> {
                     ],
                   ),
                   Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: Text(
                       product.name,
                       style: GoogleFonts.dmSans(
@@ -521,5 +570,4 @@ class _StoreScreenState extends State<StoreScreen> {
       },
     );
   }
-
 }

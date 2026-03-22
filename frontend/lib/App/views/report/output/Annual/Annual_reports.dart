@@ -17,7 +17,8 @@ class AnnualReportDetailScreen extends StatefulWidget {
   const AnnualReportDetailScreen({super.key, required this.report});
 
   @override
-  State<AnnualReportDetailScreen> createState() => _AnnualReportDetailScreenState();
+  State<AnnualReportDetailScreen> createState() =>
+      _AnnualReportDetailScreenState();
 }
 
 class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
@@ -72,8 +73,8 @@ class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
             pw.SizedBox(height: 20),
             pw.Text(
               "The ${widget.report.title} provides a detailed analysis of your year. "
-                  "It highlights your opportunities, challenges, and important moments. "
-                  "This report will guide you to align your actions with your life goals.",
+              "It highlights your opportunities, challenges, and important moments. "
+              "This report will guide you to align your actions with your life goals.",
               style: pw.TextStyle(fontSize: 14, lineSpacing: 4),
             ),
             pw.SizedBox(height: 16),
@@ -97,7 +98,9 @@ class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
             ),
             pw.SizedBox(height: 20),
 
-            pw.Bullet(text: "Maintain a balanced diet, including greens and proteins."),
+            pw.Bullet(
+              text: "Maintain a balanced diet, including greens and proteins.",
+            ),
             pw.Bullet(text: "Exercise regularly to boost energy and focus."),
             pw.Bullet(text: "Schedule weekly reflections to track progress."),
             pw.Bullet(text: "Keep a journal of achievements and challenges."),
@@ -127,9 +130,9 @@ class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
 
             pw.Text(
               "This year, focus on building meaningful connections, "
-                  "following your intuition, and pursuing personal goals with confidence. "
-                  "Use the insights from this report to plan your months strategically, "
-                  "and remember to celebrate small victories along the way.",
+              "following your intuition, and pursuing personal goals with confidence. "
+              "Use the insights from this report to plan your months strategically, "
+              "and remember to celebrate small victories along the way.",
               style: pw.TextStyle(fontSize: 14, lineSpacing: 4),
             ),
           ],
@@ -145,14 +148,13 @@ class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
       await OpenFilex.open(file.path);
     } catch (e) {
       print("PDF generation error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to generate PDF")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Failed to generate PDF")));
     } finally {
       setState(() => _generating = false);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -166,12 +168,7 @@ class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xff393053),
-                  Color(0xff050B1E),
-
-
-                ],
+                colors: [Color(0xff393053), Color(0xff050B1E)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -182,15 +179,21 @@ class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 120),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Back Button
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.arrow_back_ios_new,
-                          color: Colors.white, size: 24),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
                     const SizedBox(height: 20),
 
@@ -237,11 +240,11 @@ class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
                       ),
                       child: Text(
                         "Life Theory & Annual Insights:\n\n"
-                            "The ${report.title} analyzes your personal journey, highlighting opportunities, challenges, "
-                            "and key moments. It provides guidance on career, relationships, health, wealth, and spiritual growth. "
-                            "By understanding the patterns, you can align your actions with your goals, make informed decisions, "
-                            "and create a meaningful life strategy for the year ahead. This report includes personalized insights "
-                            "and actionable recommendations designed to maximize your growth and fulfillment.",
+                        "The ${report.title} analyzes your personal journey, highlighting opportunities, challenges, "
+                        "and key moments. It provides guidance on career, relationships, health, wealth, and spiritual growth. "
+                        "By understanding the patterns, you can align your actions with your goals, make informed decisions, "
+                        "and create a meaningful life strategy for the year ahead. This report includes personalized insights "
+                        "and actionable recommendations designed to maximize your growth and fulfillment.",
                         style: GoogleFonts.dmSans(
                           fontSize: 14,
                           color: Colors.white70,
@@ -281,13 +284,13 @@ class _AnnualReportDetailScreenState extends State<AnnualReportDetailScreen> {
                 child: _generating
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                  "Generate PDF",
-                  style: GoogleFonts.dmSans(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+                        "Generate PDF",
+                        style: GoogleFonts.dmSans(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ),

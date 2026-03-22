@@ -139,7 +139,7 @@ exports.generateBirthChart = async (req, res) => {
 
     // Call Astro Nexus API
     const apiRes = await axios.post(
-      "https://astro-nexus-backend-9u1s.onrender.com/api/v1/chart",
+      "https://astronexus-backend.onrender.com/api/unified/birth-chart",
       body
     );
 

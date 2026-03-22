@@ -1,4 +1,6 @@
 import 'package:astro_tale/App/controller/Auth_Controller.dart';
+import 'package:astro_tale/core/constants/app_colors.dart';
+import 'package:astro_tale/core/theme/app_gradients.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -6,7 +8,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:astro_tale/App/views/subscription/views/subscription_screen.dart';
 import 'package:astro_tale/App/views/wallet/screen/wallet_screen.dart';
 import '../../shop/orders/my_orders_screen.dart';
-import '../../tracking/screen/order_tracking_screen.dart';
 import '../../wishlist/screen/wishlist_screen.dart';
 import '../others/birthdetails_screen/birth_details_screen.dart';
 
@@ -17,19 +18,6 @@ class MenuSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _MenuCard(
-          title: "Personal Details",
-          icon: LucideIcons.user,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const BirthDetailsScreen()),
-            );
-          },
-        ),
-
-        const SizedBox(height: 12),
-
         _MenuCard(
           title: "Birth Details / Kundli",
           icon: LucideIcons.cake,
@@ -67,7 +55,6 @@ class MenuSection extends StatelessWidget {
           },
         ),
 
-
         const SizedBox(height: 12),
 
         /// ✅ WALLET (FIXED)
@@ -77,20 +64,16 @@ class MenuSection extends StatelessWidget {
           onTap: () {
             final userId = AuthController.userId;
 
-            if (userId == null || userId.isEmpty) {
+            if (userId.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Please login again"),
-                ),
+                const SnackBar(content: Text("Please login again")),
               );
               return;
             }
 
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => WalletScreen(userId: userId),
-              ),
+              MaterialPageRoute(builder: (_) => WalletScreen(userId: userId)),
             );
           },
         ),
@@ -126,20 +109,31 @@ class _MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = isDark
+        ? AppGradients.glassFill(theme)
+        : AppColors.lightContainerAlt;
+    final borderColor = AppGradients.glassBorder(theme);
+    final iconBg = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : Colors.white.withValues(alpha: 0.16);
+    final shadowColor = Colors.black.withValues(alpha: isDark ? 0.3 : 0.22);
+
     return InkWell(
       borderRadius: BorderRadius.circular(18),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.3),
+          color: cardColor,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black12),
+          border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.6),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
+              color: shadowColor,
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -151,20 +145,16 @@ class _MenuCard extends StatelessWidget {
               height: 42,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.grey.shade100,
+                color: iconBg,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.4),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withValues(alpha: isDark ? 0.26 : 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
-              child: Icon(
-                icon,
-                size: 20,
-                color: Colors.black87,
-              ),
+              child: Icon(icon, size: 20, color: Colors.white),
             ),
 
             const SizedBox(width: 14),

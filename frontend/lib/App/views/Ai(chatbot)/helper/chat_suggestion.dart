@@ -12,13 +12,15 @@ class ChatSuggestions {
   static List<String> getSuggestionsFromQuestion(String question) {
     final q = question.toLowerCase();
 
-    if (q.contains("marriage") || q.contains("love") || q.contains("relationship")) {
+    if (q.contains("marriage") ||
+        q.contains("love") ||
+        q.contains("relationship")) {
       return [
         "When will I get married?",
         "Will it be a love or arranged marriage?",
         "How will my married life be?",
         "Is my partner supportive?",
-        "Any remedies for better relationship harmony?"
+        "Any remedies for better relationship harmony?",
       ];
     }
 
@@ -28,7 +30,7 @@ class ChatSuggestions {
         "Is business better than a job for me?",
         "Which field suits me most?",
         "Will I work abroad?",
-        "How can I remove career obstacles?"
+        "How can I remove career obstacles?",
       ];
     }
 
@@ -38,7 +40,7 @@ class ChatSuggestions {
         "Will I become financially stable?",
         "Is property investment good for me?",
         "What causes financial delays in my chart?",
-        "Any remedies for wealth growth?"
+        "Any remedies for wealth growth?",
       ];
     }
 
@@ -48,7 +50,7 @@ class ChatSuggestions {
       "What challenges are ahead for me?",
       "Which year is most important for me?",
       "What does my destiny say?",
-      "Any spiritual advice for me?"
+      "Any spiritual advice for me?",
     ];
   }
 }

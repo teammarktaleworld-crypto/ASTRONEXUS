@@ -7,10 +7,7 @@ class _TarotDetailSheet extends StatelessWidget {
   final String title;
   final String description;
 
-  const _TarotDetailSheet({
-    required this.title,
-    required this.description,
-  });
+  const _TarotDetailSheet({required this.title, required this.description});
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +31,9 @@ class _TarotDetailSheet extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
-                borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
                 border: Border.all(
                   color: const Color(0xFFD4AF37).withOpacity(0.25),
                 ),

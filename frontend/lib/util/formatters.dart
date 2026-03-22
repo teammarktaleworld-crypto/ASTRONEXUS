@@ -4,9 +4,9 @@ class Formatters {
   /// Format a number as currency (₹1,234.00)
   static String price(num value) {
     final formatter = NumberFormat.currency(
-      locale: 'en_IN',      // Indian locale
-      symbol: '₹',          // Currency symbol
-      decimalDigits: 2,     // 2 decimal places
+      locale: 'en_IN', // Indian locale
+      symbol: '₹', // Currency symbol
+      decimalDigits: 2, // 2 decimal places
     );
     return formatter.format(value);
   }

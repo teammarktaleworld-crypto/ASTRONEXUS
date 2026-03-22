@@ -33,7 +33,6 @@ class BirthChartPdfService {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
-
                 /// 🟣 TITLE
                 pw.Text(
                   "Birth Chart Report",
@@ -69,9 +68,9 @@ class BirthChartPdfService {
                   child: isSvg
                       ? pw.SvgImage(svg: String.fromCharCodes(imageBytes))
                       : pw.Image(
-                    pw.MemoryImage(imageBytes),
-                    fit: pw.BoxFit.contain,
-                  ),
+                          pw.MemoryImage(imageBytes),
+                          fit: pw.BoxFit.contain,
+                        ),
                 ),
 
                 pw.SizedBox(height: 30),
@@ -87,18 +86,23 @@ class BirthChartPdfService {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text("Birth Details",
-                          style: pw.TextStyle(
-                              fontSize: 18,
-                              fontWeight: pw.FontWeight.bold)),
+                      pw.Text(
+                        "Birth Details",
+                        style: pw.TextStyle(
+                          fontSize: 18,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
 
                       pw.SizedBox(height: 12),
 
                       _infoRow("Rashi", rashi),
                       _infoRow("Nakshatra", nakshatra),
                       _infoRow("Ascendant Sign", ascSign),
-                      _infoRow("Ascendant Degree",
-                          "${ascLongitude.toStringAsFixed(2)}°"),
+                      _infoRow(
+                        "Ascendant Degree",
+                        "${ascLongitude.toStringAsFixed(2)}°",
+                      ),
                     ],
                   ),
                 ),
@@ -136,9 +140,10 @@ class BirthChartPdfService {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(label,
-              style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold, fontSize: 13)),
+          pw.Text(
+            label,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13),
+          ),
           pw.Text(value, style: const pw.TextStyle(fontSize: 13)),
         ],
       ),

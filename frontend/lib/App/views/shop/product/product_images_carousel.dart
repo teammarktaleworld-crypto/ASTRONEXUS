@@ -18,10 +18,7 @@ class ProductImagesCarousel extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                images[index],
-                fit: BoxFit.cover,
-              ),
+              child: Image.network(images[index], fit: BoxFit.cover),
             ),
           );
         },

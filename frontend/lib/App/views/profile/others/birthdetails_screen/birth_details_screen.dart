@@ -1,9 +1,16 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import "dart:convert";
 
-import '../../../../../ui_componets/cosmic/cosmic_one.dart';
+import "package:astro_tale/core/constants/app_colors.dart";
+import "package:astro_tale/core/localization/app_localizations.dart";
+import "package:astro_tale/core/theme/app_gradients.dart";
+import "package:astro_tale/core/widgets/themed_shimmer.dart";
+import "package:astro_tale/helper/chart_cache_helper.dart";
+import "package:astro_tale/services/api_services/chatbot/profile_services.dart";
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
+import "package:shared_preferences/shared_preferences.dart";
+
+import "../../../../../ui_componets/cosmic/cosmic_one.dart";
 
 class BirthDetailsScreen extends StatefulWidget {
   const BirthDetailsScreen({super.key});
@@ -15,8 +22,7 @@ class BirthDetailsScreen extends StatefulWidget {
 class _BirthDetailsScreenState extends State<BirthDetailsScreen>
     with TickerProviderStateMixin {
   bool loading = true;
-
-  late AnimationController planetController;
+  late final AnimationController planetController;
 
   String name = "";
   String birthDate = "";
@@ -25,19 +31,19 @@ class _BirthDetailsScreenState extends State<BirthDetailsScreen>
   String rashi = "";
   String nakshatra = "";
   String lagna = "";
-  String chartImage = "";
   String dashaPlanet = "";
   String dashaPeriod = "";
+
+  List<String> chartImageCandidates = <String>[];
+  int activeChartIndex = 0;
 
   @override
   void initState() {
     super.initState();
-
     planetController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 40),
+      duration: const Duration(seconds: 38),
     )..repeat();
-
     _loadBirthDetails();
   }
 
@@ -48,193 +54,257 @@ class _BirthDetailsScreenState extends State<BirthDetailsScreen>
   }
 
   Future<void> _loadBirthDetails() async {
-    debugPrint("🔄 Loading birth details from SharedPreferences...");
-
     final prefs = await SharedPreferences.getInstance();
+    _applyPrefsData(prefs);
 
-    // ───── BASIC INFO ─────
-    name = prefs.getString("userName") ?? "";
-    birthDate = prefs.getString("birthDate") ?? "";
-    birthTime = prefs.getString("birthTime") ?? "";
-    birthPlace = prefs.getString("birthPlace") ?? "";
-    rashi = prefs.getString("zodiacSign") ?? "";
-    nakshatra = prefs.getString("nakshatra") ?? "";
-    lagna = prefs.getString("lagnam") ?? "";
+    try {
+      await ProfileService.fetchMyProfile();
+      final freshPrefs = await SharedPreferences.getInstance();
+      _applyPrefsData(freshPrefs);
+    } catch (_) {
+      // Keep immediate cached view if refresh fails.
+    }
+  }
 
-    setState(() {
-      chartImage = prefs.getString("chartImage") ?? "";
-    });
+  void _applyPrefsData(SharedPreferences prefs) {
+    final rawChartImage = prefs.getString("chartImage");
+    final resolvedChartImage = prefs.getString("chartImageResolved");
+    final allChartsRaw = prefs.getString("allCharts");
 
-    debugPrint("👤 Name: $name");
-    debugPrint("📅 DOB: $birthDate");
-    debugPrint("⏰ Time: $birthTime");
-    debugPrint("📍 Place: $birthPlace");
-    debugPrint("♈ Rashi: $rashi");
-    debugPrint("🌟 Nakshatra: $nakshatra");
-    debugPrint("⬆️ Lagna: $lagna");
-    debugPrint("🖼 Chart Image URL: $chartImage");
-
-    // ───── DASHAS ─────
     final dashasRaw = prefs.getString("dashas");
-    debugPrint("📦 Raw Dashas JSON: $dashasRaw");
+    String planet = "";
+    String period = "";
 
     if (dashasRaw != null && dashasRaw.isNotEmpty) {
       try {
-        final Map<String, dynamic> dashas = jsonDecode(dashasRaw);
+        final dashas = jsonDecode(dashasRaw) as Map<String, dynamic>;
         final current = dashas["current_dasha"];
-
-        if (current != null) {
-          dashaPlanet = current["planet"] ?? "";
-          dashaPeriod =
-          "${current["start_date"] ?? ""} → ${current["end_date"] ?? ""}";
-
-          debugPrint("🪐 Current Mahadasha Planet: $dashaPlanet");
-          debugPrint("📆 Dasha Period: $dashaPeriod");
-        } else {
-          debugPrint("⚠️ No current_dasha found");
+        if (current is Map<String, dynamic>) {
+          planet = current["planet"]?.toString() ?? "";
+          period =
+              "${current["start_date"]?.toString() ?? ""} -> ${current["end_date"]?.toString() ?? ""}";
         }
-      } catch (e) {
-        debugPrint("❌ Error decoding dashas JSON: $e");
+      } catch (_) {
+        // Keep dasha empty if parsing fails.
       }
-    } else {
-      debugPrint("⚠️ Dashas not stored in prefs");
+    }
+
+    final candidates = <String>[
+      ...ChartCacheHelper.resolveChartImageCandidates(rawChartImage),
+      ...ChartCacheHelper.resolveChartImageCandidates(resolvedChartImage),
+    ];
+
+    if (allChartsRaw != null && allChartsRaw.isNotEmpty) {
+      try {
+        final parsed = jsonDecode(allChartsRaw);
+        if (parsed is List) {
+          for (final entry in parsed) {
+            if (entry is Map) {
+              final path =
+                  entry["chartImage"]?.toString() ??
+                  entry["chartImageUrl"]?.toString();
+              candidates.addAll(
+                ChartCacheHelper.resolveChartImageCandidates(path),
+              );
+            }
+          }
+        }
+      } catch (_) {
+        // Ignore malformed local chart cache and continue.
+      }
+    }
+
+    if (!mounted) {
+      return;
     }
 
     setState(() {
+      name = prefs.getString("userName") ?? "";
+      birthDate = prefs.getString("birthDate") ?? "";
+      birthTime = prefs.getString("birthTime") ?? "";
+      birthPlace = prefs.getString("birthPlace") ?? "";
+      rashi = prefs.getString("zodiacSign") ?? "";
+      nakshatra = prefs.getString("nakshatra") ?? "";
+      lagna = prefs.getString("lagnam") ?? "";
+      dashaPlanet = planet;
+      dashaPeriod = period;
+      chartImageCandidates = candidates
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toSet()
+          .toList();
+      activeChartIndex = 0;
       loading = false;
     });
-
-    debugPrint("✅ Birth details loaded successfully");
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xff050B1E),
-        elevation: 0,
+        backgroundColor: AppGradients.glassFill(theme),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
-          "Birth Chart",
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
+          context.l10n.tr("birthChart"),
+          style: GoogleFonts.dmSans(fontWeight: FontWeight.w700, fontSize: 18),
         ),
       ),
       body: Stack(
-        children: [
-          /// 🌌 BACKGROUND
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff050B1E),
-                  Color(0xff393053),
-                  Color(0xff050B1E),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+        children: <Widget>[
+          Container(decoration: AppGradients.screenDecoration(theme)),
+          if (isDark) const Positioned.fill(child: SmoothShootingStars()),
+          Positioned.fill(
+            child: Container(color: AppGradients.screenOverlay(theme)),
           ),
-
-          /// ✨ STARS
-          Positioned.fill(child: SmoothShootingStars()),
-
-          /// 📜 CONTENT
           SafeArea(
             child: loading
-                ? const Center(
-              child:
-              CircularProgressIndicator(color: Colors.white),
-            )
+                ? _loadingState()
                 : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// 🔮 CHART IMAGE
-                  if (chartImage.isNotEmpty && chartImage.startsWith("http"))
-                    _glassContainer(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Image.network(
-                          chartImage,
-                          height: 300,
-                          width: double.infinity,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) {
-                            return const SizedBox(
-                              height: 300,
-                              child: Center(
-                                child: Text(
-                                  "Chart image not available",
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                              ),
-                            );
-                          },
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _panel(child: _chartPreview()),
+                        const SizedBox(height: 22),
+                        _section(context.l10n.tr("birthInformation"), context),
+                        _panel(
+                          child: Column(
+                            children: <Widget>[
+                              _row(context.l10n.tr("name"), name),
+                              _row(context.l10n.tr("date"), birthDate),
+                              _row(context.l10n.tr("time"), birthTime),
+                              _row(context.l10n.tr("place"), birthPlace),
+                            ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 18),
+                        _section(context.l10n.tr("astrologyDetails"), context),
+                        _panel(
+                          child: Column(
+                            children: <Widget>[
+                              _row(context.l10n.tr("rashi"), rashi),
+                              _row(context.l10n.tr("nakshatra"), nakshatra),
+                              _row(context.l10n.tr("lagna"), lagna),
+                            ],
+                          ),
+                        ),
+                        if (dashaPlanet.isNotEmpty) ...<Widget>[
+                          const SizedBox(height: 18),
+                          _section(context.l10n.tr("currentMahadasha"), context),
+                          _panel(
+                            child: Column(
+                              children: <Widget>[
+                                _row(context.l10n.tr("planet"), dashaPlanet),
+                                _row(context.l10n.tr("period"), dashaPeriod),
+                              ],
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 60),
+                      ],
                     ),
-
-                  const SizedBox(height: 28),
-
-                  _section("Birth Information"),
-                  _glassInfo([
-                    _row("Name", name),
-                    _row("Date", birthDate),
-                    _row("Time", birthTime),
-                    _row("Place", birthPlace),
-                  ]),
-
-                  const SizedBox(height: 22),
-
-                  _section("Astrology Details"),
-                  _glassInfo([
-                    _row("Rashi", rashi),
-                    _row("Nakshatra", nakshatra),
-                    _row("Lagna", lagna),
-                  ]),
-
-                  const SizedBox(height: 22),
-
-                  if (dashaPlanet.isNotEmpty) ...[
-                    _section("Current Mahadasha"),
-                    _glassInfo([
-                      _row("Planet", dashaPlanet),
-                      _row("Period", dashaPeriod),
-                    ]),
-                  ],
-                ],
-              ),
-            ),
+                  ),
           ),
         ],
       ),
     );
   }
 
-  /// 🧊 GLASS UI
-  Widget _glassContainer({required Widget child}) {
+  Widget _loadingState() {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: const <Widget>[
+        ThemedShimmerCard(height: 320),
+        SizedBox(height: 14),
+        ThemedShimmerCard(height: 190),
+        SizedBox(height: 14),
+        ThemedShimmerCard(height: 160),
+      ],
+    );
+  }
+
+  Widget _chartPreview() {
+    if (chartImageCandidates.isEmpty) {
+      return _chartFallback();
+    }
+
+    final activeUrl = chartImageCandidates[activeChartIndex];
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Image.network(
+        activeUrl,
+        height: 300,
+        width: double.infinity,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return SizedBox(
+            height: 300,
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (_, __, ___) {
+          if (activeChartIndex < chartImageCandidates.length - 1) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() => activeChartIndex += 1);
+              }
+            });
+            return _chartRetrying();
+          }
+          return _chartFallback();
+        },
+      ),
+    );
+  }
+
+  Widget _chartRetrying() {
+    return SizedBox(
+      height: 300,
+      child: Center(
+        child: Text(
+          "Trying backup chart source...",
+          style: GoogleFonts.dmSans(color: Colors.white70),
+        ),
+      ),
+    );
+  }
+
+  Widget _chartFallback() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Image.asset(
+        "assets/images/birthchart.png",
+        height: 300,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  Widget _panel({required Widget child}) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.08),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white12),
-        boxShadow: [
+        color: AppGradients.glassFill(theme),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppGradients.glassBorder(theme)),
+        boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withOpacity(.45),
-            blurRadius: 26,
-            offset: const Offset(0, 14),
+            color: Colors.black.withValues(alpha: 0.28),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -242,22 +312,39 @@ class _BirthDetailsScreenState extends State<BirthDetailsScreen>
     );
   }
 
-  Widget _glassInfo(List<Widget> children) {
-    return _glassContainer(
-      child: Column(children: children),
-    );
-  }
+  Widget _section(String title, BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-  Widget _section(String title) {
+    final textColor = isDark
+        ? Colors.white.withOpacity(0.95)
+        : AppColors.lightTextPrimary;
+
+    final dividerColor = isDark
+        ? Colors.white.withOpacity(0.15)
+        : AppColors.lightTextPrimary.withOpacity(0.25);
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        title,
-        style: GoogleFonts.poppins(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.dmSans(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+              color: textColor,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            height: 1,
+            width: double.infinity,
+            color: dividerColor,
+          ),
+        ],
       ),
     );
   }
@@ -267,19 +354,19 @@ class _BirthDetailsScreenState extends State<BirthDetailsScreen>
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+        children: <Widget>[
           Text(
             label,
             style: GoogleFonts.dmSans(
-              color: Colors.white60,
-              fontWeight: FontWeight.w500,
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
             ),
           ),
           Flexible(
             child: Text(
               value.isEmpty ? "-" : value,
               textAlign: TextAlign.right,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.dmSans(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
               ),

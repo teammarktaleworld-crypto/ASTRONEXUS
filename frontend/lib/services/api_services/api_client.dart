@@ -1,59 +1,86 @@
-import 'dart:convert';
-import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
-import '../../App/controller/Auth_Controller.dart';
-import 'api_endpoints.dart';
+import "dart:convert";
+
+import "package:astro_tale/App/controller/Auth_Controller.dart";
+import "package:astro_tale/core/constants/app_constants.dart";
+import "package:flutter/foundation.dart";
+import "package:http/http.dart" as http;
+
+import "api_endpoints.dart";
 
 class ApiClient {
   Future<dynamic> get(String path) async {
-    final response = await http.get(
-      Uri.parse(ApiEndpoints.baseUrl + path),
-      headers: _headers(),
-    );
+    final response = await http
+        .get(_buildUri(path), headers: _headers())
+        .timeout(AppConstants.apiTimeout);
     return _handleResponse(response);
   }
 
   Future<dynamic> post(String path, Map<String, dynamic> body) async {
-    final response = await http.post(
-      Uri.parse(ApiEndpoints.baseUrl + path),
-      headers: _headers(),
-      body: jsonEncode(body),
-    );
+    final response = await http
+        .post(_buildUri(path), headers: _headers(), body: jsonEncode(body))
+        .timeout(AppConstants.apiTimeout);
     return _handleResponse(response);
   }
 
-  Future<dynamic> delete(String path) async {
-    final response = await http.delete(
-      Uri.parse(ApiEndpoints.baseUrl + path),
-      headers: _headers(),
-    );
+  Future<dynamic> put(String path, Map<String, dynamic> body) async {
+    final response = await http
+        .put(_buildUri(path), headers: _headers(), body: jsonEncode(body))
+        .timeout(AppConstants.apiTimeout);
     return _handleResponse(response);
+  }
+
+  Future<dynamic> delete(String path, {Map<String, dynamic>? body}) async {
+    final response = await http
+        .delete(
+          _buildUri(path),
+          headers: _headers(),
+          body: body == null ? null : jsonEncode(body),
+        )
+        .timeout(AppConstants.apiTimeout);
+    return _handleResponse(response);
+  }
+
+  Uri _buildUri(String path) {
+    final normalizedPath = path.startsWith("/") ? path : "/$path";
+    return Uri.parse("${ApiEndpoints.baseUrl}$normalizedPath");
   }
 
   Map<String, String> _headers() {
-    final headers = {
+    final headers = <String, String>{
       "Content-Type": "application/json",
+      "Accept": "application/json",
     };
 
     if (AuthController.token.isNotEmpty) {
       headers["Authorization"] = "Bearer ${AuthController.token}";
-      debugPrint("Sending token: ${AuthController.token}");
-    } else {
-      debugPrint("No token found in AuthController");
     }
 
     return headers;
   }
 
-
   dynamic _handleResponse(http.Response response) {
-    debugPrint("API Response [${response.statusCode}]: ${response.body}");
-    final data = jsonDecode(response.body);
+    final dynamic data = _decode(response.body);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return data;
-    } else {
-      throw Exception(data["message"] ?? "API Error");
+    }
+
+    final message = data is Map<String, dynamic>
+        ? data["message"]?.toString() ?? "API Error"
+        : "API Error";
+
+    debugPrint("API error ${response.statusCode}: $message");
+    throw Exception(message);
+  }
+
+  dynamic _decode(String body) {
+    if (body.isEmpty) {
+      return <String, dynamic>{};
+    }
+    try {
+      return jsonDecode(body);
+    } catch (_) {
+      return <String, dynamic>{"raw": body};
     }
   }
 }

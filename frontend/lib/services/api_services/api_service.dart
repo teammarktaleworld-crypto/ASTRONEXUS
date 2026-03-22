@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import ' cart_api.dart';
+import 'cart_api.dart';
 import '../../App/Model/address_model.dart';
 import 'adress_api.dart';
 import 'store_api.dart';
@@ -37,8 +37,7 @@ class ApiService {
   Future getProducts({String? categoryId}) =>
       _store.getProducts(categoryId: categoryId);
 
-  Future getProductById(String productId) =>
-      _store.getProductById(productId);
+  Future getProductById(String productId) => _store.getProductById(productId);
 
   /* ================= CART ================= */
 
@@ -50,8 +49,7 @@ class ApiService {
   Future updateCartItem(String productId, int qty) =>
       _cart.updateCartItem(productId, qty);
 
-  Future removeCartItem(String productId) =>
-      _cart.removeCartItem(productId);
+  Future removeCartItem(String productId) => _cart.removeCartItem(productId);
 
   /* ================= ORDERS ================= */
 
@@ -59,12 +57,11 @@ class ApiService {
     String? addressId,
     String paymentMethod = "UPI",
     required String deliveryType,
-  }) =>
-      _order.placeOrder(
-        addressId: addressId,
-        paymentMethod: paymentMethod,
-        deliveryType: deliveryType,
-      );
+  }) => _order.placeOrder(
+    addressId: addressId,
+    paymentMethod: paymentMethod,
+    deliveryType: deliveryType,
+  );
 
   Future getMyOrders() => _order.getMyOrders();
 
@@ -72,17 +69,15 @@ class ApiService {
 
   /* ================= PAYMENT ================= */
 
-  Future createPayment(double amount) =>
-      _payment.createPayment(amount);
+  Future createPayment(double amount) => _payment.createPayment(amount);
 
   Future verifyPayment({
     required String paymentId,
     required String transactionId,
-  }) =>
-      _payment.verifyPayment(
-        paymentId: paymentId,
-        transactionId: transactionId,
-      );
+  }) => _payment.verifyPayment(
+    paymentId: paymentId,
+    transactionId: transactionId,
+  );
 
   /* ================= ADDRESS ================= */
 

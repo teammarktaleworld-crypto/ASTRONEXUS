@@ -30,10 +30,7 @@ class ReportCard extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xff18122B),
-              Color(0xff18122B),
-            ],
+            colors: [Color(0xff18122B), Color(0xff18122B)],
           ),
           border: Border.all(color: Colors.white24),
           boxShadow: [
@@ -65,10 +62,7 @@ class ReportCard extends StatelessWidget {
                     Row(
                       children: [
                         if (report.isFree)
-                          _badge(
-                            "FREE",
-                            color: Colors.greenAccent.shade400,
-                          ),
+                          _badge("FREE", color: Colors.greenAccent.shade400),
                         const Spacer(),
                         if (report.isLocked)
                           Container(
@@ -134,26 +128,33 @@ class ReportCard extends StatelessWidget {
                     Align(
                       alignment: Alignment.center,
                       child: GestureDetector(
-                        onTap: (){
-                           Navigator.push(context,MaterialPageRoute(builder: (_){
-                             return AnnualReportDetailScreen(report: report);
-                           }));
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return AnnualReportDetailScreen(report: report);
+                              },
+                            ),
+                          );
                         },
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: report.isFree
                                   ? [
-                                Colors.greenAccent.shade400,
-                                Colors.greenAccent.shade700,
-                              ]
+                                      Colors.greenAccent.shade400,
+                                      Colors.greenAccent.shade700,
+                                    ]
                                   : [
-                                Colors.blueAccent.shade400,
-                                Colors.blueAccent.shade700,
-                              ],
+                                      Colors.blueAccent.shade400,
+                                      Colors.blueAccent.shade700,
+                                    ],
                             ),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
@@ -193,10 +194,7 @@ class ReportCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            color.withOpacity(0.9),
-            color.withOpacity(0.6),
-          ],
+          colors: [color.withOpacity(0.9), color.withOpacity(0.6)],
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [

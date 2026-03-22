@@ -1,11 +1,11 @@
+import 'package:astro_tale/App/Model/order_model.dart';
+import 'package:astro_tale/App/views/shop/orders/order_details_screen.dart';
+import 'package:astro_tale/core/widgets/unified_dark_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
-
-import '../../../../services/api_services/order_api.dart';
-import '../../../../App/Model/order_model.dart';
-import 'order_details_screen.dart';
+import 'package:astro_tale/services/api_services/order_api.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -54,187 +54,167 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xff050B1E),
-      appBar: AppBar(
-        backgroundColor: const Color(0xff050B1E),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "My Orders",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: UnifiedDarkUi.appBar(context, title: "My Orders"),
       body: loading
           ? _buildSkeletonList()
           : orders.isEmpty
           ? _buildEmptyState()
           : Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-              Color(0xff050B1E),
-              // Color(0xff1C4D8D),
-              // Color(0xff0F2854),
-              Color(0xff393053),
+              decoration: UnifiedDarkUi.screenBackground(theme),
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: orders.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final order = orders[index];
+                  final product = order.items.first.product;
 
-            ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-
-            ),
-
-          ),
-            child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: orders.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-            final order = orders[index];
-            final product = order.items.first.product;
-
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => OrderDetailsScreen(order: order),
-                  ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1C23),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// ORDER HEADER
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Order #${order.id.substring(order.id.length - 6)}",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => OrderDetailsScreen(order: order),
                         ),
-                        Text(
-                          formatDate(order.createdAt),
-                          style: GoogleFonts.poppins(
-                            color: Colors.white54,
-                            fontSize: 12,
-                          ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: UnifiedDarkUi.cardSurface(theme),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: UnifiedDarkUi.cardBorder(theme),
                         ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    /// PRODUCT SECTION
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// BIG IMAGE
-                        if (product != null)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              product.images.first,
-                              height: 90,
-                              width: 90,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-
-                        const SizedBox(width: 14),
-
-                        /// PRODUCT DETAILS
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /// ORDER HEADER
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                product?.name ?? "Product",
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                                "Order #${order.id.substring(order.id.length - 6)}",
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                                  fontSize: 13,
                                 ),
                               ),
-                              const SizedBox(height: 6),
                               Text(
-                                "Qty: ${order.items.first.quantity}",
+                                formatDate(order.createdAt),
                                 style: GoogleFonts.poppins(
                                   color: Colors.white54,
                                   fontSize: 12,
                                 ),
                               ),
-                              const SizedBox(height: 10),
+                            ],
+                          ),
 
-                              /// STATUS BADGE
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: getStatusColor(order.status)
-                                      .withOpacity(0.15),
-                                  borderRadius:
-                                  BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  order.status.toUpperCase(),
-                                  style: GoogleFonts.poppins(
-                                    color: getStatusColor(order.status),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                          const SizedBox(height: 14),
+
+                          /// PRODUCT SECTION
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              /// BIG IMAGE
+                              if (product != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    product.images.first,
+                                    height: 90,
+                                    width: 90,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
+
+                              const SizedBox(width: 14),
+
+                              /// PRODUCT DETAILS
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product?.name ?? "Product",
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      "Qty: ${order.items.first.quantity}",
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white54,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+
+                                    /// STATUS BADGE
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: getStatusColor(
+                                          order.status,
+                                        ).withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        order.status.toUpperCase(),
+                                        style: GoogleFonts.poppins(
+                                          color: getStatusColor(order.status),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              /// PRICE COLUMN
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "Rs ${order.totalAmount.toStringAsFixed(0)}",
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.amber,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  const Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 14,
+                                    color: Colors.white38,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ),
-
-                        /// PRICE COLUMN
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "₹${order.totalAmount.toStringAsFixed(0)}",
-                              style: GoogleFonts.poppins(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Icon(Icons.arrow_forward_ios_rounded,
-                                size: 14, color: Colors.white38)
-                          ],
-                        )
-                      ],
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-                    },
-                  ),
-          ),
+            ),
     );
   }
 
@@ -263,10 +243,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     return Center(
       child: Text(
         "You have no orders yet",
-        style: GoogleFonts.poppins(
-          color: Colors.white54,
-          fontSize: 14,
-        ),
+        style: GoogleFonts.poppins(color: Colors.white54, fontSize: 14),
       ),
     );
   }

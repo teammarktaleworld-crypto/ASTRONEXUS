@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:astro_tale/App/views/Auth/Sign_up/screens/astrology_signup_timeline_screen.dart';
 import 'package:astro_tale/App/views/Auth/terms%20and%20condition/termsandconditions.dart';
 import 'package:astro_tale/App/views/onboard/Screens/onboarding.dart';
+import 'package:astro_tale/core/theme/app_gradients.dart';
+import 'package:astro_tale/services/API/APIservice.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../ui_componets/cosmic/cosmic_one.dart';
 import '../../../../ui_componets/glass/glass_card.dart';
-import '../../dash/DashboardScreen.dart';
 
 class OTPVerification extends StatefulWidget {
   final String phoneNumber; // Receive phone number from Login screen
@@ -20,22 +21,23 @@ class OTPVerification extends StatefulWidget {
 }
 
 class _OTPVerificationState extends State<OTPVerification> {
-  final List<TextEditingController> otpControllers =
-  List.generate(6, (index) => TextEditingController());
+  final List<TextEditingController> otpControllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
 
   bool _isLoading = false;
 
-  final String apiBaseUrl =
-      "https://auth-astronexus-1.onrender.com"; // Node.js server
+  final String apiBaseUrl = authBaseUrl;
 
   /// Verify OTP via backend
   Future<void> verifyOtp() async {
     String otp = otpControllers.map((c) => c.text).join();
 
     if (otp.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter 6-digit OTP")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please enter 6-digit OTP")));
       return;
     }
 
@@ -51,7 +53,6 @@ class _OTPVerificationState extends State<OTPVerification> {
       final Map<String, dynamic> data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-
         // 1. Save login state
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
@@ -67,20 +68,17 @@ class _OTPVerificationState extends State<OTPVerification> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => OnboardingScreen()),
-              (route) => false, // removes OTP + Login screens
+          (route) => false, // removes OTP + Login screens
         );
-      }
-
-
-      else {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'] ?? "Invalid OTP")),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
 
     setState(() => _isLoading = false);
@@ -100,20 +98,18 @@ class _OTPVerificationState extends State<OTPVerification> {
       final Map<String, dynamic> data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("OTP Sent Again")),
-        );
-
-
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("OTP Sent Again")));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'] ?? "Failed to resend OTP")),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
 
     setState(() => _isLoading = false);
@@ -132,7 +128,6 @@ class _OTPVerificationState extends State<OTPVerification> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(6, (index) {
         return Expanded(
-
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 3.0),
             child: TextField(
@@ -170,32 +165,21 @@ class _OTPVerificationState extends State<OTPVerification> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient Background
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff18122B),
-                  // Color(0xff1C4D8D),
-                  // Color(0xff0F2854),
-                  Color(0xff393053),
-
-
-                  Color(0xff18122B),
-
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+            decoration: AppGradients.screenDecoration(theme),
           ),
 
-          // Cosmic overlay
-          Positioned.fill(child: SmoothShootingStars()),
-          Positioned.fill(child: Container(color: Colors.black.withOpacity(0.45))),
+          if (isDark) Positioned.fill(child: SmoothShootingStars()),
+          Positioned.fill(
+            child: Container(color: AppGradients.screenOverlay(theme)),
+          ),
 
           Center(
             child: SingleChildScrollView(
@@ -210,13 +194,18 @@ class _OTPVerificationState extends State<OTPVerification> {
                   const SizedBox(height: 6),
                   RichText(
                     text: TextSpan(
-                      style: GoogleFonts.dmSans(fontSize: 16, color: Colors.white70),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 16,
+                        color: isDark
+                            ? Colors.white70
+                            : colors.onSurface.withOpacity(0.72),
+                      ),
                       children: const [
                         TextSpan(text: "Discover the stars "),
                         TextSpan(
                           text: "within",
                           style: TextStyle(
-                            color: Color(0xFFDBC33F),
+                            color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -233,7 +222,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                         Text(
                           "OTP Verification",
                           style: GoogleFonts.dmSans(
-                            color: Colors.white,
+                            color: colors.onSurface,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -242,7 +231,10 @@ class _OTPVerificationState extends State<OTPVerification> {
                         Text(
                           "A 6-digit code has been sent to your number",
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.dmSans(color: Colors.white70, fontSize: 14),
+                          style: GoogleFonts.dmSans(
+                            color: colors.onSurface.withOpacity(0.72),
+                            fontSize: 14,
+                          ),
                         ),
                         const SizedBox(height: 30),
 
@@ -258,22 +250,24 @@ class _OTPVerificationState extends State<OTPVerification> {
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : verifyOtp,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xff393053),
+                              backgroundColor: colors.primary,
                               elevation: 6,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
                             child: _isLoading
-                                ? const CircularProgressIndicator(color: Colors.white)
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
                                 : Text(
-                              "Verify OTP",
-                              style: GoogleFonts.dmSans(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                                    "Verify OTP",
+                                    style: GoogleFonts.dmSans(
+                                      color: colors.onPrimary,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -284,7 +278,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                           child: Text(
                             "Didn't receive code? Resend",
                             style: GoogleFonts.dmSans(
-                              color: const Color(0xFFFFC107),
+                              color: colors.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -298,11 +292,16 @@ class _OTPVerificationState extends State<OTPVerification> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => AstrologySignupTimeline()),
+                                MaterialPageRoute(
+                                  builder: (_) => AstrologySignupTimeline(),
+                                ),
                               );
                             },
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.white, width: 2),
+                              side: const BorderSide(
+                                color: Colors.white,
+                                width: 2,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -325,7 +324,9 @@ class _OTPVerificationState extends State<OTPVerification> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) =>  TermsAndConditions()),
+                              MaterialPageRoute(
+                                builder: (_) => TermsAndConditions(),
+                              ),
                             );
                           },
                           child: Text(

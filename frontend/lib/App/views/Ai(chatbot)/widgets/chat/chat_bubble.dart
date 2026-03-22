@@ -1,13 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import "package:astro_tale/core/constants/app_colors.dart";
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 
 class ChatBubble extends StatelessWidget {
   final String text;
   final bool isUser;
   final String? userAvatar;
   final String? botAvatar;
-
-  /// List of keywords to highlight
   final List<String> keywords;
 
   const ChatBubble({
@@ -16,68 +15,92 @@ class ChatBubble extends StatelessWidget {
     required this.isUser,
     this.userAvatar,
     this.botAvatar,
-    this.keywords = const [],
+    this.keywords = const <String>[],
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final maxWidth = MediaQuery.of(context).size.width * 0.72;
+    final textColor = isUser
+        ? Colors.white
+        : (isDark
+              ? Colors.white.withValues(alpha: 0.92)
+              : const Color(0xFF0F172A));
+    final botBubbleColor = isDark
+        ? AppColors.surfaceAlt
+        : Colors.white.withValues(alpha: 0.96);
+    final userGradient = const LinearGradient(
+      colors: <Color>[Color(0xFF2B6CB0), Color(0xFF1E3A8A)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
 
-    // Function to build a RichText with highlighted keywords
-    TextSpan _buildTextSpan() {
+    TextSpan buildSpan() {
       if (keywords.isEmpty) {
         return TextSpan(
           text: text,
           style: GoogleFonts.dmSans(
-            color: isUser ? Colors.white : const Color(0xFF1A1A1A),
-            fontSize: 15.5,
+            color: textColor,
+            fontSize: 15,
             height: 1.6,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w500,
           ),
         );
       }
 
-      List<TextSpan> spans = [];
+      final spans = <TextSpan>[];
       String remaining = text;
 
       while (remaining.isNotEmpty) {
         int index = remaining.length;
         String? matchedKeyword;
 
-        // Find the first occurrence of any keyword
-        for (var keyword in keywords) {
-          final i = remaining.toLowerCase().indexOf(keyword.toLowerCase());
-          if (i >= 0 && i < index) {
-            index = i;
-            matchedKeyword = remaining.substring(i, i + keyword.length);
+        for (final keyword in keywords) {
+          final current = remaining.toLowerCase().indexOf(
+            keyword.toLowerCase(),
+          );
+          if (current >= 0 && current < index) {
+            index = current;
+            matchedKeyword = remaining.substring(
+              current,
+              current + keyword.length,
+            );
           }
         }
 
         if (index > 0) {
-          spans.add(TextSpan(
-            text: remaining.substring(0, index),
-            style: GoogleFonts.dmSans(
-              color: isUser ? Colors.white : const Color(0xFF1A1A1A),
-              fontSize: 15.5,
-              height: 1.6,
-              fontWeight: FontWeight.w400,
+          spans.add(
+            TextSpan(
+              text: remaining.substring(0, index),
+              style: GoogleFonts.dmSans(
+                color: textColor,
+                fontSize: 15,
+                height: 1.6,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ));
+          );
         }
 
         if (matchedKeyword != null) {
-          spans.add(TextSpan(
-            text: matchedKeyword,
-            style: GoogleFonts.dmSans(
-              color: Colors.orange, // Highlight color
-              fontSize: 15.5,
-              height: 1.6,
-              fontWeight: FontWeight.bold, // Bold
+          spans.add(
+            TextSpan(
+              text: matchedKeyword,
+              style: GoogleFonts.dmSans(
+                color: isUser
+                    ? const Color(0xFFFCD34D)
+                    : AppColors.lightPrimary,
+                fontSize: 15,
+                height: 1.6,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ));
+          );
           remaining = remaining.substring(index + matchedKeyword.length);
         } else {
-          remaining = '';
+          break;
         }
       }
 
@@ -88,68 +111,70 @@ class ChatBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment:
-        isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          // Bot avatar
-          if (!isUser) ...[
+        mainAxisAlignment: isUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        children: <Widget>[
+          if (!isUser) ...<Widget>[
             CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.white,
-              backgroundImage: botAvatar != null ? AssetImage(botAvatar!) : null,
+              radius: 19,
+              backgroundColor: isDark
+                  ? const Color(0xFF24314E)
+                  : const Color(0xFFEAF2FF),
+              backgroundImage: botAvatar != null
+                  ? AssetImage(botAvatar!)
+                  : null,
               child: botAvatar == null
-                  ? const Icon(Icons.auto_awesome, size: 16, color: Colors.deepPurple)
+                  ? const Icon(
+                      Icons.auto_awesome,
+                      size: 16,
+                      color: Color(0xFF2563EB),
+                    )
                   : null,
             ),
             const SizedBox(width: 8),
           ],
-
-          // Message bubble
           Flexible(
             child: Container(
               constraints: BoxConstraints(maxWidth: maxWidth),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                gradient: isUser
-                    ? const LinearGradient(
-                  colors: [
-                    Color(0xFF00C853),
-                    Color(0xFF009624),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-                    : null,
-                color: isUser ? null : Colors.white,
+                gradient: isUser ? userGradient : null,
+                color: isUser ? null : botBubbleColor,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(18),
                   topRight: const Radius.circular(18),
                   bottomLeft: Radius.circular(isUser ? 18 : 6),
                   bottomRight: Radius.circular(isUser ? 6 : 18),
                 ),
-                boxShadow: [
+                border: Border.all(
+                  color: isUser
+                      ? Colors.transparent
+                      : (isDark ? Colors.white24 : const Color(0xFFD8E3F6)),
+                ),
+                boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
+                    color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
-              child: RichText(
-                text: _buildTextSpan(),
-              ),
+              child: RichText(text: buildSpan()),
             ),
           ),
-
-          // User avatar
-          if (isUser) ...[
+          if (isUser) ...<Widget>[
             const SizedBox(width: 8),
             CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.white,
-              backgroundImage: userAvatar != null ? NetworkImage(userAvatar!) : null,
+              radius: 19,
+              backgroundColor: isDark
+                  ? Colors.white12
+                  : const Color(0xFFEAF2FF),
+              backgroundImage: userAvatar != null
+                  ? NetworkImage(userAvatar!)
+                  : null,
               child: userAvatar == null
-                  ? const Icon(Icons.person, size: 16, color: Colors.blueAccent)
+                  ? const Icon(Icons.person, size: 16, color: Color(0xFF2563EB))
                   : null,
             ),
           ],

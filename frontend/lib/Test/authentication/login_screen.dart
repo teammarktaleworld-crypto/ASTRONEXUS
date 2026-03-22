@@ -21,7 +21,8 @@ class AstrologyLoginScreen extends StatelessWidget {
     final phoneNumber = data.additionalSignupData?['Phone Number'];
 
     if (fullName == null || fullName.isEmpty) return "Full Name is required";
-    if (phoneNumber == null || phoneNumber.isEmpty) return "Phone Number is required";
+    if (phoneNumber == null || phoneNumber.isEmpty)
+      return "Phone Number is required";
 
     return null;
   }
@@ -111,18 +112,17 @@ class AstrologyLoginScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  bodyStyle: GoogleFonts.poppins(
-                    color: Colors.white70,
-                  ),
-                  textFieldStyle: GoogleFonts.poppins(
-                    color: Colors.white,
-                  ),
+                  bodyStyle: GoogleFonts.poppins(color: Colors.white70),
+                  textFieldStyle: GoogleFonts.poppins(color: Colors.white),
                   cardTheme: CardTheme(
                     color: Colors.black87.withOpacity(0.85),
                     elevation: 14,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
-                      side: const BorderSide(color: Color(0xFFFFD700), width: 1),
+                      side: const BorderSide(
+                        color: Color(0xFFFFD700),
+                        width: 1,
+                      ),
                     ),
                   ),
                   inputTheme: InputDecorationTheme(
@@ -133,8 +133,10 @@ class AstrologyLoginScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 20,
+                    ),
                   ),
                   buttonTheme: LoginButtonTheme(
                     backgroundColor: Colors.white.withOpacity(0.15),
