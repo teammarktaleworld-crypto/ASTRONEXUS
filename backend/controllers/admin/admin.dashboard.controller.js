@@ -57,8 +57,12 @@ export const getDashboardOverview = async (req, res) => {
     let topUser = null;
     if (topUserAgg.length > 0) {
       topUser = await User.findById(topUserAgg[0]._id).select("name email");
-      topUser = topUser.toObject(); // convert to plain object
-      topUser.totalSpent = topUserAgg[0].totalSpent;
+      if (topUser) {
+        topUser = topUser.toObject(); // convert to plain object
+        topUser.totalSpent = topUserAgg[0].totalSpent;
+      } else {
+        topUser = null;
+      }
     }
 
     // 6️⃣ Admin list
